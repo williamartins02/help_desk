@@ -1,20 +1,46 @@
 package com.start.helpdesk.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.start.helpdesk.domain.enums.Perfil;
 
-public abstract class Pessoa {
+@Entity
+public abstract class Pessoa implements Serializable {
+	private static final long serialVersionUID = 1L;
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)//Para cada objeto banco gera um "ID" diferente.
 	protected Integer id;
 	protected String nome;
+	
+	@Column(unique = true)//Dizendo que essa coluna "CPF" sera unica no banco, p n gerar duas vezes o mesmo.
 	protected String cpf;
+	
+	@Column(unique = true)
 	protected String email;
+	
 	protected String senha;
+	
+	@ElementCollection(fetch = FetchType.EAGER)//informando q é uma coleção, element tipo Integer, q a lista tem que vir junto com usuario assim que for informado
+	@CollectionTable(name = "PERFIS")//UMA TABELA NO BANCO COM APENAS OS PERFIS
 	protected Set<Integer> perfis = new HashSet<>(); //HashSet: evita ter dois perfils
+	
+	@JsonFormat(pattern = "dd/MM/yyy")
 	protected LocalDate dataCriacao = LocalDate.now();
 	
 	public Pessoa() {
