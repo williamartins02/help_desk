@@ -3,6 +3,8 @@ package com.start.helpdesk.services;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,7 @@ public class TecnicoService {
 		return tecnicoObj.orElseThrow(() -> new ObjectnotFoundException("Objeto não econtrado! Id: " + id));
 	}
 	
+
 	/*Listando uma lista de tecnico findAll*/
 	public List<Tecnico> findAll() {
 		return repository.findAll();
@@ -40,6 +43,15 @@ public class TecnicoService {
 		validationCpfEmail(objectDTO);
 	    Tecnico newObject = new Tecnico(objectDTO);
 		return repository.save(newObject);
+	}
+	
+	/*validação para update*/
+	public Tecnico update(Integer id, @Valid TecnicoDTO objectDTO) {
+		objectDTO.setId(id);
+		Tecnico putObj = findById(id);
+		validationCpfEmail(objectDTO);
+		putObj = new Tecnico(objectDTO);
+		return repository.save(putObj);
 	}
 	
 	/*Fazendo comparação atraves do ID, se já existe CPF/E-mal já cadastrado*/
@@ -54,5 +66,7 @@ public class TecnicoService {
 			if(object.isPresent() && object.get().getId() != objectDTO.getId()) {
 			    throw new DataIntegrityViolationException("E-mail já cadatrado no sistema!");
 		    }
-    }
+	}
 }
+
+	
