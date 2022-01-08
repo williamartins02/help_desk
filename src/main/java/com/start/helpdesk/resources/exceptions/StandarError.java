@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 
 /*
- * Campo com atributos, para tratar exceções
+ * Campo com atributos, para tratar exceções 
  * */
 public class StandarError implements Serializable {
 	private static final long serialVersionUID = 1L;

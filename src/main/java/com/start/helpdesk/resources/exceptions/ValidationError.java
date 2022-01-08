@@ -3,6 +3,7 @@ package com.start.helpdesk.resources.exceptions;
 import java.util.ArrayList;
 import java.util.List;
 
+/*Validador de execeções personalizado para CPF/E-mail*/
 public class ValidationError extends StandarError {
 	private static final long serialVersionUID = 1L;
 	

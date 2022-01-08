@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,19 +28,19 @@ import com.start.helpdesk.services.TecnicoService;
 @RequestMapping(value = "/tecnicos")
 public class TecnicoResource {
 	
-	//representa td resposta HTTP, localhost:8080/tecnicos
+	/*representa td resposta HTTP, localhost:8080/tecnicos*/
 	
 	@Autowired 
 	private TecnicoService service;
 	
-	/*EndPoint para trazer tecnicos por ID*/
+	/*EndPoint para (BUSCAR) tecnicos por ID*/
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id){
 		Tecnico object = service.findById(id);
 		return ResponseEntity.ok().body(new TecnicoDTO(object));
 	}
 	
-    /*EndPont litar uma list de tecnico findAll*/
+    /*EndPont litar uma (LIST) de tecnico findAll*/
 	@GetMapping
 	public ResponseEntity<List<TecnicoDTO>> findAll(){
 		List<Tecnico> list = service.findAll();
@@ -47,7 +48,7 @@ public class TecnicoResource {
 		return ResponseEntity.ok().body(listDTO);
 	}
 	
-	/*EndPoint para criar tecnico, 
+	/*EndPoint para (CREATE) criar tecnico, 
 	 * criando URI de acesso ao ID.*/
 	@PostMapping
 	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO){
@@ -56,11 +57,18 @@ public class TecnicoResource {
 		return ResponseEntity.created(uri).build();
 	}
 	
-	/*EndPoint Update criando um tecnico novo.*/
+	/*EndPoint (ATUALIZAR) criando um tecnico novo.*/
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objectDTO){
 		Tecnico object = service.update(id, objectDTO);
 		return ResponseEntity.ok().body(new TecnicoDTO(object));
+	}
+	
+	/*EndPoint (DELETAR) por ID*/
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<TecnicoDTO> delete(@PathVariable Integer id) {
+		service.delete(id);
+		return ResponseEntity.noContent().build();
 	}
 	
 	

@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import com.start.helpdesk.domain.Pessoa;
 import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.TecnicoDTO;
@@ -21,40 +22,49 @@ import com.start.helpdesk.services.exception.ObjectnotFoundException;
 public class TecnicoService {
 
 	@Autowired
-	private TecnicoRepository repository;
+	private TecnicoRepository tecnicoRepository;
 	@Autowired
 	private PessoaRepository pessoaRepository;
 	
-	//Buscando ID do tecnico no banco
+	/*METODO -> Buscando ID do tecnico no banco*/
 	public Tecnico findById(Integer id) {
-		Optional<Tecnico> tecnicoObj = repository.findById(id);
+		Optional<Tecnico> tecnicoObj = tecnicoRepository.findById(id);
 		return tecnicoObj.orElseThrow(() -> new ObjectnotFoundException("Objeto não econtrado! Id: " + id));
 	}
 	
 
-	/*Listando uma lista de tecnico findAll*/
+	/*METODO -> Listando uma (LIST) de tecnico findAll*/
 	public List<Tecnico> findAll() {
-		return repository.findAll();
+		return tecnicoRepository.findAll();
 	}
 
-	/*Criando um tecnico novo*/
+	/*METODO -> Criando um tecnico NOVO (CREATE)*/
 	public Tecnico create(TecnicoDTO objectDTO) {
 		objectDTO.setId(null);/*Assegurando que o ID vai vir nulo,*/
 		validationCpfEmail(objectDTO);
 	    Tecnico newObject = new Tecnico(objectDTO);
-		return repository.save(newObject);
+		return tecnicoRepository.save(newObject);
 	}
 	
-	/*validação para update*/
+	/*METODO -> validação para UPDATE*/
 	public Tecnico update(Integer id, @Valid TecnicoDTO objectDTO) {
 		objectDTO.setId(id);
-		Tecnico putObj = findById(id);
+		Tecnico Object = findById(id);
 		validationCpfEmail(objectDTO);
-		putObj = new Tecnico(objectDTO);
-		return repository.save(putObj);
+		Object = new Tecnico(objectDTO);
+		return tecnicoRepository.save(Object);
 	}
 	
-	/*Fazendo comparação atraves do ID, se já existe CPF/E-mal já cadastrado*/
+	/*METODO -> (DELETE)*/
+    public void delete(Integer id) {
+    	Tecnico object = findById(id);
+		if(object.getChamados().size() > 0){
+			throw new DataIntegrityViolationException("Técnico possui ordens de serviço e não pode ser deletado!");
+		}
+		tecnicoRepository.deleteById(id);
+	}
+
+	/*METODO -> Fazendo comparação atraves do ID, se já existe CPF/E-mal já cadastrado*/
 	private void validationCpfEmail(TecnicoDTO objectDTO) {
 		
 		Optional<Pessoa> object = pessoaRepository.findByCpf(objectDTO.getCpf());
@@ -67,6 +77,9 @@ public class TecnicoService {
 			    throw new DataIntegrityViolationException("E-mail já cadatrado no sistema!");
 		    }
 	}
+
+
+	
 }
 
 	
