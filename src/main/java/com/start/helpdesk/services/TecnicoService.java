@@ -66,7 +66,6 @@ public class TecnicoService {
 
 	/*METODO -> Fazendo comparação atraves do ID, se já existe CPF/E-mal já cadastrado*/
 	private void validationCpfEmail(TecnicoDTO objectDTO) {
-		
 		Optional<Pessoa> object = pessoaRepository.findByCpf(objectDTO.getCpf());
 			if(object.isPresent() && object.get().getId() != objectDTO.getId()) {
 				throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");

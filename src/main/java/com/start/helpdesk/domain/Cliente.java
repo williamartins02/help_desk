@@ -2,11 +2,13 @@ package com.start.helpdesk.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.start.helpdesk.domain.dtos.ClienteDTO;
 import com.start.helpdesk.domain.enums.Perfil;
 
 
@@ -22,6 +24,17 @@ public class Cliente extends Pessoa {
 	public Cliente() {
 		super();
 		addPerfil(Perfil.CLIENTE);
+	}
+	
+	public Cliente(ClienteDTO object) {
+		super();
+		this.id =     object.getId();
+		this.nome =   object.getNome();
+		this.cpf =    object .getCpf();
+		this.email =  object.getEmail();
+		this.senha =  object.getSenha();
+		this.perfis = object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
+		this.dataCriacao = object.getDataCriacao();
 	}
 
 	public Cliente(Integer id, String nome, String cpf, String email, String senha) {
