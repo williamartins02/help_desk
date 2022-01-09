@@ -1,5 +1,6 @@
 package com.start.helpdesk.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,17 @@ public class ChamadoService {
 	public List<Chamado> findAll(){
 		return chamadoRepository.findAll();
 	}
-
+	
 	public Chamado create(@Valid ChamadoDTO objectDTO) {
 		return chamadoRepository.save(newChamado(objectDTO));
 	}
 	
+	public Chamado update(Integer id, @Valid ChamadoDTO objectDTO) {
+		objectDTO.setId(id);
+		Chamado oldObject = findById(id);
+		oldObject = newChamado(objectDTO);
+		return chamadoRepository.save(oldObject);
+	}	
 	private Chamado newChamado(ChamadoDTO object) {
 		Tecnico tecnico = tecnicoService.findById(object.getTecnico());
 		Cliente cliente = clienteService.findById(object.getCliente());
@@ -48,12 +55,25 @@ public class ChamadoService {
 		if(object.getId() != null) {
 			chamado.setId((object.getId()));
 		}
+		/*Se o chamado for "Encerrado" retorna dia do fechamento*/
+		 if(object.getStatus().equals(2)){
+			 chamado.setDataFechamento(LocalDate.now());
+		 }
 		
 		chamado.setTecnico(tecnico);
 		chamado.setCliente(cliente);
 		chamado.setPrioridade(Prioridade.toEnum(object.getPrioridade()));
 		chamado.setStatus(Status.toEnum(object.getStatus()));
+		chamado.setTitulo(object.getTitulo());
 		chamado.setObservacoes(object.getObservacoes());
 		return chamado;
-	}	
+	}
+
+
+	
+	
+	
+	
+	
+	
 }
