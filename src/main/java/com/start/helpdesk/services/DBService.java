@@ -1,8 +1,10 @@
 package com.start.helpdesk.services;
 
+
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.start.helpdesk.domain.Chamado;
@@ -24,24 +26,26 @@ public class DBService {
 	private ClienteRepository clienteRepository;
 	@Autowired
 	private ChamadoRepository chamadoRepository;
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public void instanciaDB() {
-		Tecnico tec1 = new Tecnico(null, "Renan Paulo Arthur Melo", "412.468.591-22","renanpauloarthurmelo@gruposimoes.com", "FgY9AMzs");
+		Tecnico tec1 = new Tecnico(null, "Renan Paulo Arthur Melo", "412.468.591-22","renanpauloarthurmelo@gruposimoes.com", bCryptPasswordEncoder.encode("FgY9AMzs"));
 		tec1.addPerfil(Perfil.ADMIN);
 		
 		Tecnico tec2 = new Tecnico(null, "Isabelly Camila da Mata", "383.239.996-86","iisabellycamiladamata@gruposimoes.com.br", "EPsYWn32pD");
 		tec1.addPerfil(Perfil.ADMIN);
 		
-		Tecnico tec3 = new Tecnico(null, "Henrique Yuri Márcio Silveira", "809.659.299-81","henriqueyurimarciosilveira@gruposimoescom.br", "UIYGEsULUZ");
+		Tecnico tec3 = new Tecnico(null, "Henrique Yuri Márcio Silveira", "809.659.299-81","henriqueyurimarciosilveira@gruposimoescom.br", bCryptPasswordEncoder.encode("UIYGEsULUZ"));
 		tec1.addPerfil(Perfil.ADMIN);
 		
-		Tecnico tec4 = new Tecnico(null, "Mariana Sarah Rocha", "923.194.501-73","marianasarahrocha__21@gruposimoescom.br", "FuEx6RAdg9");
+		Tecnico tec4 = new Tecnico(null, "Mariana Sarah Rocha", "923.194.501-73","marianasarahrocha__21@gruposimoescom.br", bCryptPasswordEncoder.encode("FuEx6RAdg9"));
 		tec1.addPerfil(Perfil.ADMIN);
 
-		Cliente cli1 = new Cliente(null, "Amanda Malu Luciana Rocha", "094.167.932-21", "amandamalulucianarocha-97@hidracom.com.br","wslsIEJge7");
-		Cliente cli2 = new Cliente(null, "Nair Nina Fogaça", "837.106.538-86", "nairninafogaca__nairninafogaca@eccofibra.com.br","DegWwgwEF7");
-		Cliente cli3 = new Cliente(null, "Stefany Gabriela Marina Oliveira", "491.837.982-69", "stefanygabrielamarinaoliveira@salera.com.br","BSUBKhRAId");
-		Cliente cli4 = new Cliente(null, "Catarina Cláudia Gomes", "987.836.122-54", "catarinaclaudiagomes@bol.com","DIJRxpWdAQ");
+		Cliente cli1 = new Cliente(null, "Amanda Malu Luciana Rocha", "094.167.932-21", "amandamalulucianarocha-97@hidracom.com.br",bCryptPasswordEncoder.encode("wslsIEJge7"));
+		Cliente cli2 = new Cliente(null, "Nair Nina Fogaça", "837.106.538-86", "nairninafogaca__nairninafogaca@eccofibra.com.br",bCryptPasswordEncoder.encode("DegWwgwEF7"));
+		Cliente cli3 = new Cliente(null, "Stefany Gabriela Marina Oliveira", "491.837.982-69", "stefanygabrielamarinaoliveira@salera.com.br",bCryptPasswordEncoder.encode("BSUBKhRAId"));
+		Cliente cli4 = new Cliente(null, "Catarina Cláudia Gomes", "987.836.122-54", "catarinaclaudiagomes@bol.com",bCryptPasswordEncoder.encode("DIJRxpWdAQ"));
 
 		Chamado c1 = new Chamado(null, Prioridade.MEDIA, Status.ANDAMENTO, "Chamado 01", "Primeiro chamado", tec1,cli1);
 		Chamado c2 = new Chamado(null, Prioridade.ALTA,  Status.ANDAMENTO, "Chamado 04", "Primeiro chamado", tec2,cli2);

@@ -8,10 +8,9 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.start.helpdesk.domain.Chamado;
 
-
 public class ChamadoDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private Integer id;
 	@JsonFormat(pattern = "dd/MM/yyy")
 	private LocalDate dataAbertura = LocalDate.now();
@@ -31,7 +30,7 @@ public class ChamadoDTO implements Serializable {
 	private Integer cliente;
 	private String nomeTecnico;
 	private String nomeCliente;
-	
+
 	public ChamadoDTO() {
 		super();
 	}
@@ -138,7 +137,5 @@ public class ChamadoDTO implements Serializable {
 	public void setNomeCliente(String nomeCliente) {
 		this.nomeCliente = nomeCliente;
 	}
-	
-	
 
 }

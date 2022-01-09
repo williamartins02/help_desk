@@ -14,7 +14,8 @@ import com.start.helpdesk.domain.enums.Perfil;
 
 
 /**
- * DTO é uma abreviação de Data Transfer Object, transferir dados de um sistema para outro.
+ * DTO é uma abreviação de Data Transfer Object, transferir dados de um sistema para outro
+ * Fazer trafego em REDES.
  */
 public class ClienteDTO implements Serializable {
 	private static final long serialVersionUID = 1L; 

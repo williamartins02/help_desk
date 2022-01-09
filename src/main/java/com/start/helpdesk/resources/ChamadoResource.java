@@ -24,35 +24,38 @@ import com.start.helpdesk.services.ChamadoService;
 @RestController
 @RequestMapping(value = "/chamados")
 public class ChamadoResource {
-	
+
 	@Autowired
 	private ChamadoService service;
-	
+
+	/*Buscando chamado por ID findById*/
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<ChamadoDTO> findById(@PathVariable Integer id){
+	public ResponseEntity<ChamadoDTO> findById(@PathVariable Integer id) {
 		Chamado object = service.findById(id);
 		return ResponseEntity.ok().body(new ChamadoDTO(object));
 	}
-	
+
+	/*BUSCANDO uma lista de chamado findAll*/
 	@GetMapping
-	public ResponseEntity<List<ChamadoDTO>> findAll(){
+	public ResponseEntity<List<ChamadoDTO>> findAll() {
 		List<Chamado> listChamado = service.findAll();
 		List<ChamadoDTO> listDTO = listChamado.stream().map(object -> new ChamadoDTO(object)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDTO);
 	}
-	
+
+	/*CRIANDO um chamado novo*/
 	@PostMapping
-	public ResponseEntity<ChamadoDTO> create(@Valid @RequestBody ChamadoDTO objectDTO){
-		Chamado newObject = service.create(objectDTO);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObject.getId()).toUri();
+	public ResponseEntity<ChamadoDTO> create(@Valid @RequestBody ChamadoDTO objectDTO) {
+		Chamado object = service.create(objectDTO);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(object.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
-	
+
+	/*ATUALIZANDO um chamado*/
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<ChamadoDTO> update(@PathVariable Integer id, @Valid @RequestBody ChamadoDTO objectDTO){
-		Chamado newObject  = service.update(id, objectDTO);
+	public ResponseEntity<ChamadoDTO> update(@PathVariable Integer id, @Valid @RequestBody ChamadoDTO objectDTO) {
+		Chamado newObject = service.update(id, objectDTO);
 		return ResponseEntity.ok().body(new ChamadoDTO(newObject));
 	}
 
-	
 }
