@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.start.helpdesk.domain.dtos.CredenciaisDTO;
 
+
+/*Filtro de AUTETICAÇÃO usando JWT*/
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
 

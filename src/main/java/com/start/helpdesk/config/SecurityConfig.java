@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,9 +18,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.start.helpdesk.security.JWTAuthenticationFilter;
+import com.start.helpdesk.security.JWTAuthorizationFilter;
 import com.start.helpdesk.security.JWTUtil;
 
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)// Liberando para usar segurity dentro dos edPoints (Autorização/auteticacção)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	/* Liberando o acesso banco H2 */
@@ -42,19 +45,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
 			http.headers().frameOptions().disable();
 		}
-
-		/*Registrando filtro de AUTENTIFICAÇÂO*/
-		http.addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtUtil));
-
+		
 		/* permitindo o acesso H2 */
 		http.authorizeRequests().antMatchers(PUBLIC_MATCHERS).permitAll().anyRequest().authenticated();
 
+		/*Filtro de AUTENTICACAÇÂO*/
+		http.addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtUtil));
+		
+		/*Filtro de AUTORIZAÇÂO*/
+		http.addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService));
 		/*
 		 * Como no caso a política de sessão é stateless (sem estado), não teria essa
 		 * preocupação sobre ataques maliciosos
 		 */
 		http.cors().and().csrf().disable();/* DESABILITANDO proteção ataque "csrf" */
-
 		http.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);/*Assegunrando que n sera criado uma sessão
 																		 * para manter o crsf desabilitado*/																
