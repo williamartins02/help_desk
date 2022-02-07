@@ -4,9 +4,12 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import javax.validation.Valid;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +24,14 @@ import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.dtos.ChamadoDTO;
 import com.start.helpdesk.services.ChamadoService;
 
+
 @RestController
 @RequestMapping(value = "/chamados")
 public class ChamadoResource {
 
 	@Autowired
 	private ChamadoService service;
+	
 
 	/*Buscando chamado por ID findById*/
 	@GetMapping(value = "/{id}")
@@ -57,5 +62,5 @@ public class ChamadoResource {
 		Chamado newObject = service.update(id, objectDTO);
 		return ResponseEntity.ok().body(new ChamadoDTO(newObject));
 	}
-
+	
 }

@@ -48,19 +48,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		
 		/* permitindo o acesso H2 */
 		http.authorizeRequests().antMatchers(PUBLIC_MATCHERS).permitAll().anyRequest().authenticated();
-
-		/*Filtro de AUTENTICACAÇÂO*/
+		
+		/*Filtro de AUTENTICACAÇÂO token*/
 		http.addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtUtil));
 		
-		/*Filtro de AUTORIZAÇÂO*/
+		/*Filtro de AUTORIZAÇÂO token*/
 		http.addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService));
 		/*
 		 * Como no caso a política de sessão é stateless (sem estado), não teria essa
 		 * preocupação sobre ataques maliciosos
+		 * Proteção contra usuario q não estao validado por topken
 		 */
 		http.cors().and().csrf().disable();/* DESABILITANDO proteção ataque "csrf" */
-		http.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);/*Assegunrando que n sera criado uma sessão
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);/*Assegunrando que n sera criado uma sessão
 																		 * para manter o crsf desabilitado*/																
 	}
 

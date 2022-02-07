@@ -54,6 +54,10 @@ public class TecnicoService {
 	public Tecnico update(Integer id, @Valid TecnicoDTO objectDTO) {
 		objectDTO.setId(id);
 		Tecnico Object = findById(id);
+		   /*Verificando se usuario editou uma nova  senha ou não.*/
+		   if(!objectDTO.getSenha().equals(Object.getSenha())) {//se senha for diferente da senha salva, criar uma criptografia nova.
+			   objectDTO.setSenha(bCryptPasswordEncoder.encode(objectDTO.getSenha()));
+		   }  
 		validationCpfEmail(objectDTO);
 		Object = new Tecnico(objectDTO);
 		return tecnicoRepository.save(Object);
@@ -74,13 +78,14 @@ public class TecnicoService {
 			if(object.isPresent() && object.get().getId() != objectDTO.getId()) {
 				throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");
 			}
-			
 		object = pessoaRepository.findByEmail(objectDTO.getEmail());
 			if(object.isPresent() && object.get().getId() != objectDTO.getId()) {
 			    throw new DataIntegrityViolationException("E-mail já cadatrado no sistema!");
 		    }
 	}
 
+
+	
 
 	
 }

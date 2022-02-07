@@ -13,6 +13,7 @@ import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.Cliente;
 import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.ChamadoDTO;
+import com.start.helpdesk.domain.enums.Classificacao;
 import com.start.helpdesk.domain.enums.Prioridade;
 import com.start.helpdesk.domain.enums.Status;
 import com.start.helpdesk.repositories.ChamadoRepository;
@@ -67,6 +68,7 @@ public class ChamadoService {
 		chamado.setCliente(cliente);
 		chamado.setPrioridade(Prioridade.toEnum(object.getPrioridade()));
 		chamado.setStatus(Status.toEnum(object.getStatus()));
+		chamado.setClassificacao(Classificacao.toEnum(object.getClassificacao()));
 		chamado.setTitulo(object.getTitulo());
 		chamado.setObservacoes(object.getObservacoes());
 		return chamado;

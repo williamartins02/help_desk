@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -31,11 +32,14 @@ public class TecnicoResource {
 
 	@Autowired
 	private TecnicoService service;
+	
+	
 
 	/* EndPoint para (BUSCAR) tecnicos por ID */
-	@GetMapping(value = "/{id}")
+	@RequestMapping(value = "/{id}", method=RequestMethod.GET )
 	public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id) {
 		Tecnico object = service.findById(id);
+		
 		return ResponseEntity.ok().body(new TecnicoDTO(object));
 	}
 
@@ -44,6 +48,7 @@ public class TecnicoResource {
 	public ResponseEntity<List<TecnicoDTO>> findAll() {
 		List<Tecnico> list = service.findAll();
 		List<TecnicoDTO> listDTO = list.stream().map(object -> new TecnicoDTO(object)).collect(Collectors.toList());
+		
 		return ResponseEntity.ok().body(listDTO);
 	}
 
@@ -55,6 +60,7 @@ public class TecnicoResource {
 	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO) {
 		Tecnico newObject = service.create(objectDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObject.getId()).toUri();
+		
 		return ResponseEntity.created(uri).build();
 	}
 
@@ -63,6 +69,7 @@ public class TecnicoResource {
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objectDTO) {
 		Tecnico object = service.update(id, objectDTO);
+		
 		return ResponseEntity.ok().body(new TecnicoDTO(object));
 	}
 
@@ -71,6 +78,7 @@ public class TecnicoResource {
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> delete(@PathVariable Integer id) {
 		service.delete(id);
+		
 		return ResponseEntity.noContent().build();
 	}
 }
