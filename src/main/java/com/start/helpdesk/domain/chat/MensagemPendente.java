@@ -1,4 +1,4 @@
-package com.start.helpdesk.domain;
+package com.start.helpdesk.domain.chat;
 
 import javax.persistence.*;
 import java.io.Serializable;

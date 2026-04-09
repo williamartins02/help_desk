@@ -29,8 +29,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat-websocket")
-                // Permitir conexão a partir do Angular dev server
-                .setAllowedOrigins("http://localhost:4200")
+                // Permite conexão de qualquer origem localhost (dev)
+                .setAllowedOrigins("*")
                 // Fallback SockJS para browsers sem suporte nativo a WebSocket
                 .withSockJS();
     }

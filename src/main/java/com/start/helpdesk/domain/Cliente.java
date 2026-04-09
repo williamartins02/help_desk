@@ -6,6 +6,7 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
@@ -21,8 +22,8 @@ import lombok.ToString;
 
 @Getter @Setter
 @ToString
-
 @Entity
+@DiscriminatorValue("Cliente")
 public class Cliente extends Pessoa {
 	private static final long serialVersionUID = 1L;
 	

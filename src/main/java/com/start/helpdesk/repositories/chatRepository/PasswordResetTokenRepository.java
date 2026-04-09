@@ -1,4 +1,4 @@
-package com.start.helpdesk.repositories;
+package com.start.helpdesk.repositories.chatRepository;
 
 import com.start.helpdesk.domain.redefinirSenhaEntity.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;

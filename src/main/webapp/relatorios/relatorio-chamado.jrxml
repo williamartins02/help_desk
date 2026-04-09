@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="relatorio-chamado"
+              pageWidth="842" pageHeight="595"
+              orientation="Landscape"
+              whenNoDataType="NoPages"
+              columnWidth="802"
+              leftMargin="20" rightMargin="20"
+              topMargin="15" bottomMargin="15"
+              uuid="e115bc59-fd0f-446b-a585-04725e27d7f0">
+
+  <!-- ══════════════════════════════════════════════════════════
+       ESTILOS
+       Layout de colunas (soma = 802 px):
+         ID(30) | Titulo(130) | Tipo(68) | Cliente(108) |
+         Tecnico(108) | Abertura(90) | Prior.(62) | Status(88) | Obs(118)
+       ══════════════════════════════════════════════════════════ -->
+  <style name="Title"       fontName="Arial" fontSize="24" isBold="true"  forecolor="#FFFFFF"/>
+  <style name="Subtitle"    fontName="Arial" fontSize="10"               forecolor="#BBDEFB"/>
+  <style name="ColHeader"   fontName="Arial" fontSize="9"  isBold="true"  forecolor="#FFFFFF"/>
+  <style name="Detail"      fontName="Arial" fontSize="9"                forecolor="#37474F"/>
+  <style name="DetailSmall" fontName="Arial" fontSize="8"                forecolor="#546E7A"/>
+  <style name="IdStyle"     fontName="Arial" fontSize="9"  isBold="true"  forecolor="#1565C0"/>
+  <style name="Footer"      fontName="Arial" fontSize="8"                forecolor="#90A4AE"/>
+
+  <!-- Status — cor semântica por valor -->
+  <style name="StatusStyle" fontName="Arial" fontSize="9" isBold="false" forecolor="#546E7A">
+    <conditionalStyle>
+      <conditionExpression><![CDATA["ABERTO".equals($F{status})]]></conditionExpression>
+      <style isBold="true" forecolor="#1565C0"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["EM ANDAMENTO".equals($F{status})]]></conditionExpression>
+      <style isBold="true" forecolor="#E65100"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["ENCERRADO".equals($F{status})]]></conditionExpression>
+      <style isBold="false" forecolor="#546E7A"/>
+    </conditionalStyle>
+  </style>
+
+  <!-- Prioridade — cor semântica por valor -->
+  <style name="PrioridadeStyle" fontName="Arial" fontSize="9" isBold="false" forecolor="#37474F">
+    <conditionalStyle>
+      <conditionExpression><![CDATA["BAIXA".equals($F{prioridade})]]></conditionExpression>
+      <style isBold="true" forecolor="#2E7D32"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["MEDIA".equals($F{prioridade})]]></conditionExpression>
+      <style isBold="true" forecolor="#F57F17"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["ALTA".equals($F{prioridade})]]></conditionExpression>
+      <style isBold="true" forecolor="#C62828"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["CRITICA".equals($F{prioridade})]]></conditionExpression>
+      <style isBold="true" forecolor="#6A1B9A"/>
+    </conditionalStyle>
+  </style>
+
+  <!-- Classificação — cor semântica por tipo -->
+  <style name="ClassStyle" fontName="Arial" fontSize="9" isBold="false" forecolor="#37474F">
+    <conditionalStyle>
+      <conditionExpression><![CDATA["HARDWARE".equals($F{classificacao})]]></conditionExpression>
+      <style isBold="true" forecolor="#1565C0"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["SOFTWARE".equals($F{classificacao})]]></conditionExpression>
+      <style isBold="true" forecolor="#00695C"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["REDES".equals($F{classificacao})]]></conditionExpression>
+      <style isBold="true" forecolor="#0277BD"/>
+    </conditionalStyle>
+    <conditionalStyle>
+      <conditionExpression><![CDATA["BANCO".equals($F{classificacao})]]></conditionExpression>
+      <style isBold="true" forecolor="#4527A0"/>
+    </conditionalStyle>
+  </style>
+
+  <!-- ── Parâmetros ── -->
+  <parameter name="DATA_INICIO"           class="java.lang.String"/>
+  <parameter name="DATA_FIM"              class="java.lang.String"/>
+  <parameter name="DATA_INICIO_FORMATADA" class="java.lang.String">
+    <defaultValueExpression><![CDATA[$P{DATA_INICIO}]]></defaultValueExpression>
+  </parameter>
+  <parameter name="DATA_FIM_FORMATADA"    class="java.lang.String">
+    <defaultValueExpression><![CDATA[$P{DATA_FIM}]]></defaultValueExpression>
+  </parameter>
+
+  <!-- ── Query ── -->
+  <queryString>
+    <![CDATA[
+      SELECT
+        c.id,
+        c.titulo,
+        CASE c.classificacao
+          WHEN 0 THEN 'HARDWARE'
+          WHEN 1 THEN 'SOFTWARE'
+          WHEN 2 THEN 'REDES'
+          WHEN 3 THEN 'BANCO'
+          ELSE 'N/A'
+        END AS classificacao,
+        COALESCE(p_cli.nome, 'Nao atribuido') AS nome_cliente,
+        COALESCE(p_tec.nome, 'Nao atribuido') AS nome_tecnico,
+        c.data_abertura,
+        CASE c.prioridade
+          WHEN 0 THEN 'BAIXA'
+          WHEN 1 THEN 'MEDIA'
+          WHEN 2 THEN 'ALTA'
+          WHEN 3 THEN 'CRITICA'
+          ELSE 'N/A'
+        END AS prioridade,
+        CASE c.status
+          WHEN 0 THEN 'ABERTO'
+          WHEN 1 THEN 'EM ANDAMENTO'
+          WHEN 2 THEN 'ENCERRADO'
+          ELSE 'N/A'
+        END AS status,
+        c.observacoes
+      FROM chamado c
+      LEFT JOIN pessoa p_cli ON c.cliente_id = p_cli.id
+      LEFT JOIN pessoa p_tec ON c.tecnico_id = p_tec.id
+      WHERE c.data_abertura BETWEEN '$P!{DATA_INICIO} 00:00:00' AND '$P!{DATA_FIM} 23:59:59'
+      ORDER BY c.id
+    ]]>
+  </queryString>
+
+  <!-- ── Campos ── -->
+  <field name="id"            class="java.lang.Integer"/>
+  <field name="titulo"        class="java.lang.String"/>
+  <field name="classificacao" class="java.lang.String"/>
+  <field name="nome_cliente"  class="java.lang.String"/>
+  <field name="nome_tecnico"  class="java.lang.String"/>
+  <field name="data_abertura" class="java.sql.Timestamp"/>
+  <field name="prioridade"    class="java.lang.String"/>
+  <field name="status"        class="java.lang.String"/>
+  <field name="observacoes"   class="java.lang.String"/>
+
+  <!-- ── Variáveis ── -->
+  <variable name="TOTAL_CHAMADOS" class="java.lang.Integer" calculation="Count">
+    <variableExpression><![CDATA[$F{id}]]></variableExpression>
+  </variable>
+
+  <background>
+    <band height="565" splitType="Stretch"/>
+  </background>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TITLE BAND
+       ══════════════════════════════════════════════════════════ -->
+  <title>
+    <band height="88" splitType="Stretch">
+      <!-- Fundo azul principal -->
+      <rectangle>
+        <reportElement x="0" y="0" width="802" height="68" backcolor="#1565C0" uuid="a1000001-0001-0001-0001-000000000001"/>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <!-- Barra de acento lateral -->
+      <rectangle>
+        <reportElement x="0" y="0" width="6" height="68" backcolor="#0D47A1" uuid="a1000001-0001-0001-0001-000000000002"/>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <!-- Título -->
+      <staticText>
+        <reportElement style="Title" x="18" y="5" width="460" height="34" uuid="a1000001-0001-0001-0001-000000000003"/>
+        <textElement verticalAlignment="Middle"><font size="24" isBold="true"/></textElement>
+        <text><![CDATA[Relatorio de Chamados]]></text>
+      </staticText>
+      <!-- Subtítulo -->
+      <staticText>
+        <reportElement style="Subtitle" x="18" y="42" width="420" height="18" uuid="a1000001-0001-0001-0001-000000000004"/>
+        <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+        <text><![CDATA[Help Desk - Sistema de Gestao de Atendimento Tecnico]]></text>
+      </staticText>
+      <!-- Período (canto direito) -->
+      <textField>
+        <reportElement x="440" y="8" width="360" height="22" forecolor="#FFFFFF" uuid="a1000001-0001-0001-0001-000000000005"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle">
+          <font size="11" isBold="true" fontName="Arial"/>
+        </textElement>
+        <textFieldExpression><![CDATA["Periodo: " + $P{DATA_INICIO_FORMATADA} + "  a  " + $P{DATA_FIM_FORMATADA}]]></textFieldExpression>
+      </textField>
+      <!-- Data/hora de geração -->
+      <textField pattern="dd/MM/yyyy 'as' HH:mm">
+        <reportElement x="440" y="34" width="360" height="18" forecolor="#BBDEFB" uuid="a1000001-0001-0001-0001-000000000006"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle">
+          <font size="9" fontName="Arial"/>
+        </textElement>
+        <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+      </textField>
+      <!-- Barra de informação (azul claro) -->
+      <rectangle>
+        <reportElement x="0" y="68" width="802" height="20" backcolor="#E3F2FD" uuid="a1000001-0001-0001-0001-000000000007"/>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <staticText>
+        <reportElement x="8" y="68" width="540" height="20" forecolor="#1565C0" uuid="a1000001-0001-0001-0001-000000000008"/>
+        <textElement verticalAlignment="Middle"><font size="8" fontName="Arial"/></textElement>
+        <text><![CDATA[  Relatorio gerado automaticamente. Chamados filtrados pelo periodo e ordenados por ID.]]></text>
+      </staticText>
+      <staticText>
+        <reportElement x="548" y="68" width="254" height="20" forecolor="#1565C0" uuid="a1000001-0001-0001-0001-000000000009"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle">
+          <font size="8" fontName="Arial" isBold="true"/>
+        </textElement>
+        <text><![CDATA[Central de Chamados - Help Desk  ]]></text>
+      </staticText>
+    </band>
+  </title>
+
+  <!-- ══════════════════════════════════════════════════════════
+       COLUMN HEADER
+       Limites das colunas (x):
+         0 | 30 | 160 | 228 | 336 | 444 | 534 | 596 | 684 | 802
+       ══════════════════════════════════════════════════════════ -->
+  <columnHeader>
+    <band height="26" splitType="Stretch">
+      <!-- Fundo azul escuro -->
+      <rectangle>
+        <reportElement x="0" y="0" width="802" height="26" backcolor="#0D47A1" uuid="b1000001-0001-0001-0001-000000000001"/>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <!-- Separadores verticais no cabeçalho -->
+      <rectangle><reportElement x="30"  y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000001"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="160" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000002"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="228" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000003"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="336" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000004"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="444" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000005"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="534" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000006"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="596" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000007"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="684" y="3" width="1" height="20" backcolor="#1A4FA0" uuid="b2000001-0001-0001-0001-000000000008"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <!-- Labels das colunas -->
+      <staticText>
+        <reportElement style="ColHeader" x="3"   y="0" width="27"  height="26" uuid="b1000001-0001-0001-0001-000000000002"/>
+        <textElement textAlignment="Center" verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[ID]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="34"  y="0" width="122" height="26" uuid="b1000001-0001-0001-0001-000000000003"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Titulo]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="164" y="0" width="60"  height="26" uuid="b1000001-0001-0001-0001-000000000004"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Tipo]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="232" y="0" width="100" height="26" uuid="b1000001-0001-0001-0001-000000000005"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Cliente]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="340" y="0" width="100" height="26" uuid="b1000001-0001-0001-0001-000000000006"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Tecnico]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="448" y="0" width="82"  height="26" uuid="b1000001-0001-0001-0001-000000000007"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Abertura]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="538" y="0" width="54"  height="26" uuid="b1000001-0001-0001-0001-000000000008"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Prior.]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="600" y="0" width="80"  height="26" uuid="b1000001-0001-0001-0001-000000000009"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Status]]></text>
+      </staticText>
+      <staticText>
+        <reportElement style="ColHeader" x="688" y="0" width="110" height="26" uuid="b1000001-0001-0001-0001-000000000010"/>
+        <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+        <text><![CDATA[Observacoes]]></text>
+      </staticText>
+    </band>
+  </columnHeader>
+
+  <!-- ══════════════════════════════════════════════════════════
+       DETAIL BAND
+       ══════════════════════════════════════════════════════════ -->
+  <detail>
+    <band height="40" splitType="Stretch">
+      <!-- Fundo zebrado — linhas pares em azul suave -->
+      <rectangle>
+        <reportElement x="0" y="0" width="802" height="40" backcolor="#EBF4FF"
+                       stretchType="RelativeToBandHeight"
+                       uuid="c1000001-0001-0001-0001-000000000001">
+          <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+        </reportElement>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <!-- Borda inferior da linha -->
+      <line>
+        <reportElement x="0" y="39" width="802" height="1" forecolor="#D0E4FF" uuid="c1000001-0001-0001-0001-000000000002"/>
+      </line>
+      <!-- Separadores verticais nas linhas de dados -->
+      <rectangle><reportElement x="30"  y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000001"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="160" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000002"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="228" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000003"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="336" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000004"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="444" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000005"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="534" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000006"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="596" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000007"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+      <rectangle><reportElement x="684" y="0" width="1" height="40" backcolor="#D8E9FF" stretchType="RelativeToBandHeight" uuid="c2000001-0001-0001-0001-000000000008"/><graphicElement><pen lineWidth="0.0"/></graphicElement></rectangle>
+
+      <!-- ID (#N) -->
+      <textField>
+        <reportElement style="IdStyle" x="3" y="0" width="27" height="40" uuid="c1000001-0001-0001-0001-000000000003"/>
+        <textElement textAlignment="Center" verticalAlignment="Middle">
+          <font size="9" isBold="true"/>
+        </textElement>
+        <textFieldExpression><![CDATA["#" + $F{id}]]></textFieldExpression>
+      </textField>
+
+      <!-- Título -->
+      <textField isStretchWithOverflow="true">
+        <reportElement style="Detail" x="34" y="4" width="122" height="32"
+                       stretchType="RelativeToBandHeight" uuid="c1000001-0001-0001-0001-000000000004"/>
+        <textElement verticalAlignment="Top"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{titulo}]]></textFieldExpression>
+      </textField>
+
+      <!-- Classificação (cor condicional) -->
+      <textField>
+        <reportElement style="ClassStyle" x="164" y="0" width="60" height="40" uuid="c1000001-0001-0001-0001-000000000005"/>
+        <textElement verticalAlignment="Middle"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{classificacao}]]></textFieldExpression>
+      </textField>
+
+      <!-- Nome Cliente -->
+      <textField isStretchWithOverflow="true">
+        <reportElement style="Detail" x="232" y="4" width="100" height="32"
+                       stretchType="RelativeToBandHeight" uuid="c1000001-0001-0001-0001-000000000006"/>
+        <textElement verticalAlignment="Top"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{nome_cliente}]]></textFieldExpression>
+      </textField>
+
+      <!-- Nome Técnico -->
+      <textField isStretchWithOverflow="true">
+        <reportElement style="Detail" x="340" y="4" width="100" height="32"
+                       stretchType="RelativeToBandHeight" uuid="c1000001-0001-0001-0001-000000000007"/>
+        <textElement verticalAlignment="Top"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{nome_tecnico}]]></textFieldExpression>
+      </textField>
+
+      <!-- Data Abertura formatada -->
+      <textField>
+        <reportElement style="Detail" x="448" y="0" width="82" height="40" uuid="c1000001-0001-0001-0001-000000000008"/>
+        <textElement verticalAlignment="Middle"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{data_abertura} != null ? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($F{data_abertura}) : ""]]></textFieldExpression>
+      </textField>
+
+      <!-- Prioridade (cor condicional) -->
+      <textField>
+        <reportElement style="PrioridadeStyle" x="538" y="0" width="54" height="40" uuid="c1000001-0001-0001-0001-000000000009"/>
+        <textElement verticalAlignment="Middle"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{prioridade}]]></textFieldExpression>
+      </textField>
+
+      <!-- Status (cor condicional) -->
+      <textField>
+        <reportElement style="StatusStyle" x="600" y="0" width="80" height="40" uuid="c1000001-0001-0001-0001-000000000010"/>
+        <textElement verticalAlignment="Middle"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+      </textField>
+
+      <!-- Observações -->
+      <textField isStretchWithOverflow="true">
+        <reportElement style="DetailSmall" x="688" y="4" width="110" height="32"
+                       stretchType="RelativeToBandHeight" uuid="c1000001-0001-0001-0001-000000000011"/>
+        <textElement verticalAlignment="Top"><font size="8"/></textElement>
+        <textFieldExpression><![CDATA[$F{observacoes} != null ? $F{observacoes} : ""]]></textFieldExpression>
+      </textField>
+    </band>
+  </detail>
+
+  <columnFooter>
+    <band splitType="Stretch"/>
+  </columnFooter>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE FOOTER
+       ══════════════════════════════════════════════════════════ -->
+  <pageFooter>
+    <band height="22" splitType="Stretch">
+      <line>
+        <reportElement x="0" y="0" width="802" height="1" forecolor="#90A4AE" uuid="d1000001-0001-0001-0001-000000000001"/>
+      </line>
+      <staticText>
+        <reportElement style="Footer" x="0" y="3" width="280" height="16" uuid="d1000001-0001-0001-0001-000000000002"/>
+        <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+        <text><![CDATA[Help Desk - Sistema de Gestao - By Goncalves M William]]></text>
+      </staticText>
+      <textField>
+        <reportElement style="Footer" x="305" y="3" width="80" height="16" forecolor="#607D8B" uuid="d1000001-0001-0001-0001-000000000003"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle">
+          <font size="8" isBold="true" fontName="Arial"/>
+        </textElement>
+        <textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+      </textField>
+      <textField evaluationTime="Report">
+        <reportElement style="Footer" x="385" y="3" width="40" height="16" forecolor="#607D8B" uuid="d1000001-0001-0001-0001-000000000004"/>
+        <textElement textAlignment="Left" verticalAlignment="Middle">
+          <font size="8" isBold="true" fontName="Arial"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+      </textField>
+      <textField pattern="EEEE, dd 'de' MMMM 'de' yyyy">
+        <reportElement style="Footer" x="430" y="3" width="372" height="16" uuid="d1000001-0001-0001-0001-000000000005"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
+        <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+      </textField>
+    </band>
+  </pageFooter>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SUMMARY — Total de chamados no período
+       ══════════════════════════════════════════════════════════ -->
+  <summary>
+    <band height="32" splitType="Stretch">
+      <rectangle>
+        <reportElement x="0" y="0" width="802" height="32" backcolor="#E3F2FD" uuid="e1000001-0001-0001-0001-000000000001"/>
+        <graphicElement><pen lineWidth="0.0"/></graphicElement>
+      </rectangle>
+      <line>
+        <reportElement x="0" y="0" width="802" height="1" forecolor="#90CAF9" uuid="e1000001-0001-0001-0001-000000000002"/>
+      </line>
+      <staticText>
+        <reportElement x="10" y="0" width="230" height="32" forecolor="#1565C0" uuid="e1000001-0001-0001-0001-000000000003"/>
+        <textElement verticalAlignment="Middle">
+          <font size="10" isBold="true" fontName="Arial"/>
+        </textElement>
+        <text><![CDATA[Total de chamados no periodo:]]></text>
+      </staticText>
+      <textField>
+        <reportElement x="240" y="0" width="60" height="32" forecolor="#1565C0" uuid="e1000001-0001-0001-0001-000000000004"/>
+        <textElement verticalAlignment="Middle">
+          <font size="12" isBold="true" fontName="Arial"/>
+        </textElement>
+        <textFieldExpression><![CDATA[$V{TOTAL_CHAMADOS}]]></textFieldExpression>
+      </textField>
+      <staticText>
+        <reportElement x="590" y="0" width="212" height="32" forecolor="#90A4AE" uuid="e1000001-0001-0001-0001-000000000005"/>
+        <textElement textAlignment="Right" verticalAlignment="Middle">
+          <font size="8" fontName="Arial"/>
+        </textElement>
+        <text><![CDATA[Fim do Relatorio - Help Desk  ]]></text>
+      </staticText>
+    </band>
+  </summary>
+
+</jasperReport>

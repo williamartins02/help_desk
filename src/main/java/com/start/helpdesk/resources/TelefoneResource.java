@@ -57,20 +57,21 @@ public class TelefoneResource {
 		return ResponseEntity.ok().body(listDTO);
 	}
 
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<TelefoneDTO> update(@PathVariable Integer id, @Valid @RequestBody TelefoneDTO objectDTO) {
 		Telefone object = service.update(id, objectDTO);
 		return ResponseEntity.ok().body(new TelefoneDTO(object));
 	}
 
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<TelefoneDTO> delete(@PathVariable("id") Integer id){
 		service.delete(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@PostMapping
 	public ResponseEntity<TelefoneDTO> create(@Valid @RequestBody TelefoneDTO objectDTO){
 		Telefone newObjCliente = service.create(objectDTO);

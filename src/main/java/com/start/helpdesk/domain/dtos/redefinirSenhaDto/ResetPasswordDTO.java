@@ -1,4 +1,4 @@
-package com.start.helpdesk.resources.redefinirSenhaController;
+package com.start.helpdesk.domain.dtos.redefinirSenhaDto;
 
 public class ResetPasswordDTO {
     private String token;

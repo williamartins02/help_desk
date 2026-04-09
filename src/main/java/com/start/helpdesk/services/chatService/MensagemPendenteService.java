@@ -1,8 +1,8 @@
-package com.start.helpdesk.services;
+package com.start.helpdesk.services.chatService;
 
-import com.start.helpdesk.domain.Mensagem;
-import com.start.helpdesk.domain.MensagemPendente;
-import com.start.helpdesk.repositories.MensagemPendenteRepository;
+import com.start.helpdesk.domain.chat.Mensagem;
+import com.start.helpdesk.domain.chat.MensagemPendente;
+import com.start.helpdesk.repositories.chatRepository.MensagemPendenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

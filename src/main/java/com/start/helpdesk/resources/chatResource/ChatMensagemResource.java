@@ -1,7 +1,7 @@
-package com.start.helpdesk.resources;
+package com.start.helpdesk.resources.chatResource;
 
-import com.start.helpdesk.domain.Mensagem;
-import com.start.helpdesk.services.MensagemPendenteService;
+import com.start.helpdesk.domain.chat.Mensagem;
+import com.start.helpdesk.services.chatService.MensagemPendenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

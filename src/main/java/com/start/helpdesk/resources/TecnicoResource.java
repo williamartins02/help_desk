@@ -55,7 +55,7 @@ public class TecnicoResource {
 	/*
 	 * EndPoint para (CREATE) criar tecnico, criando URI de acesso ao ID.
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@PostMapping
 	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO) {
 		Tecnico newObject = service.create(objectDTO);
@@ -65,7 +65,7 @@ public class TecnicoResource {
 	}
 
 	/* EndPoint (ATUALIZAR) criando um tecnico novo. */
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objectDTO) {
 		Tecnico object = service.update(id, objectDTO);
@@ -74,7 +74,7 @@ public class TecnicoResource {
 	}
 
 	/* EndPoint (DELETAR) por ID */
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> delete(@PathVariable Integer id) {
 		service.delete(id);

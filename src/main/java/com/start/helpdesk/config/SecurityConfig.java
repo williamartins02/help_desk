@@ -1,9 +1,20 @@
 package com.start.helpdesk.config;
 
+import java.io.IOException;
 import java.util.Arrays;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,8 +36,13 @@ import com.start.helpdesk.security.JWTUtil;
 @EnableGlobalMethodSecurity(prePostEnabled = true)// Liberando para usar segurity dentro dos edPoints (Autorização/auteticacção)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	/* Liberando o acesso banco H2 */
-	private static final String[] PUBLIC_MATCHERS = { "/h2-console/**" };
+	/* Liberando o acesso banco H2 e endpoints públicos de autenticação */
+	private static final String[] PUBLIC_MATCHERS = {
+			"/h2-console/**",
+			"/auth/forgot-password",
+			"/auth/reset-password",
+			"/chat-websocket/**"   // ← WebSocket / SockJS endpoint
+	};
 
 	@Autowired
 	private Environment env; /* habilitando o H2 no perfil de test */
@@ -70,12 +86,55 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
 	}
 
-	/* Recebendo liberação para os endPOint */
-	@Bean // executar assim que startar proj
+	/**
+	 * Filtro CORS dinâmico: aceita qualquer origem http://localhost:*
+	 * Compatível com Spring 5.2 (Spring Boot 2.3) e allowCredentials=true
+	 */
+	@Bean
+	public FilterRegistrationBean<Filter> dynamicCorsFilter() {
+		FilterRegistrationBean<Filter> bean = new FilterRegistrationBean<>();
+		bean.setFilter(new Filter() {
+			@Override
+			public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+					throws IOException, ServletException {
+				HttpServletRequest  request  = (HttpServletRequest)  req;
+				HttpServletResponse response = (HttpServletResponse) res;
+				String origin = request.getHeader("Origin");
+				if (origin != null && origin.matches("http://localhost(:\\d+)?")) {
+					response.setHeader("Access-Control-Allow-Origin",      origin);
+					response.setHeader("Access-Control-Allow-Credentials", "true");
+					response.setHeader("Access-Control-Allow-Methods",     "GET,POST,PUT,DELETE,OPTIONS,PATCH");
+					response.setHeader("Access-Control-Allow-Headers",     "Authorization,Content-Type,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers");
+					response.setHeader("Access-Control-Expose-Headers",    "Authorization");
+					response.setHeader("Access-Control-Max-Age",           "3600");
+				}
+				if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+					response.setStatus(HttpServletResponse.SC_OK);
+					return;
+				}
+				chain.doFilter(req, res);
+			}
+		});
+		bean.addUrlPatterns("/*");
+		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		return bean;
+	}
+
+	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();/* LIBERANDO os metodo */
-		configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "OPTIONS"));
-		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:58486"));
+		configuration.setAllowedMethods(Arrays.asList(
+				"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		configuration.setAllowedHeaders(Arrays.asList(
+				"Authorization", "Content-Type", "X-Requested-With", "Accept",
+				"Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+		configuration.setExposedHeaders(Arrays.asList(
+				"Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+		configuration.setAllowCredentials(true);
+		configuration.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}

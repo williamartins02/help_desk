@@ -1,4 +1,4 @@
-package com.start.helpdesk.resources;
+package com.start.helpdesk.resources.chatResource;
 
 import com.start.helpdesk.domain.Pessoa;
 import com.start.helpdesk.domain.dtos.PessoaDTO;

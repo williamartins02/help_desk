@@ -2,6 +2,7 @@ package com.start.helpdesk.domain;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.br.CPF;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -59,7 +61,12 @@ public abstract class Pessoa implements Serializable {
 	
 	@JsonFormat(pattern = "dd/MM/yyy")
 	protected LocalDate dataCriacao = LocalDate.now();
-	
+
+	/** Horário exato de criação — preenchido automaticamente pelo Hibernate */
+	@CreationTimestamp
+	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+	protected LocalDateTime dataHoraCriacao;
+
 	public Pessoa() {
 		super();
 		addPerfil(Perfil.CLIENTE);//cliente precisa ter pelo menos um perfil, se caso esquecer (CLIENTE) como padrão

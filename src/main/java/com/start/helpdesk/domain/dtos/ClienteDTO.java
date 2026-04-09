@@ -2,6 +2,7 @@ package com.start.helpdesk.domain.dtos;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +46,9 @@ public class ClienteDTO implements Serializable {
 		@JsonFormat(pattern = "dd/MM/yyy")
 		protected LocalDate dataCriacao = LocalDate.now();
 
+		@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+		protected LocalDateTime dataHoraCriacao;
+
 		public ClienteDTO() {
 			super();
 			addPerfis(Perfil.CLIENTE);
@@ -52,13 +56,14 @@ public class ClienteDTO implements Serializable {
 
 		public ClienteDTO(Cliente object) {
 			super();
-			this.id =     object.getId();
-			this.nome =   object.getNome();
-			this.cpf =    object .getCpf();
-			this.email =  object.getEmail();
-			this.senha =  object.getSenha();
-			this.perfis = object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
-			this.dataCriacao = object.getDataCriacao();
+			this.id =          object.getId();
+			this.nome =        object.getNome();
+			this.cpf =         object.getCpf();
+			this.email =       object.getEmail();
+			this.senha =       object.getSenha();
+			this.perfis =      object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
+			this.dataCriacao =     object.getDataCriacao();
+			this.dataHoraCriacao = object.getDataHoraCriacao();
 			addPerfis(Perfil.CLIENTE);
 		}
 

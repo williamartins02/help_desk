@@ -2,6 +2,7 @@ package com.start.helpdesk.domain.dtos;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,6 +45,9 @@ public class TecnicoDTO implements Serializable {
 		
 		@JsonFormat(pattern = "dd/MM/yyy")
 		protected LocalDate dataCriacao = LocalDate.now();
+
+		@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+		protected LocalDateTime dataHoraCriacao;
 		
 		public TecnicoDTO() {
 			super();
@@ -52,18 +56,19 @@ public class TecnicoDTO implements Serializable {
 
 		public TecnicoDTO(Tecnico object) {
 			super();
-			this.id =     object.getId();
-			this.nome =   object.getNome();
-			this.cpf =    object .getCpf();
-			this.email =  object.getEmail();
-			this.senha =  object.getSenha();
-			this.perfis = object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
-			this.dataCriacao = object.getDataCriacao();
+			this.id =    object.getId();
+			this.nome =  object.getNome();
+			this.cpf =   object.getCpf();
+			this.email = object.getEmail();
+			this.senha = object.getSenha();
+			this.perfis =        object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
+			this.dataCriacao =     object.getDataCriacao();
+			this.dataHoraCriacao = object.getDataHoraCriacao();
 			addPerfis(Perfil.TECNICO);
 		}
 
-		/*Tranzendo um SETTERS de perfil/Ao inves de STRING o CODIGO*/
-		public Set<Perfil> getPerfis() {
+		/*Retorna os perfis como enum (uso interno — não serializado pelo Jackson)*/
+		public Set<Perfil> getPerfisMapped() {
 			return perfis.stream().map(p -> Perfil.toEnum(p)).collect(Collectors.toSet());
 		}
 		public void addPerfis(Perfil perfil) {

@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 
 
 
@@ -31,13 +33,15 @@ public class RelatoriosService implements Serializable {
 		/*Obter a conexão com o banco de dados*/
 		Connection connection = jdbcTemplate.getDataSource().getConnection();
 		
-		/*Carregar o caminho do arquivo Jasper*/
-		String caminhoJasper = servletContext.getRealPath("relatorios")
-				+ File.separator + nomeRelatorio + ".jasper";
-		
+		/*Carregar e compilar o arquivo JRXML em runtime (evita dependência de .jasper pré-compilado)*/
+		String caminhoJrxml = servletContext.getRealPath("relatorios")
+				+ File.separator + nomeRelatorio + ".jrxml";
+
+		JasperReport jasperReport = JasperCompileManager.compileReport(caminhoJrxml);
+
 		/*Gerar o relatorio com os dados e conexão*/
-		JasperPrint print = JasperFillManager.fillReport(caminhoJasper, params, connection);
-		
+		JasperPrint print = JasperFillManager.fillReport(jasperReport, params, connection);
+
 		/*Exporta para byte o PDF para fazer o Download*/
 		byte [] retorno = JasperExportManager.exportReportToPdf(print);
 		

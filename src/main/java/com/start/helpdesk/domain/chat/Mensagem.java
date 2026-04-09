@@ -1,4 +1,4 @@
-package com.start.helpdesk.domain;
+package com.start.helpdesk.domain.chat;
 
 /**
  * Modelo de mensagem trocada no chat em tempo real.

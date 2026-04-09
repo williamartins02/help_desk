@@ -1,11 +1,12 @@
 package com.start.helpdesk.domain.dtos;
 
 import java.io.Serializable;
-
+import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
-import com.start.helpdesk.domain.Telefone;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.start.helpdesk.domain.Telefone;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,20 +27,22 @@ public class TelefoneDTO implements Serializable {
 		private Integer tipoTelefone;
 		private Integer tecnico;
 		private String nomeTecnico;
-		
+
+		@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+		private LocalDateTime dataCriacao;
+
 		public TelefoneDTO() {
 			super();
 		}
 
 		public TelefoneDTO(Telefone object) {
 			super();
-			this.id =             object.getId();
-			this.numero =         object.getNumero();
-			this.tipoTelefone =   object.getTipoTelefone().getCodigo();
-			this.tecnico =        object.getTecnico().getId();
-			this.nomeTecnico =    object.getTecnico().getNome();
-			
+			this.id           = object.getId();
+			this.numero       = object.getNumero();
+			this.tipoTelefone = object.getTipoTelefone().getCodigo();
+			this.tecnico      = object.getTecnico().getId();
+			this.nomeTecnico  = object.getTecnico().getNome();
+			this.dataCriacao  = object.getDataCriacao();
 		}
-		
-	
+
 }

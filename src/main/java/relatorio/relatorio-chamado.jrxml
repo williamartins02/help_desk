@@ -75,12 +75,7 @@
 		<variableExpression><![CDATA[$F{prioridade}]]></variableExpression>
 	</variable>
 	<background>
-		<band height="575" splitType="Stretch">
-			<image>
-				<reportElement x="180" y="60" width="480" height="445" uuid="889ba4a6-73f7-4a8c-9735-5fdd57f53176"/>
-				<imageExpression><![CDATA["C:/Users/Will_Day/OneDrive/Área de Trabalho/download.png"]]></imageExpression>
-			</image>
-		</band>
+		<band height="575" splitType="Stretch"/>
 	</background>
 	<title>
 		<band height="139" splitType="Stretch">
@@ -101,10 +96,6 @@
 			<frame>
 				<reportElement mode="Opaque" x="40" y="102" width="742" height="5" backcolor="#666666" uuid="35d90a9b-bb7e-4ec4-bfa2-68be1967d6b2"/>
 			</frame>
-			<image>
-				<reportElement x="0" y="-30" width="379" height="150" uuid="cea25e96-4ce4-4810-80e7-d359879c7026"/>
-				<imageExpression><![CDATA["C:/Users/Will_Day/OneDrive/Área de Trabalho/e29f14109f44f8fecaf12e84bd82114c.png"]]></imageExpression>
-			</image>
 		</band>
 	</title>
 	<pageHeader>

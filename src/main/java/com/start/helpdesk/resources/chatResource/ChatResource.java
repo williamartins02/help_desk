@@ -1,8 +1,8 @@
-package com.start.helpdesk.resources;
+package com.start.helpdesk.resources.chatResource;
 
-import com.start.helpdesk.domain.Mensagem;
-import com.start.helpdesk.services.MensagemPendenteService;
-import com.start.helpdesk.services.PresenceService;
+import com.start.helpdesk.domain.chat.Mensagem;
+import com.start.helpdesk.services.chatService.MensagemPendenteService;
+import com.start.helpdesk.services.chatService.PresenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -25,7 +25,7 @@ import java.util.Random;
  *   Broker   →  /chat/escrevendo  →  Todos os subscribers
  */
 @Controller
-public class ChatController {
+public class ChatResource {
 
     /** Paleta de cores para distinguir os usuários no chat */
     private static final List<String> CORES = Arrays.asList(

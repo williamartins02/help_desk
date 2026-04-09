@@ -1,4 +1,4 @@
-package com.start.helpdesk.services;
+package com.start.helpdesk.services.chatService;
 
 import org.springframework.stereotype.Service;
 import java.util.Set;
