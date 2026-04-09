@@ -1,0 +1,147 @@
+<div *ngIf="mostrarBubble" class="float-host">
+
+  <!-- ── Chat Panel ── -->
+  <div *ngIf="expanded" class="float-panel mat-elevation-z10" [@slideUp]>
+
+    <!-- Header -->
+    <div class="fp-header">
+      <mat-icon class="fp-header-icon">people</mat-icon>
+      <span class="fp-title">Usuários</span>
+      <span class="fp-conn-status"
+            [class.fp-conn-online]="conexaoStatus === 'conectado'"
+            [class.fp-conn-reconectando]="conexaoStatus === 'reconectando'"
+            [class.fp-conn-offline]="conexaoStatus === 'offline'">
+        <span class="fp-conn-dot"></span>
+        {{ conexaoStatus === 'conectado' ? 'Online' : conexaoStatus === 'reconectando' ? 'Reconectando...' : 'Offline' }}
+      </span>
+      <button mat-icon-button class="fp-btn-close" (click)="toggle()" matTooltip="Minimizar">
+        <mat-icon>remove</mat-icon>
+      </button>
+    </div>
+
+    <!-- Notificação in-panel (nova mensagem recebida com painel aberto) -->
+    <div *ngIf="notificacaoAtiva" class="fp-notif" [@notifEnter]>
+      <mat-icon class="fp-notif-icon">notifications_active</mat-icon>
+      <div class="fp-notif-body">
+        <span class="fp-notif-nome">{{ notificacaoAtiva.nome }}</span>
+        <span class="fp-notif-texto">{{ notificacaoAtiva.texto }}</span>
+      </div>
+      <button mat-icon-button class="fp-notif-close" (click)="notificacaoAtiva = null">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Busca -->
+    <div class="fp-search">
+      <mat-icon class="fp-search-icon">search</mat-icon>
+      <input class="fp-search-input"
+             [(ngModel)]="searchQuery"
+             placeholder="Buscar usuário..."/>
+      <button *ngIf="searchQuery" mat-icon-button class="fp-search-clear" (click)="searchQuery=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Lista de usuários -->
+    <div class="fp-user-list">
+
+      <!-- ── Técnicos ── -->
+      <ng-container *ngIf="tecnicos.length > 0">
+        <div class="fp-group-label">
+          <mat-icon class="fp-group-icon">engineering</mat-icon>
+          Técnicos
+        </div>
+        <div *ngFor="let user of tecnicos"
+             class="fp-user-item"
+             [class.has-unread]="getUnread(user) > 0"
+             (click)="abrirConversa(user)"
+             matTooltip="Iniciar conversa">
+          <!-- Avatar com ponto de presença -->
+          <div class="fp-u-avatar-wrap">
+            <div class="fp-u-avatar" [style.background]="getAvatarCor(user.nome)">
+              {{ getInitials(user.nome) }}
+            </div>
+            <span class="fp-u-presence-dot" [class.online]="isOnline(user)"></span>
+          </div>
+          <!-- Info -->
+          <div class="fp-u-info">
+            <span class="fp-u-name">{{ user.nome }}</span>
+            <!-- Prévia da última mensagem OU status de presença -->
+            <span *ngIf="getLastMessage(user); else tNoMsg" class="fp-u-preview">
+              {{ getLastMessage(user) }}
+            </span>
+            <ng-template #tNoMsg>
+              <span class="fp-u-status" [class.online]="isOnline(user)">
+                {{ isOnline(user) ? 'Online' : (getLastSeen(user) ? 'Visto ' + formatLastSeen(getLastSeen(user)) : 'Offline') }}
+              </span>
+            </ng-template>
+          </div>
+          <!-- Badge de não-lidas -->
+          <span *ngIf="getUnread(user) > 0" class="fp-u-badge">
+            {{ getUnread(user) > 99 ? '99+' : getUnread(user) }}
+          </span>
+          <mat-icon *ngIf="getUnread(user) === 0" class="fp-u-action">chevron_right</mat-icon>
+        </div>
+      </ng-container>
+
+      <!-- ── Clientes ── -->
+      <ng-container *ngIf="clientes.length > 0">
+        <div class="fp-group-label">
+          <mat-icon class="fp-group-icon">person</mat-icon>
+          Clientes
+        </div>
+        <div *ngFor="let user of clientes"
+             class="fp-user-item"
+             [class.has-unread]="getUnread(user) > 0"
+             (click)="abrirConversa(user)"
+             matTooltip="Iniciar conversa">
+          <div class="fp-u-avatar-wrap">
+            <div class="fp-u-avatar" [style.background]="getAvatarCor(user.nome)">
+              {{ getInitials(user.nome) }}
+            </div>
+            <span class="fp-u-presence-dot" [class.online]="isOnline(user)"></span>
+          </div>
+          <div class="fp-u-info">
+            <span class="fp-u-name">{{ user.nome }}</span>
+            <span *ngIf="getLastMessage(user); else cNoMsg" class="fp-u-preview">
+              {{ getLastMessage(user) }}
+            </span>
+            <ng-template #cNoMsg>
+              <span class="fp-u-status" [class.online]="isOnline(user)">
+                {{ isOnline(user) ? 'Online' : (getLastSeen(user) ? 'Visto ' + formatLastSeen(getLastSeen(user)) : 'Offline') }}
+              </span>
+            </ng-template>
+          </div>
+          <span *ngIf="getUnread(user) > 0" class="fp-u-badge">
+            {{ getUnread(user) > 99 ? '99+' : getUnread(user) }}
+          </span>
+          <mat-icon *ngIf="getUnread(user) === 0" class="fp-u-action">chevron_right</mat-icon>
+        </div>
+      </ng-container>
+
+      <!-- Estado vazio -->
+      <div *ngIf="tecnicos.length === 0 && clientes.length === 0" class="fp-empty">
+        <mat-icon>search_off</mat-icon>
+        <span>Nenhum usuário encontrado</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="fp-footer">
+      <span class="fp-f-dot online"></span>
+      {{ usuariosOnline.length }} usuário(s) online
+    </div>
+
+  </div>
+
+  <!-- ── FAB ── -->
+  <button class="float-fab" (click)="toggle()" [attr.aria-label]="expanded ? 'Fechar chat' : 'Abrir chat'">
+    <mat-icon>{{ expanded ? 'close' : 'chat' }}</mat-icon>
+    <span *ngIf="naoLidas > 0 && !expanded" class="float-badge">
+      {{ naoLidas > 99 ? '99+' : naoLidas }}
+    </span>
+  </button>
+
+</div>
+

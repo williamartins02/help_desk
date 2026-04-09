@@ -1,0 +1,128 @@
+<div class="dialog-wrapper">
+
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>group_add</mat-icon>
+      Novo cliente
+    </span>
+
+    <div class="header-content">
+      <div class="header-brand">
+        <div class="header-icon-badge">
+          <mat-icon class="header-icon">person_add_alt</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>Cadastrar Cliente</h2>
+          <p class="header-subtitle">Preencha os dados do novo cliente</p>
+        </div>
+      </div>
+<!--      <img src="assets/img/cadastra-cliente.png" alt="Cadastrar Cliente" class="header-img">-->
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form">
+
+      <!-- Seção: Perfis -->
+      <div class="section-header">
+        <mat-icon class="section-icon">manage_accounts</mat-icon>
+        <span>Perfis de acesso</span>
+      </div>
+
+      <div class="perfis-section">
+        <div class="perfil-chip">
+          <mat-checkbox (click)="addPerfil(0)" disabled color="primary">
+            <span class="chip-content">
+              <mat-icon>admin_panel_settings</mat-icon>Admin
+            </span>
+          </mat-checkbox>
+        </div>
+        <div class="perfil-chip active">
+          <mat-checkbox (click)="addPerfil(1)" [checked]="true" color="primary">
+            <span class="chip-content">
+              <mat-icon>person</mat-icon>Cliente
+            </span>
+          </mat-checkbox>
+        </div>
+        <div class="perfil-chip">
+          <mat-checkbox (click)="addPerfil(2)" disabled color="primary">
+            <span class="chip-content">
+              <mat-icon>build</mat-icon>Técnico
+            </span>
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Seção: Dados pessoais -->
+      <div class="section-header">
+        <mat-icon class="section-icon">badge</mat-icon>
+        <span>Dados pessoais</span>
+      </div>
+
+      <!-- Linha: Nome + CPF -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>Nome completo</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
+          <input [(ngModel)]="cliente.nome" name="nome" [formControl]="nome"
+                 matInput placeholder="Ex: Fulano de Tal" maxlength="50" required>
+          <mat-error *ngIf="nome.invalid">Mínimo de 3 caracteres</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field-half">
+          <mat-label>CPF</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">pin</mat-icon>
+          <input [(ngModel)]="cliente.cpf" name="cpf" [formControl]="cpf"
+                 matInput placeholder="000.000.000-00" mask="000.000.000-00" required>
+          <mat-error *ngIf="cpf.invalid">CPF é obrigatório</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- E-mail -->
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>E-mail</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">email</mat-icon>
+        <input [(ngModel)]="cliente.email" name="email" [formControl]="email"
+               matInput placeholder="Ex: fulano@gmail.com" maxlength="50" required>
+        <mat-error *ngIf="email.invalid">Informe um e-mail válido</mat-error>
+      </mat-form-field>
+
+      <!-- Senha -->
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Senha</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">lock</mat-icon>
+        <input matInput [type]="hide ? 'password' : 'text'"
+               [(ngModel)]="cliente.senha" name="senha" [formControl]="senha"
+               placeholder="Mínimo 3 caracteres" required>
+        <button mat-icon-button matSuffix (click)="hide = !hide" type="button"
+                [attr.aria-label]="'Alternar visibilidade'" [attr.aria-pressed]="hide">
+          <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="senha.invalid">A senha deve ter no mínimo 3 caracteres</mat-error>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button mat-stroked-button color="warn" class="btn-cancel"
+                (click)="onNoClick()" type="button">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button mat-flat-button color="primary" class="btn-save"
+                (click)="create()" [disabled]="!validaCampos()" type="button">
+          <mat-icon>how_to_reg</mat-icon>
+          Cadastrar Cliente
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+
+</div>

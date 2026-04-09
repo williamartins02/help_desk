@@ -1,0 +1,198 @@
+/* ===== Wrapper ===== */
+.dialog-wrapper {
+  width: min(100%, 450px);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* ===== Gradient Header ===== */
+.dialog-header {
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 60%, #00bcd4 100%);
+  padding: 1.3rem 1.5rem 2.75rem;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer overlay — matches header.component.css */
+.dialog-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.00) 60%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Frosted-glass icon circle — matches chamado-create + header patterns */
+.header-icon-badge {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.header-icon {
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #fff;
+  opacity: 0.95;
+}
+
+.dialog-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.22rem;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+  line-height: 1.3;
+  color: #fff;
+}
+
+/* ===== Body — Card-lift over gradient ===== */
+.dialog-body {
+  background: #fff;
+  padding: 1.25rem 1.5rem 1.1rem;
+}
+
+.dialog-wrapper--has-header .dialog-body {
+  border-radius: 1.25rem 1.25rem 0 0;
+  margin-top: -1.35rem;
+  position: relative;
+  z-index: 1;
+}
+
+.dialog-wrapper--headerless .dialog-body {
+  padding-top: 1.5rem;
+}
+
+/* ===== Content ===== */
+.dialog-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.dialog-text {
+  margin: 0;
+  color: #546e7a;
+  font-size: 0.93rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+/* ===== Actions ===== */
+.dialog-actions {
+  margin: 0.9rem 0 0 !important;
+  padding: 0.7rem 0 0 !important;
+  min-height: auto !important;
+  border-top: 1px solid #f0f4ff;
+  justify-content: flex-end;
+}
+
+.btn-ok {
+  min-height: 2.5rem;
+  min-width: 5.5rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-radius: 0.75rem !important;
+  padding: 0 1.35rem;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.3) !important;
+  transition: box-shadow 0.2s ease;
+}
+
+.btn-ok:hover {
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.42) !important;
+}
+
+.btn-ok:focus-visible {
+  outline: 2px solid rgba(21, 101, 192, 0.45);
+  outline-offset: 2px;
+}
+
+/* ===== Error Variant ===== */
+.dialog-wrapper--error .dialog-header {
+  background: linear-gradient(135deg, #b71c1c 0%, #c62828 55%, #e57373 100%);
+}
+
+.dialog-wrapper--error .btn-ok {
+  box-shadow: 0 4px 14px rgba(183, 28, 28, 0.28) !important;
+}
+
+.dialog-wrapper--error .btn-ok:hover {
+  box-shadow: 0 6px 20px rgba(183, 28, 28, 0.38) !important;
+}
+
+/* ===== Success Variant ===== */
+.dialog-wrapper--success .dialog-header {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 55%, #66bb6a 100%);
+}
+
+.dialog-wrapper--success .btn-ok {
+  box-shadow: 0 4px 14px rgba(27, 94, 32, 0.28) !important;
+}
+
+.dialog-wrapper--success .btn-ok:hover {
+  box-shadow: 0 6px 20px rgba(27, 94, 32, 0.38) !important;
+}
+
+/* ===== Loading Variant ===== */
+.dialog-wrapper--loading .dialog-header {
+  justify-content: center;
+  text-align: center;
+}
+
+.dialog-wrapper--loading .header-icon-badge {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+::ng-deep .dialog-wrapper--loading .mat-progress-spinner circle,
+::ng-deep .dialog-wrapper--loading .mat-spinner circle {
+  stroke: rgba(255, 255, 255, 0.92);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 560px) {
+  .dialog-header {
+    padding: 1.1rem 1.25rem 2.5rem;
+  }
+
+  .dialog-body {
+    padding: 1rem 1.25rem 0.9rem;
+  }
+
+  .dialog-actions {
+    justify-content: stretch;
+  }
+
+  .btn-ok {
+    width: 100%;
+    justify-content: center;
+  }
+}

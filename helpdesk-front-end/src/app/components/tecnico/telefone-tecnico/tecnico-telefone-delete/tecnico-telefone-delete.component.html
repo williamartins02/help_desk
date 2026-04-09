@@ -1,0 +1,59 @@
+<div class="delete-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-risk-text">
+  <div class="dialog-header">
+    <span class="warning-badge" aria-hidden="true">
+      <mat-icon>warning_amber</mat-icon>
+    </span>
+
+    <div class="header-copy">
+      <h2 id="delete-dialog-title" mat-dialog-title class="dialog-title">Excluir telefone</h2>
+      <p class="dialog-subtitle">Esta acao e permanente e nao pode ser desfeita.</p>
+    </div>
+  </div>
+
+  <div class="risk-banner" id="delete-risk-text">
+    <mat-icon aria-hidden="true">report_problem</mat-icon>
+    <span>Confirme se os dados abaixo pertencem ao telefone correto antes de excluir.</span>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div *ngIf="isLoadingData" class="loading-state" aria-live="polite">
+      <mat-icon class="spin-icon">autorenew</mat-icon>
+      <span>Carregando os dados do telefone...</span>
+    </div>
+
+    <div *ngIf="!isLoadingData" class="phone-card">
+      <div class="card-title-row">
+        <h3>Resumo do telefone</h3>
+      </div>
+
+      <div class="phone-line">
+        <span class="label">Numero</span>
+        <strong>{{ telefone.numero || '-' }}</strong>
+      </div>
+
+      <div class="phone-line">
+        <span class="label">Tipo</span>
+        <strong>{{ telefone.tipoTelefone || '-' }}</strong>
+      </div>
+
+      <div class="phone-line">
+        <span class="label">Tecnico</span>
+        <strong>{{ telefone.nomeTecnico || '-' }}</strong>
+      </div>
+    </div>
+
+    <p *ngIf="errorMessage" class="error-message" aria-live="assertive">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" class="cancel-btn" (click)="closeModal(false)" [disabled]="isDeleting">
+      Cancelar
+    </button>
+
+    <button mat-flat-button color="warn" type="button" class="delete-btn" (click)="delete()" [disabled]="isDeleting || isLoadingData">
+      <mat-icon *ngIf="!isDeleting">delete_forever</mat-icon>
+      <mat-icon *ngIf="isDeleting" class="spin-icon">autorenew</mat-icon>
+      <span>{{ isDeleting ? 'Excluindo...' : 'Excluir definitivamente' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

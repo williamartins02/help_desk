@@ -1,0 +1,119 @@
+<!-- Janelas flutuantes de DM — uma por conversa aberta -->
+<ng-container *ngFor="let win of windows; let i = index">
+  <div class="fw-window mat-elevation-z8"
+       [class.minimized]="win.minimized"
+       [style.right.px]="windowRight(i)"
+       [@windowEnter]>
+
+    <!-- ── Cabeçalho ──────────────────────────────────────────────────── -->
+    <div class="fw-header" (click)="toggle(win)">
+      <div class="fw-avatar" [style.background]="win.cor">
+        {{ getInitials(win.nome) }}
+      </div>
+
+      <div class="fw-info">
+        <span class="fw-name">{{ win.nome }}</span>
+        <span class="fw-status" [class.online]="isOnline(win.email)">
+          <span class="fw-dot"></span>
+          <ng-container *ngIf="isOnline(win.email); else fwOffline">Online</ng-container>
+          <ng-template #fwOffline>
+            <ng-container *ngIf="getLastSeen(win.email); else justOffline">
+              Visto {{ formatLastSeen(getLastSeen(win.email)) }}
+            </ng-container>
+            <ng-template #justOffline>Offline</ng-template>
+          </ng-template>
+        </span>
+      </div>
+
+      <!-- Badge de não-lidas (quando minimizado) -->
+      <span *ngIf="win.naoLidas > 0" class="fw-badge">
+        {{ win.naoLidas > 99 ? '99+' : win.naoLidas }}
+      </span>
+
+      <!-- Botão minimizar/expandir -->
+      <button class="fw-btn-icon" mat-icon-button
+              (click)="toggle(win); $event.stopPropagation()"
+              [matTooltip]="win.minimized ? 'Expandir' : 'Minimizar'">
+        <mat-icon>{{ win.minimized ? 'expand_less' : 'remove' }}</mat-icon>
+      </button>
+
+      <!-- Botão fechar -->
+      <button class="fw-btn-icon" mat-icon-button
+              (click)="fechar(win, $event)"
+              matTooltip="Fechar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- ── Corpo (mensagens + input) ──────────────────────────────────── -->
+    <ng-container *ngIf="!win.minimized">
+
+      <!-- Barra de estado de conexão (reconectando / offline) -->
+      <div *ngIf="conexaoStatus !== 'conectado'"
+           class="fw-conn-bar"
+           [class.fw-conn-reconectando]="conexaoStatus === 'reconectando'"
+           [class.fw-conn-offline]="conexaoStatus === 'offline'">
+        <mat-spinner *ngIf="conexaoStatus === 'reconectando'" diameter="10"></mat-spinner>
+        <mat-icon *ngIf="conexaoStatus === 'offline'" class="fw-conn-icon">wifi_off</mat-icon>
+        <span>{{ conexaoStatus === 'reconectando' ? 'Reconectando...' : 'Offline' }}</span>
+      </div>
+
+      <!-- Área de mensagens -->
+      <div class="fw-messages" [id]="'fw-msgs-' + win.userId">
+
+        <!-- Estado vazio -->
+        <div *ngIf="getMensagens(win).length === 0" class="fw-empty">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <span>Início da conversa 👋</span>
+        </div>
+
+        <!-- Mensagens -->
+        <div *ngFor="let msg of getMensagens(win)"
+             class="fw-msg-row"
+             [class.mine]="isMeu(msg)">
+
+          <!-- Avatar do contato -->
+          <div *ngIf="!isMeu(msg)"
+               class="fw-avatar-xs"
+               [style.background]="win.cor"
+               [matTooltip]="win.nome">
+            {{ getInitials(win.nome) }}
+          </div>
+
+          <!-- Balão -->
+          <div class="fw-bubble-col" [class.mine]="isMeu(msg)">
+            <div class="fw-bubble" [class.mine]="isMeu(msg)">{{ msg.texto }}</div>
+            <span class="fw-time">{{ formatTime(msg.timestamp) }}</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Indicador de digitação -->
+      <div *ngIf="escrevendo[win.userId]" class="fw-typing">
+        <i class="td"></i><i class="td"></i><i class="td"></i>
+        <span>{{ escrevendo[win.userId] }}</span>
+      </div>
+
+      <!-- Barra de input -->
+      <div class="fw-input-row">
+        <input class="fw-input"
+               [(ngModel)]="textos[win.userId]"
+               placeholder="Mensagem..."
+               (keydown)="onKey($event, win)"
+               (input)="escrever(win)"
+               maxlength="256"
+               autocomplete="off"/>
+        <button mat-icon-button class="fw-btn-send"
+                [disabled]="!textos[win.userId]?.trim() || !connected"
+                (click)="enviar(win)"
+                matTooltip="Enviar (Enter)">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+
+    </ng-container>
+
+  </div>
+</ng-container>
+

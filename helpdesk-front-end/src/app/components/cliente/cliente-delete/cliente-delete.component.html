@@ -1,0 +1,81 @@
+<div class="delete-dialog" role="dialog" aria-modal="true"
+     aria-labelledby="delete-dialog-title" aria-describedby="delete-risk-text">
+
+  <!-- ── Cabeçalho ── -->
+  <div class="dialog-header">
+    <span class="warning-badge" aria-hidden="true">
+      <mat-icon>warning_amber</mat-icon>
+    </span>
+
+    <div class="header-copy">
+      <h2 id="delete-dialog-title" mat-dialog-title class="dialog-title">Excluir cliente</h2>
+      <p class="dialog-subtitle">Esta ação é permanente e não pode ser desfeita.</p>
+    </div>
+  </div>
+
+  <!-- ── Banner de risco ── -->
+  <div class="risk-banner" id="delete-risk-text">
+    <mat-icon aria-hidden="true">report_problem</mat-icon>
+    <span>Confirme se os dados abaixo pertencem ao cliente correto antes de excluir.</span>
+  </div>
+
+  <!-- ── Conteúdo: dados do cliente ── -->
+  <mat-dialog-content class="dialog-content">
+
+    <!-- Estado de carregamento -->
+    <div *ngIf="isLoadingData" class="loading-state" aria-live="polite">
+      <mat-icon class="spin-icon">autorenew</mat-icon>
+      <span>Carregando os dados do cliente...</span>
+    </div>
+
+    <!-- Card com informações -->
+    <div *ngIf="!isLoadingData" class="client-card">
+      <div class="card-title-row">
+        <h3>Resumo do cliente</h3>
+        <span class="client-id-badge">#{{ cliente.id }}</span>
+      </div>
+
+      <div class="info-line">
+        <span class="label">Nome</span>
+        <strong>{{ cliente.nome || '-' }}</strong>
+      </div>
+
+      <div class="info-line">
+        <span class="label">CPF</span>
+        <strong>{{ cliente.cpf || '-' }}</strong>
+      </div>
+
+      <div class="info-line">
+        <span class="label">E-mail</span>
+        <strong>{{ cliente.email || '-' }}</strong>
+      </div>
+
+      <div class="info-line">
+        <span class="label">Cadastrado em</span>
+        <strong>{{ cliente.dataCriacao ? (cliente.dataCriacao | date:'dd/MM/yyyy') : '-' }}</strong>
+      </div>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <p *ngIf="errorMessage" class="error-message" aria-live="assertive">{{ errorMessage }}</p>
+
+  </mat-dialog-content>
+
+  <!-- ── Ações ── -->
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" class="cancel-btn"
+            (click)="closeModal(false)" [disabled]="isDeleting">
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+
+    <button mat-flat-button color="warn" type="button" class="delete-btn"
+            (click)="delete()" [disabled]="isDeleting || isLoadingData">
+      <mat-icon *ngIf="!isDeleting">delete_forever</mat-icon>
+      <mat-icon *ngIf="isDeleting" class="spin-icon">autorenew</mat-icon>
+      <span>{{ isDeleting ? 'Excluindo...' : 'Excluir definitivamente' }}</span>
+    </button>
+  </mat-dialog-actions>
+
+</div>
+

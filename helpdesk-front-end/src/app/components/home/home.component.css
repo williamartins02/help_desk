@@ -1,0 +1,472 @@
+/* ── Wrapper — fills viewport minus header + menu toggle ──── */
+.home-wrapper {
+  padding: 0.75rem 1.5rem 0.75rem;
+  max-width: 1320px;
+  margin: 0 auto;
+  /* Flex column that fills the available viewport height */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: calc(100vh - 120px); /* 64px header + 56px menu-toggle area */
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ── Welcome bar ─────────────────────────────────────────── */
+.welcome-bar {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.welcome-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.welcome-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-right: 1rem;
+}
+
+.welcome-icon {
+  font-size: 2.4rem !important;
+  width: 2.4rem !important;
+  height: 2.4rem !important;
+  line-height: 2.4rem !important;
+  color: #1565c0;
+}
+
+/* Thin vertical separator between icon and text */
+.welcome-divider-vert {
+  width: 1.5px;
+  height: 2.6rem;
+  background: #cfd8dc;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
+
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #263238;
+  line-height: 1.2;
+}
+
+.welcome-name { color: #1565c0; }
+
+/* Thin horizontal separator line below the title row */
+.welcome-divider {
+  width: 100%;
+  height: 1.5px;
+  background: #cfd8dc;
+  margin: 0.5rem 0 0;
+  border-radius: 2px;
+}
+
+.welcome-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #90a4ae;
+  line-height: 1.3;
+}
+
+/* ── KPI row — fixed height, no compression ──────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  color: #fff;
+  min-height: 100px;
+  cursor: default;
+  transition: filter 0.18s, transform 0.18s;
+}
+
+.kpi-card:hover { filter: brightness(1.07); transform: translateY(-2px); }
+
+.kpi-blue   { background: #1976d2; }
+.kpi-orange { background: #f57c00; }
+.kpi-red    { background: #e53935; }
+.kpi-green  { background: #43a047; }
+
+.kpi-skeleton {
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.kpi-top mat-icon {
+  font-size: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  line-height: 2rem !important;
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+
+.kpi-lbl {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.92;
+}
+
+.kpi-num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  display: block;
+  margin-top: 0.35rem;
+}
+
+/* ── Dashboard card — grows to fill remaining space ──────── */
+.dashboard-card {
+  flex: 1 1 0;          /* ← takes all leftover height */
+  min-height: 0;        /* ← crucial: allows shrinking below content size */
+  display: flex;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* ── Left panel (activities) ─────────────────────────────── */
+.panel-left {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.25rem;
+}
+
+/* ── Right panel (chart) ─────────────────────────────────── */
+.panel-right {
+  flex: 0 0 58%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.25rem;
+}
+
+.panel-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #37474f;
+  flex-shrink: 0;
+}
+
+/* ── Chart section ───────────────────────────────────────── */
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.period-btns {
+  display: flex;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.period-btn {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  color: #78909c;
+  transition: background 0.15s, color 0.15s;
+}
+
+.period-btn + .period-btn { border-left: 1px solid #e0e0e0; }
+.period-btn.active { background: #1976d2; color: #fff; }
+.period-btn:hover:not(.active) { background: #f5f5f5; }
+
+/* Chart fills remaining panel height */
+.chart-wrap {
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
+}
+
+/* ── Vertical divider ────────────────────────────────────── */
+.panel-divider { width: 1px; background: rgba(0,0,0,0.07); flex-shrink: 0; }
+
+/* ── Activity panel header ───────────────────────────────── */
+.panel-act-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.panel-act-header .panel-title { margin: 0; }
+
+.act-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.act-sync-label {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.68rem;
+  color: #90a4ae;
+  white-space: nowrap;
+}
+
+.act-sync-icon {
+  font-size: 0.85rem !important;
+  width:  0.85rem !important;
+  height: 0.85rem !important;
+  line-height: 0.85rem !important;
+  color: #43a047;
+}
+
+.act-sync-icon.spin {
+  color: #1976d2;
+  animation: spin 1s linear infinite;
+}
+
+/* Botão de refresh manual */
+.act-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 2px 5px;
+  cursor: pointer;
+  color: #78909c;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.act-refresh-btn:hover {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-color: #1976d2;
+}
+
+.act-refresh-btn mat-icon {
+  font-size: 1rem !important;
+  width:  1rem !important;
+  height: 1rem !important;
+  line-height: 1rem !important;
+  transition: transform 0.3s;
+}
+
+.act-refresh-btn.spinning mat-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Activity list ───────────────────────────────────────── */
+.act-loading,
+.act-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 0.5rem;
+  color: #b0bec5;
+  font-size: 0.85rem;
+}
+
+.act-empty mat-icon { font-size: 2rem; width: 2rem; height: 2rem; opacity: 0.45; }
+
+/* List fills remaining panel height and scrolls only if needed */
+.act-list {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.act-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  flex-shrink: 0;
+}
+
+.act-item:last-child { border-bottom: none; }
+
+.act-icon-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.act-icon-circle mat-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.act-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.act-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #37474f;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.act-sub { font-size: 0.71rem; color: #b0bec5; }
+
+/* ── Bottom row — fixed height ───────────────────────────── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.85rem;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.avisos-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 0.85rem 1.1rem;
+}
+
+.avisos-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.avisos-title-icon { color: #f57c00; font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+
+.avisos-header h3 {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #37474f;
+}
+
+.avisos-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.aviso-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.81rem;
+  color: #546e7a;
+  line-height: 1.35;
+}
+
+.aviso-item mat-icon { font-size: 1rem; width: 1rem; height: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+.mini-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 0.85rem 1.25rem;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mini-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.mini-card-header mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+.mini-card-header span { font-size: 0.75rem; font-weight: 600; color: #546e7a; }
+
+.mini-num { font-size: 2rem; font-weight: 700; color: #1a237e; line-height: 1; }
+.mini-sub { font-size: 0.72rem; color: #90a4ae; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .panel-right { flex: 0 0 52%; }
+}
+
+@media (max-width: 960px) {
+  .home-wrapper { height: auto; overflow: visible; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-card { flex-direction: column; min-height: 500px; }
+  .panel-divider { width: auto; height: 1px; }
+  .panel-right { flex: none; min-height: 280px; }
+  .chart-wrap { height: 240px; flex: none; }
+  .act-list { max-height: 280px; flex: none; }
+  .bottom-row { grid-template-columns: 1fr 1fr; }
+  .avisos-card { grid-column: 1 / -1; }
+}
+
+@media (max-width: 560px) {
+  .home-wrapper { padding: 0.75rem; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .kpi-num { font-size: 2rem; }
+  .bottom-row { grid-template-columns: 1fr; }
+}

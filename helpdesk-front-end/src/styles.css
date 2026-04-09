@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+@import'../node_modules/ngx-toastr/toastr.css';
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Remove padding do container para todos os dialogs que usam .dialog-wrapper */
+.mat-dialog-container,
+.mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 1.25rem !important;
+}
+
+/* Mantém compatibilidade com panelClass legado */
+.custom-dialog-container .mat-dialog-container,
+.custom-dialog-container .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 1.25rem !important;
+}
+
+

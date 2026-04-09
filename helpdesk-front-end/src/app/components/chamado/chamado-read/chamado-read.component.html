@@ -1,0 +1,133 @@
+<div class="dialog-wrapper">
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>visibility</mat-icon>
+      Visualizar chamado
+    </span>
+
+    <div class="header-content">
+      <div class="header-brand">
+        <div class="header-icon-badge">
+          <mat-icon class="header-icon">assignment_turned_in</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>Detalhes do Chamado</h2>
+          <p class="header-subtitle">Informações completas do atendimento técnico</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <!-- ── Faixa de chips visuais ── -->
+    <div class="status-row">
+      <div class="status-item">
+        <span class="status-label">
+          <mat-icon class="label-icon">circle</mat-icon>
+          Status
+        </span>
+        <span
+          class="chip"
+          [class.chip-aberto]="chamado.status === '0'"
+          [class.chip-andamento]="chamado.status === '1'"
+          [class.chip-encerrado]="chamado.status === '2'"
+        >
+          <mat-icon>
+            {{ chamado.status === '0' ? 'radio_button_checked' : chamado.status === '1' ? 'autorenew' : 'check_circle' }}
+          </mat-icon>
+          {{ retornaStatus(chamado.status) }}
+        </span>
+      </div>
+
+      <div class="divider-v"></div>
+
+      <div class="status-item">
+        <span class="status-label">
+          <mat-icon class="label-icon">flag</mat-icon>
+          Prioridade
+        </span>
+        <span
+          class="chip"
+          [class.chip-baixa]="chamado.prioridade === '0'"
+          [class.chip-media]="chamado.prioridade === '1'"
+          [class.chip-alta]="chamado.prioridade === '2'"
+          [class.chip-critica]="chamado.prioridade === '3'"
+        >
+          {{ retornaPrioridade(chamado.prioridade) }}
+        </span>
+      </div>
+
+      <div class="divider-v"></div>
+
+      <div class="status-item">
+        <span class="status-label">
+          <mat-icon class="label-icon">category</mat-icon>
+          Classificação
+        </span>
+        <span class="chip chip-classificacao">
+          <mat-icon>
+            {{ chamado.classificacao === '0' ? 'memory' : chamado.classificacao === '1' ? 'code' : chamado.classificacao === '2' ? 'lan' : 'storage' }}
+          </mat-icon>
+          {{ retornaClassificacao(chamado.classificacao) }}
+        </span>
+      </div>
+    </div>
+
+    <form class="main-form">
+      <!-- Seção: Dados do chamado -->
+      <div class="section-header">
+        <mat-icon class="section-icon">assignment</mat-icon>
+        <span>Dados do chamado</span>
+      </div>
+
+      <div class="form-grid">
+        <!-- Título (2 colunas) -->
+        <mat-form-field class="field field-wide" appearance="outline">
+          <mat-label>Título do chamado</mat-label>
+          <input matInput [(ngModel)]="chamado.titulo" name="titulo" [disabled]="true" />
+        </mat-form-field>
+
+        <!-- Técnico -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Técnico responsável</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
+          <input matInput [value]="chamado.nomeTecnico || 'Não atribuído'" name="nomeTecnico" [disabled]="true" />
+        </mat-form-field>
+
+        <!-- Cliente -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Cliente</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
+          <input matInput [value]="chamado.nomeCliente || 'Não especificado'" name="nomeCliente" [disabled]="true" />
+        </mat-form-field>
+      </div>
+
+      <!-- Seção: Observações -->
+      <div class="section-header">
+        <mat-icon class="section-icon">notes</mat-icon>
+        <span>Observações</span>
+      </div>
+
+      <mat-form-field class="field-full" appearance="outline">
+        <mat-label>Descrição do problema</mat-label>
+        <textarea [(ngModel)]="chamado.observacoes" name="observacoes" class="observacoes" [disabled]="true" matInput></textarea>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button type="button" mat-flat-button color="primary" class="btn-return" (click)="onNoClick()">
+          <mat-icon>keyboard_return</mat-icon>
+          Retornar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+</div>
+

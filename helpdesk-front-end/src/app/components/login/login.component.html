@@ -1,0 +1,56 @@
+<div class="login-wrapper">
+  <div class="login-card mat-elevation-z12">
+
+    <!-- Painel Esquerdo: Branding -->
+    <div class="login-left">
+      <div class="brand">
+        <mat-icon class="brand-icon">support_agent</mat-icon>
+        <h1>Help Desk</h1>
+        <p>Sistema de gerenciamento de chamados</p>
+      </div>
+      <img src="assets/img/login-img.png" alt="Help Desk - Login">
+    </div>
+
+    <!-- Painel Direito: Formulário -->
+    <div class="login-right">
+      <div class="login-header">
+        <h2>Bem-vindo(a)!</h2>
+        <p class="subtitle">Faça login para continuar</p>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>E-mail</mat-label>
+        <mat-icon matPrefix class="field-icon">email</mat-icon>
+        <input [formControl]="email" [(ngModel)]="creds.email" name="email"
+               matInput placeholder="fulano@mail.com" required>
+        <mat-error *ngIf="email.invalid">Informe um e-mail válido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Senha</mat-label>
+        <mat-icon matPrefix class="field-icon">lock</mat-icon>
+        <input [formControl]="senha" [(ngModel)]="creds.senha" name="senha"
+               [type]="hidePassword ? 'password' : 'text'" matInput placeholder="Mínimo 4 caracteres" required>
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button"
+                [attr.aria-label]="'Alternar visibilidade da senha'">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="senha.invalid">A senha deve ter no mínimo 4 caracteres</mat-error>
+      </mat-form-field>
+
+      <div class="forgot-password-link">
+        <a routerLink="/esqueceu-senha" mat-button color="primary">
+          <mat-icon>help_outline</mat-icon>
+          Esqueceu sua senha?
+        </a>
+      </div>
+
+      <button (click)="login()" [disabled]="!validaCampos()" class="full-width login-btn"
+              mat-raised-button color="primary">
+        <mat-icon>login</mat-icon>
+        ENTRAR
+      </button>
+    </div>
+
+  </div>
+</div>

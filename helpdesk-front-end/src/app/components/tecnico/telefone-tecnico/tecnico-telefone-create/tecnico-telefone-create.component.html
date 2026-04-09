@@ -1,0 +1,87 @@
+<div class="dialog-wrapper">
+
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>phone_in_talk</mat-icon>
+      Novo telefone
+    </span>
+
+    <div class="header-content">
+      <div class="header-brand">
+        <div class="header-icon-badge">
+          <mat-icon class="header-icon">add_ic_call</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>Cadastrar Telefone</h2>
+          <p class="header-subtitle">Preencha os dados do novo telefone</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form">
+
+      <!-- Seção: Dados do telefone -->
+      <div class="section-header">
+        <mat-icon class="section-icon">phone</mat-icon>
+        <span>Dados do telefone</span>
+      </div>
+
+      <!-- Número -->
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Número</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">phone</mat-icon>
+        <input [(ngModel)]="telefone.numero" name="numero"
+               [formControl]="numero" required matInput
+               placeholder="Ex: (00) 9 0000-0000"
+               prefix="+55 " mask="(00) 0 0000 0000 || (00) 0000 0000"
+               maxlength="21">
+        <mat-error *ngIf="numero.invalid">Número é obrigatório</mat-error>
+      </mat-form-field>
+
+      <!-- Tipo de telefone -->
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Tipo de telefone</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">category</mat-icon>
+        <mat-select [(ngModel)]="telefone.tipoTelefone" name="tipoTelefone"
+                    [formControl]="tipoTelefone" required>
+          <mat-option value="">NENHUM</mat-option>
+          <mat-option value="0">
+            <mat-icon>home</mat-icon> CASA
+          </mat-option>
+          <mat-option value="1">
+            <mat-icon>business</mat-icon> EMPRESA
+          </mat-option>
+          <mat-option value="2">
+            <mat-icon>smartphone</mat-icon> CELULAR
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="tipoTelefone.invalid">Selecione um tipo</mat-error>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button mat-stroked-button color="warn" class="btn-cancel"
+                (click)="onNoClick()" type="button">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button mat-flat-button color="primary" class="btn-save"
+                (click)="create()" [disabled]="!validaCampos()" type="button">
+          <mat-icon>phone_forwarded</mat-icon>
+          Cadastrar Telefone
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+
+</div>

@@ -1,0 +1,138 @@
+<div class="dialog-wrapper">
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>support_agent</mat-icon>
+      Novo chamado
+    </span>
+
+    <div class="header-content">
+      <div class="header-brand">
+        <div class="header-icon-badge">
+          <mat-icon class="header-icon">add_task</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>Criar Chamado</h2>
+          <p class="header-subtitle">Preencha os dados para abrir um atendimento</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form" (ngSubmit)="create()">
+
+      <!-- Seção: Dados do chamado -->
+      <div class="section-header">
+        <mat-icon class="section-icon">assignment</mat-icon>
+        <span>Dados do chamado</span>
+      </div>
+
+      <div class="form-grid">
+        <!-- Título (largura total) -->
+        <mat-form-field class="field field-wide" appearance="outline">
+          <mat-label>Título do chamado</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">title</mat-icon>
+          <input matInput placeholder="Ex.: Trocar teclado"
+                 [(ngModel)]="chamado.titulo" name="titulo"
+                 [formControl]="titulo" required />
+          <mat-error *ngIf="titulo.invalid">Título é obrigatório</mat-error>
+        </mat-form-field>
+
+        <!-- Status | Prioridade -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">toggle_on</mat-icon>
+          <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status">
+            <mat-option value="0">ABERTO</mat-option>
+          </mat-select>
+          <mat-error *ngIf="status.invalid">Selecione um status</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Prioridade</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">flag</mat-icon>
+          <mat-select [(ngModel)]="chamado.prioridade" name="prioridade" [formControl]="prioridade" required>
+            <mat-option value="">NENHUMA</mat-option>
+            <mat-option value="0">BAIXA</mat-option>
+            <mat-option value="1">MÉDIA</mat-option>
+            <mat-option value="2">ALTA</mat-option>
+            <mat-option value="3">CRÍTICA</mat-option>
+          </mat-select>
+          <mat-error *ngIf="prioridade.invalid">Selecione uma prioridade</mat-error>
+        </mat-form-field>
+
+        <!-- Classificação | Técnico -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Classificação</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">category</mat-icon>
+          <mat-select [(ngModel)]="chamado.classificacao" name="classificacao" [formControl]="classificacao" required>
+            <mat-option value="">NENHUMA</mat-option>
+            <mat-option value="0">HARDWARE</mat-option>
+            <mat-option value="1">SOFTWARE</mat-option>
+            <mat-option value="2">REDES</mat-option>
+            <mat-option value="3">BANCO DE DADOS</mat-option>
+          </mat-select>
+          <mat-error *ngIf="classificacao.invalid">Selecione uma classificação</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Técnico responsável</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
+          <mat-select [(ngModel)]="chamado.tecnico" name="tecnico" [formControl]="tecnico" required>
+            <mat-option value="">NENHUM</mat-option>
+            <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="tecnico.invalid">Selecione um técnico</mat-error>
+        </mat-form-field>
+
+        <!-- Cliente (largura total) -->
+        <mat-form-field class="field field-wide" appearance="outline">
+          <mat-label>Cliente</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
+          <mat-select [(ngModel)]="chamado.cliente" name="cliente" [formControl]="cliente" required>
+            <mat-option value="">NENHUM</mat-option>
+            <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="cliente.invalid">Selecione um cliente</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Seção: Observações -->
+      <div class="section-header">
+        <mat-icon class="section-icon">notes</mat-icon>
+        <span>Observações</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Descreva o problema</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">description</mat-icon>
+        <textarea matInput
+                  [(ngModel)]="chamado.observacoes" name="observacoes"
+                  [formControl]="observacoes" required
+                  class="observacoes"
+                  placeholder="Ex.: Trocar bateria de notebook..."></textarea>
+        <mat-error *ngIf="observacoes.invalid">Observações são obrigatórias</mat-error>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button type="button" mat-stroked-button color="warn" class="btn-cancel" (click)="onNoClick()">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button type="submit" mat-flat-button color="primary" class="btn-save" [disabled]="!validaCampos()">
+          <mat-icon>playlist_add_check</mat-icon>
+          Abrir Chamado
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+</div>

@@ -1,0 +1,88 @@
+<mat-drawer-container class="container" autosize>
+  <mat-drawer #drawer class="sidenav" mode="side">
+
+    <!-- ── Seção de identidade ── -->
+    <div class="brand-header">
+      <div class="brand-icon-wrap">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+      <div class="brand-info">
+        <span class="brand-name">Help Desk</span>
+        <span class="brand-sub">Sistema de Chamados</span>
+      </div>
+    </div>
+
+    <!-- ── Label de seção ── -->
+    <p class="nav-section-label">Navegação</p>
+
+    <!-- ── Itens de navegação ── -->
+    <mat-nav-list class="nav-list">
+
+      <a mat-list-item routerLink="home" routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{exact: true}">
+        <mat-icon class="nav-icon">home</mat-icon>
+        <span class="nav-label">Home</span>
+      </a>
+
+      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">badge</mat-icon>
+        <span class="nav-label">Técnicos</span>
+      </a>
+
+      <a mat-list-item routerLink="clientes" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">people</mat-icon>
+        <span class="nav-label">Clientes</span>
+      </a>
+
+      <a mat-list-item routerLink="chamados" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">support_agent</mat-icon>
+        <span class="nav-label">Chamados</span>
+      </a>
+
+      <a mat-list-item routerLink="chart" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">bar_chart</mat-icon>
+        <span class="nav-label">Gráfico</span>
+      </a>
+
+      <a mat-list-item routerLink="chat" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">chat</mat-icon>
+        <span class="nav-label">Chat</span>
+      </a>
+
+      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link">
+        <mat-icon class="nav-icon">manage_accounts</mat-icon>
+        <span class="nav-label">Usuários</span>
+      </a>
+
+    </mat-nav-list>
+
+    <!-- ── Espaçador flexível ── -->
+    <div class="sidenav-spacer"></div>
+
+    <!-- ── Rodapé: sair ── -->
+    <div class="sidenav-footer">
+      <div class="footer-divider"></div>
+      <a mat-list-item class="logout-item" (click)="logout()">
+        <mat-icon class="nav-icon">logout</mat-icon>
+        <span class="nav-label">Sair</span>
+      </a>
+    </div>
+
+  </mat-drawer>
+
+  <div class="sidenav-content">
+    <app-header></app-header>
+    <button class="menu-toggle" mat-icon-button (click)="drawer.toggle()" aria-label="Alternar menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <router-outlet></router-outlet>
+  </div>
+
+</mat-drawer-container>
+
+<!-- ── Widget flutuante de chat (visível em todas as páginas) ── -->
+<app-chat-bubble></app-chat-bubble>
+
+<!-- ── Janelas de DM flutuantes (abertas via bubble ou notificação) ── -->
+<app-floating-chat></app-floating-chat>
+

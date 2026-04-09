@@ -1,0 +1,223 @@
+<div class="container">
+
+    <!-- ── Hero panel ── -->
+    <section class="hero-panel">
+        <div class="hero-content">
+            <span class="page-badge">
+                <mat-icon>people</mat-icon>
+                Base de clientes
+            </span>
+
+            <h1>Gestão de Clientes</h1>
+            <p>
+                Visualize, filtre e administre os clientes cadastrados de forma rápida,
+                mantendo o padrão visual moderno e organizado do sistema.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card stat-total">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">group</mat-icon>
+                </div>
+                <span>Total cadastrados</span>
+                <strong>{{ totalClientes }}</strong>
+            </div>
+
+            <div class="stat-card"
+                 [class.stat-filter-active]="hasActiveFilter"
+                 [class.stat-filter]="!hasActiveFilter"
+                 [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : ''"
+                 (click)="hasActiveFilter ? clearFilter(input) : null"
+                 [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'people_outline' }}</mat-icon>
+                </div>
+                <span>{{ hasActiveFilter ? 'Filtrados' : 'Resultados exibidos' }}</span>
+                <strong>{{ filteredCount }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Content card ── -->
+    <section class="content-card mat-elevation-z8">
+
+        <!-- Toolbar: busca + botão -->
+        <div class="toolbar">
+            <div class="search-area">
+                <mat-form-field class="search-field" appearance="outline">
+                    <mat-label>Buscar cliente</mat-label>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input
+                        #input
+                        matInput
+                        [value]="searchTerm"
+                        (keyup)="applyFilter($event)"
+                        placeholder="Pesquise por ID, nome, CPF ou e-mail"
+                    >
+                    <button
+                        *ngIf="searchTerm"
+                        type="button"
+                        mat-icon-button
+                        matSuffix
+                        aria-label="Limpar busca"
+                        (click)="clearFilter(input)"
+                    >
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </mat-form-field>
+
+                <div class="toolbar-meta">
+                    <span class="result-chip" [class.active]="hasActiveFilter">
+                        <mat-icon>{{ hasActiveFilter ? 'filter_alt' : 'people' }}</mat-icon>
+                        {{ hasActiveFilter ? (filteredCount + ' resultado(s) encontrado(s)') : 'Visualizando todos os clientes' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="toolbar-actions">
+                <button
+                    type="button"
+                    mat-icon-button
+                    class="refresh-btn"
+                    [disabled]="isLoading"
+                    (click)="manualRefresh()"
+                    matTooltip="Atualizar lista"
+                    aria-label="Atualizar lista de clientes"
+                >
+                    <mat-icon [class.is-spinning]="isLoading">refresh</mat-icon>
+                </button>
+
+                <button
+                    (click)="openCreate()"
+                    class="add-button"
+                    mat-raised-button
+                    color="primary"
+                    aria-label="Adicionar novo cliente"
+                >
+                    <mat-icon>person_add</mat-icon>
+                    Adicionar Cliente
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção de tabela -->
+        <div class="table-section">
+            <div class="table-header">
+                <div>
+                    <h2>Lista de clientes</h2>
+                    <p>Acompanhe os registros e atualize cadastros quando necessário.</p>
+                </div>
+                <span class="table-caption">{{ totalClientes }} cliente(s) registrado(s)</span>
+            </div>
+
+            <div class="table-wrapper">
+
+                <!-- Loading overlay -->
+                <div *ngIf="isLoading" class="loading-overlay">
+                    <mat-spinner diameter="48"></mat-spinner>
+                    <span>Carregando clientes...</span>
+                </div>
+
+                <ng-container *ngIf="!hasNoResults; else emptyState">
+                    <cdk-virtual-scroll-viewport appendOnly itemSize="56" class="example-viewport">
+                        <table mat-table [dataSource]="dataSource" class="professional-table">
+
+                            <!-- ID -->
+                            <ng-container matColumnDef="id">
+                                <th mat-header-cell *matHeaderCellDef> ID </th>
+                                <td mat-cell *matCellDef="let cliente">
+                                    <span class="id-badge">#{{ cliente.id }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Nome -->
+                            <ng-container matColumnDef="nome">
+                                <th mat-header-cell *matHeaderCellDef> Nome </th>
+                                <td mat-cell *matCellDef="let cliente">
+                                    <div class="main-cell">
+                                        <strong>{{ cliente.nome }}</strong>
+                                        <span>Cliente cadastrado</span>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <!-- CPF -->
+                            <ng-container matColumnDef="cpf">
+                                <th mat-header-cell *matHeaderCellDef> CPF </th>
+                                <td mat-cell *matCellDef="let cliente">{{ cliente.cpf }}</td>
+                            </ng-container>
+
+                            <!-- E-mail -->
+                            <ng-container matColumnDef="email">
+                                <th mat-header-cell *matHeaderCellDef> E-mail </th>
+                                <td mat-cell *matCellDef="let cliente">{{ cliente.email }}</td>
+                            </ng-container>
+
+                            <!-- Ações -->
+                            <ng-container matColumnDef="acoes">
+                                <th mat-header-cell *matHeaderCellDef> Ações </th>
+                                <td mat-cell *matCellDef="let cliente" class="actions-cell">
+                                    <div class="actions-group">
+                                        <button
+                                            type="button"
+                                            mat-icon-button
+                                            class="action-btn edit-action"
+                                            matTooltip="Editar cliente"
+                                            matTooltipShowDelay="400"
+                                            [attr.aria-label]="'Editar cliente ' + cliente.nome"
+                                            (click)="openEdit(cliente.id)"
+                                        >
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            mat-icon-button
+                                            class="action-btn delete-action"
+                                            matTooltip="Excluir cliente"
+                                            matTooltipShowDelay="400"
+                                            [attr.aria-label]="'Excluir cliente ' + cliente.nome"
+                                            (click)="delete(cliente.id)"
+                                        >
+                                            <mat-icon>delete_forever</mat-icon>
+                                        </button>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-row-id]="row.id"></tr>
+                        </table>
+                    </cdk-virtual-scroll-viewport>
+
+                    <div class="table-footer">
+                        <mat-paginator class="pagination" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                    </div>
+                </ng-container>
+
+                <!-- Estado vazio -->
+                <ng-template #emptyState>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <mat-icon>{{ hasActiveFilter ? 'search_off' : 'people_outline' }}</mat-icon>
+                        </div>
+
+                        <h3>{{ hasActiveFilter ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado' }}</h3>
+                        <p>
+                            {{ hasActiveFilter
+                                ? 'Tente buscar por outro nome, CPF, e-mail ou limpe o filtro aplicado.'
+                                : 'Quando houver clientes cadastrados, eles aparecerão organizados nesta lista.' }}
+                        </p>
+
+                        <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(input)">
+                            <mat-icon>restart_alt</mat-icon>
+                            Limpar filtro
+                        </button>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </section>
+</div>
+

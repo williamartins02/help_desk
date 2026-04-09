@@ -1,0 +1,194 @@
+/* ── Container principal ─────────────────────────────────── */
+.container {
+  height: 100%;
+}
+
+/* ── Sidenav ─────────────────────────────────────────────── */
+.sidenav {
+  width: 15rem;
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(180deg, #0d47a1 0%, #1565c0 20%, #0288d1 60%, #00bcd4 100%);
+  box-shadow: 4px 0 28px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+}
+
+/* ── Brand header ────────────────────────────────────────── */
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.4rem 1.2rem 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.brand-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.brand-icon-wrap mat-icon {
+  color: #fff;
+  font-size: 1.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.brand-name {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.brand-sub {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.67rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.nav-section-label {
+  margin: 0;
+  padding: 0.95rem 1.25rem 0.4rem;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+  flex-shrink: 0;
+}
+
+/* ── Nav list ────────────────────────────────────────────── */
+.nav-list {
+  padding: 0 0.55rem !important;
+  flex-shrink: 0;
+}
+
+/* Todos os itens do nav */
+.nav-list a,
+.logout-item {
+  display: flex;
+  align-items: center;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.15rem;
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 0.85rem !important;
+  min-height: 46px;
+  text-decoration: none;
+}
+
+.nav-list a:hover {
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: #fff !important;
+}
+
+/* Rota ativa */
+.nav-list a.active-link {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.85);
+}
+
+/* Ícone dos itens de nav */
+.nav-icon {
+  font-size: 1.15rem !important;
+  width: 1.15rem !important;
+  height: 1.15rem !important;
+  margin-right: 0.85rem;
+  opacity: 0.88;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.nav-list a.active-link .nav-icon {
+  opacity: 1;
+}
+
+/* Texto dos itens */
+.nav-label {
+  font-size: 0.875rem;
+  letter-spacing: 0.15px;
+  font-weight: 500;
+}
+
+/* ── Espaçador ───────────────────────────────────────────── */
+.sidenav-spacer {
+  flex: 1 1 auto;
+  min-height: 1rem;
+}
+
+/* ── Footer: logout ──────────────────────────────────────── */
+.sidenav-footer {
+  padding: 0 0.55rem 1rem;
+  flex-shrink: 0;
+}
+
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 0 0.5rem 0.55rem;
+  border-radius: 1px;
+}
+
+.logout-item {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.logout-item:hover {
+  background: rgba(229, 57, 53, 0.26) !important;
+  color: #ffcdd2 !important;
+}
+
+.logout-item:hover .nav-icon {
+  opacity: 1;
+}
+
+/* ── Área de conteúdo ────────────────────────────────────── */
+.sidenav-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #f4f7fb;
+}
+
+/* ── Menu toggle ─────────────────────────────────────────── */
+.menu-toggle {
+  align-self: flex-start;
+  margin: 0.75rem 0 0 0.75rem;
+  width: 40px;
+  height: 40px;
+  color: #fff !important;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
+  border-radius: 0.75rem !important;
+  transition: box-shadow 0.2s ease, transform 0.18s ease;
+  flex-shrink: 0;
+}
+
+.menu-toggle:hover {
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.48) !important;
+  transform: scale(1.06);
+}

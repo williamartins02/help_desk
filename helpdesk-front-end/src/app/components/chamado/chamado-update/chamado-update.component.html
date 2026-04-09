@@ -1,0 +1,141 @@
+<div class="dialog-wrapper">
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>edit_note</mat-icon>
+      Editar chamado
+    </span>
+    <div class="header-brand">
+      <div class="header-icon-badge">
+        <mat-icon class="header-icon">support_agent</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>Atualizar Chamado</h2>
+        <p class="header-subtitle">Revise os dados e salve as alterações</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form" (ngSubmit)="update()">
+      <!-- Seção: Dados do chamado -->
+      <div class="section-header">
+        <mat-icon class="section-icon">assignment</mat-icon>
+        <span>Dados do chamado</span>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Linha 1: Título (2 colunas) -->
+        <mat-form-field class="field field-wide" appearance="outline">
+          <mat-label>Título do chamado</mat-label>
+          <input matInput placeholder="Ex.: Trocar teclado"
+                 [(ngModel)]="chamado.titulo" name="titulo"
+                 [formControl]="titulo" required />
+        </mat-form-field>
+
+        <!-- Linha 2: Status (2 colunas — único campo editável nesta linha) -->
+        <mat-form-field class="field field-wide" appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status">
+            <mat-option value="0">ABERTO</mat-option>
+            <mat-option value="1">EM ANDAMENTO</mat-option>
+            <mat-option value="2">ENCERRADO</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Linha 3: Prioridade | Classificação (somente leitura) -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Prioridade</mat-label>
+          <mat-select [(ngModel)]="chamado.prioridade" name="prioridade"
+                      [formControl]="prioridade" [disabled]="true">
+            <mat-option value="0">BAIXA</mat-option>
+            <mat-option value="1">MÉDIA</mat-option>
+            <mat-option value="2">ALTA</mat-option>
+            <mat-option value="3">CRÍTICA</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Classificação</mat-label>
+          <mat-select [(ngModel)]="chamado.classificacao" name="classificacao"
+                      [formControl]="classificacao" [disabled]="true">
+            <mat-option value="0">HARDWARE</mat-option>
+            <mat-option value="1">SOFTWARE</mat-option>
+            <mat-option value="2">REDES</mat-option>
+            <mat-option value="3">BANCO DE DADOS</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Linha 4: Técnico | Cliente -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>{{ chamado.nomeTecnico || 'Técnico' }}</mat-label>
+          <mat-select [(ngModel)]="chamado.tecnico" name="tecnico"
+                      [formControl]="tecnico" required>
+            <mat-option>NENHUM</mat-option>
+            <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>{{ chamado.nomeCliente || 'Cliente' }}</mat-label>
+          <mat-select [(ngModel)]="chamado.cliente" name="cliente"
+                      [formControl]="cliente" required>
+            <mat-option>NENHUM</mat-option>
+            <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Seção: Observações -->
+      <div class="section-header">
+        <mat-icon class="section-icon">notes</mat-icon>
+        <span>Observações</span>
+      </div>
+
+      <mat-form-field class="field-full" appearance="outline">
+        <mat-label>Observações</mat-label>
+        <textarea
+          [(ngModel)]="chamado.observacoes"
+          name="observacoes"
+          [formControl]="observacoes"
+          required
+          class="observacoes"
+          matInput
+          placeholder="Ex.: Trocar bateria de notebook..."
+        ></textarea>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button
+          type="button"
+          mat-stroked-button
+          color="warn"
+          class="btn-cancel"
+          (click)="onNoClick()"
+        >
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          mat-flat-button
+          color="primary"
+          class="btn-save"
+          [disabled]="!validaCampos()"
+        >
+          <mat-icon>save</mat-icon>
+          Salvar Alterações
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+</div>

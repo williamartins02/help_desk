@@ -1,0 +1,36 @@
+<div
+  class="delete-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="delete-dialog-title"
+  aria-describedby="delete-dialog-description"
+>
+  <div class="dialog-header">
+    <span class="warning-badge" aria-hidden="true">
+      <mat-icon>warning_amber</mat-icon>
+    </span>
+
+    <div class="header-copy">
+      <h2 id="delete-dialog-title" mat-dialog-title class="dialog-title">Excluir item</h2>
+      <p id="delete-dialog-description" class="dialog-subtitle">
+        Esta acao e permanente e nao pode ser desfeita.
+      </p>
+    </div>
+  </div>
+
+  <div class="risk-banner">
+    <mat-icon aria-hidden="true">report_problem</mat-icon>
+    <span>Confirme se este e realmente o item que voce deseja remover.</span>
+  </div>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" class="cancel-btn" (click)="closeModal(false)">
+      Cancelar
+    </button>
+
+    <button mat-flat-button color="warn" type="button" class="delete-btn" (click)="closeModal(true)">
+      <mat-icon>delete_forever</mat-icon>
+      <span>Excluir definitivamente</span>
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,337 @@
+<!-- ══ CONECTANDO (exibido apenas na conexão inicial) ═════════════════════ -->
+<div *ngIf="!hasEverConnected" class="connecting-screen">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>{{ conexaoStatus === 'reconectando' ? 'Conectando ao chat...' : 'Iniciando...' }}</p>
+</div>
+
+<!-- ══ LAYOUT PRINCIPAL ═══════════════════════════════════════════════════ -->
+<div *ngIf="hasEverConnected" class="chat-outer" [@chatEnter]>
+
+  <!-- Banner de reconexão / offline (aparece quando a conexão é perdida) -->
+  <div *ngIf="conexaoStatus !== 'conectado'" class="reconn-banner"
+       [class.is-offline]="conexaoStatus === 'offline'">
+    <mat-spinner *ngIf="conexaoStatus === 'reconectando'" diameter="14"></mat-spinner>
+    <mat-icon *ngIf="conexaoStatus === 'offline'" class="reconn-icon">wifi_off</mat-icon>
+    <span>{{ conexaoStatus === 'reconectando' ? 'Reconectando com o servidor...' : 'Sem conexão com o servidor' }}</span>
+  </div>
+
+  <div class="chat-wrapper">
+
+  <!-- ── Painel Esquerdo: Lista de Conversas ────────────────────────────── -->
+  <aside class="left-panel">
+
+    <!-- Header do painel -->
+    <div class="left-header">
+      <div class="me-badge">
+        <div class="avatar sm" [style.background]="getAvatarCor(meuNome)">
+          {{ getInitials(meuNome) }}
+        </div>
+        <div class="me-info">
+          <span class="me-name">{{ meuNome }}</span>
+          <span class="me-status"
+                [class.conn-reconectando]="conexaoStatus === 'reconectando'"
+                [class.conn-offline]="conexaoStatus === 'offline'">
+            <span class="conn-dot"></span>
+            {{ conexaoStatus === 'conectado' ? 'Online' : conexaoStatus === 'reconectando' ? 'Reconectando...' : 'Offline' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Busca -->
+    <div class="search-box">
+      <mat-icon class="search-prefix">search</mat-icon>
+      <input [(ngModel)]="searchQuery" placeholder="Buscar conversas..." class="search-inp"/>
+      <button *ngIf="searchQuery" mat-icon-button class="btn-clear" (click)="searchQuery=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Lista de conversas agrupada por perfil -->
+    <div class="conv-list">
+
+      <!-- ── Técnicos ── -->
+      <ng-container *ngIf="tecnicosFiltrados.length > 0">
+        <div class="conv-group-label">
+          <mat-icon class="conv-group-icon">engineering</mat-icon>
+          Técnicos
+        </div>
+        <div *ngFor="let conv of tecnicosFiltrados"
+             class="conv-item"
+             [class.active]="conversaAtiva?.id === conv.id"
+             (click)="selecionarConversa(conv)">
+
+          <div class="avatar-wrap">
+            <div class="avatar" [style.background]="conv.cor">{{ getInitials(conv.nome) }}</div>
+            <span class="dot-status" [class.online]="conv.online"></span>
+          </div>
+
+          <div class="conv-text">
+            <div class="conv-row1">
+              <span class="conv-nome">
+                <mat-icon *ngIf="conv.fixada" class="icon-xs">push_pin</mat-icon>
+                {{ conv.nome }}
+              </span>
+              <span class="conv-time">{{ formatTime(conv.timestamp) }}</span>
+            </div>
+            <div class="conv-row2">
+              <span class="conv-preview" [class.muted]="conv.silenciada">
+                <mat-icon *ngIf="conv.silenciada" class="icon-xs">notifications_off</mat-icon>
+                <ng-container *ngIf="conv.ultimaMensagem; else tsLastSeen">
+                  {{ conv.ultimaMensagem }}
+                </ng-container>
+                <ng-template #tsLastSeen>
+                  <span *ngIf="!conv.online && conv.lastSeen" class="conv-last-seen">
+                    <mat-icon class="icon-xs">schedule</mat-icon>
+                    Visto {{ formatLastSeen(conv.lastSeen) }}
+                  </span>
+                </ng-template>
+              </span>
+              <span *ngIf="conv.naoLidas > 0 && !conv.silenciada" class="badge-count">
+                {{ conv.naoLidas > 99 ? '99+' : conv.naoLidas }}
+              </span>
+            </div>
+          </div>
+
+          <div class="conv-hover-actions">
+            <button mat-icon-button class="btn-xs-action"
+                    (click)="fixarConversa(conv, $event)"
+                    [matTooltip]="conv.fixada ? 'Desafixar' : 'Fixar'">
+              <mat-icon>push_pin</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-xs-action"
+                    (click)="silenciarConversa(conv, $event)"
+                    [matTooltip]="conv.silenciada ? 'Ativar notificações' : 'Silenciar'">
+              <mat-icon>{{ conv.silenciada ? 'notifications' : 'notifications_off' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── Clientes ── -->
+      <ng-container *ngIf="clientesFiltrados.length > 0">
+        <div class="conv-group-label">
+          <mat-icon class="conv-group-icon">person</mat-icon>
+          Clientes
+        </div>
+        <div *ngFor="let conv of clientesFiltrados"
+             class="conv-item"
+             [class.active]="conversaAtiva?.id === conv.id"
+             (click)="selecionarConversa(conv)">
+
+          <div class="avatar-wrap">
+            <div class="avatar" [style.background]="conv.cor">{{ getInitials(conv.nome) }}</div>
+            <span class="dot-status" [class.online]="conv.online"></span>
+          </div>
+
+          <div class="conv-text">
+            <div class="conv-row1">
+              <span class="conv-nome">
+                <mat-icon *ngIf="conv.fixada" class="icon-xs">push_pin</mat-icon>
+                {{ conv.nome }}
+              </span>
+              <span class="conv-time">{{ formatTime(conv.timestamp) }}</span>
+            </div>
+            <div class="conv-row2">
+              <span class="conv-preview" [class.muted]="conv.silenciada">
+                <mat-icon *ngIf="conv.silenciada" class="icon-xs">notifications_off</mat-icon>
+                <ng-container *ngIf="conv.ultimaMensagem; else clLastSeen">
+                  {{ conv.ultimaMensagem }}
+                </ng-container>
+                <ng-template #clLastSeen>
+                  <span *ngIf="!conv.online && conv.lastSeen" class="conv-last-seen">
+                    <mat-icon class="icon-xs">schedule</mat-icon>
+                    Visto {{ formatLastSeen(conv.lastSeen) }}
+                  </span>
+                </ng-template>
+              </span>
+              <span *ngIf="conv.naoLidas > 0 && !conv.silenciada" class="badge-count">
+                {{ conv.naoLidas > 99 ? '99+' : conv.naoLidas }}
+              </span>
+            </div>
+          </div>
+
+          <div class="conv-hover-actions">
+            <button mat-icon-button class="btn-xs-action"
+                    (click)="fixarConversa(conv, $event)"
+                    [matTooltip]="conv.fixada ? 'Desafixar' : 'Fixar'">
+              <mat-icon>push_pin</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-xs-action"
+                    (click)="silenciarConversa(conv, $event)"
+                    [matTooltip]="conv.silenciada ? 'Ativar notificações' : 'Silenciar'">
+              <mat-icon>{{ conv.silenciada ? 'notifications' : 'notifications_off' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Estado vazio -->
+      <div *ngIf="tecnicosFiltrados.length === 0 && clientesFiltrados.length === 0" class="conv-empty">
+        <mat-icon>search_off</mat-icon>
+        <span>Nenhum usuário encontrado</span>
+      </div>
+
+    </div>
+
+    <!-- Footer do painel -->
+    <div class="left-footer">
+      <span class="dot online"></span>
+      <span class="footer-txt">{{ usuariosOnline.length }} usuário(s) online</span>
+    </div>
+
+  </aside>
+
+  <!-- ── Área de Conversa ───────────────────────────────────────────────── -->
+  <main class="right-panel" *ngIf="conversaAtiva; else semConversa">
+
+    <!-- Header da conversa ativa -->
+    <div class="conv-header">
+      <div class="avatar lg" [style.background]="conversaAtiva.cor">
+        {{ getInitials(conversaAtiva.nome) }}
+      </div>
+      <div class="conv-header-info">
+        <span class="conv-header-nome">{{ conversaAtiva.nome }}</span>
+        <span class="conv-header-status">
+          <span class="dot" [class.online]="conversaAtiva.online"></span>
+          {{ conversaAtiva.online ? 'Online' : 'Offline' }}
+          <!-- Last seen quando offline -->
+          <ng-container *ngIf="!conversaAtiva.online && conversaAtiva.lastSeen">
+            &nbsp;·&nbsp;
+            <span class="last-seen-txt">Visto {{ formatLastSeen(conversaAtiva.lastSeen) }}</span>
+          </ng-container>
+        </span>
+      </div>
+      <div class="conv-header-badges">
+        <mat-icon *ngIf="conversaAtiva.silenciada" class="badge-icon" matTooltip="Silenciada">notifications_off</mat-icon>
+        <mat-icon *ngIf="conversaAtiva.fixada"     class="badge-icon" matTooltip="Fixada">push_pin</mat-icon>
+      </div>
+    </div>
+
+    <!-- Área de mensagens -->
+    <div class="messages-wrapper">
+
+      <div class="messages-scroll" #messagesArea
+           (click)="fecharEmoji()"
+           (scroll)="onMessagesScroll()">
+
+        <!-- Estado vazio -->
+        <div *ngIf="mensagensAtivas.length === 0" class="empty-state">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <p>Nenhuma mensagem ainda</p>
+          <span>Comece a conversa! 👋</span>
+        </div>
+
+        <ng-container *ngFor="let msg of mensagensAtivas; let i = index">
+
+          <!-- Separador de data -->
+          <div *ngIf="showDateSep(mensagensAtivas, i)" class="date-sep">
+            <span>{{ formatDateLabel(msg.timestamp) }}</span>
+          </div>
+
+          <!-- Aviso de sistema (novo usuário) -->
+          <div *ngIf="msg.type === 'NEW_USER'" class="sys-msg">
+            <mat-icon>person_add</mat-icon>
+            <span>{{ msg.texto }}</span>
+          </div>
+
+          <!-- Balão de mensagem -->
+          <div *ngIf="msg.type === 'MENSAGEM'"
+               class="msg-row"
+               [class.mine]="isMeu(msg)"
+               [@messageFade]>
+
+            <!-- Avatar esquerda (outro usuário) -->
+            <div *ngIf="!isMeu(msg)"
+                 class="avatar xs"
+                 [style.background]="getAvatarCor(msg.username)"
+                 [matTooltip]="msg.username">
+              {{ getInitials(msg.username) }}
+            </div>
+
+            <!-- Coluna do balão -->
+            <div class="bubble-col" [class.mine]="isMeu(msg)">
+              <span *ngIf="!isMeu(msg)" class="sender-name">{{ getNomeByEmail(msg.username) }}</span>
+              <div class="bubble" [class.mine]="isMeu(msg)">{{ msg.texto }}</div>
+              <div class="msg-meta" [class.mine]="isMeu(msg)">
+                <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
+                <span *ngIf="isMeu(msg)" class="msg-tick" [class]="'tick-' + msg.status">
+                  <mat-icon *ngIf="msg.status === 'sent'">done</mat-icon>
+                  <mat-icon *ngIf="msg.status === 'delivered'">done_all</mat-icon>
+                  <mat-icon *ngIf="msg.status === 'read'">done_all</mat-icon>
+                </span>
+              </div>
+            </div>
+
+            <!-- Avatar direita (minha mensagem) -->
+            <div *ngIf="isMeu(msg)"
+                 class="avatar xs"
+                 [style.background]="getAvatarCor(msg.username)">
+              {{ getInitials(msg.username) }}
+            </div>
+
+          </div>
+
+        </ng-container>
+      </div><!-- /messages-scroll -->
+
+      <!-- Botão flutuante: novas mensagens fora da área visível -->
+      <button *ngIf="!isAtBottom && newMessagesCount > 0"
+              class="btn-new-messages"
+              (click)="scrollToLatest()">
+        <mat-icon>arrow_downward</mat-icon>
+        {{ newMessagesCount }} nova{{ newMessagesCount > 1 ? 's mensagens' : ' mensagem' }} ↓
+      </button>
+
+    </div><!-- /messages-wrapper -->
+
+    <!-- ── Indicador de digitação ── -->
+    <div *ngIf="escrevendo" class="typing-row" @typingEnter>
+      <div class="avatar xs" [style.background]="conversaAtiva.cor">
+        {{ getInitials(conversaAtiva.nome) }}
+      </div>
+      <div class="typing-bubble">
+        <i class="td"></i><i class="td"></i><i class="td"></i>
+        <span class="typing-label">{{ conversaAtiva.nome }} está digitando</span>
+      </div>
+    </div>
+
+    <!-- Emoji picker -->
+    <div *ngIf="showEmojiPicker" class="emoji-panel">
+      <button *ngFor="let e of emojis" class="emoji-btn" (click)="inserirEmoji(e)">{{ e }}</button>
+    </div>
+
+    <!-- Barra de input -->
+    <div class="input-bar">
+      <button mat-icon-button class="btn-icon-bar" (click)="toggleEmoji()" matTooltip="Emojis">
+        <mat-icon>emoji_emotions</mat-icon>
+      </button>
+      <input class="msg-input"
+             [(ngModel)]="mensagem.texto"
+             placeholder="Digite uma mensagem..."
+             (keydown)="onKeyDown($event)"
+             (input)="escreverEvento()"
+             maxlength="500"
+             autocomplete="off"/>
+      <button mat-icon-button class="btn-icon-bar send"
+              [disabled]="!mensagem.texto?.trim()"
+              (click)="enviarMensagem()"
+              matTooltip="Enviar (Enter)">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Placeholder quando nenhuma conversa está selecionada -->
+  <ng-template #semConversa>
+    <div class="no-conv">
+      <mat-icon>forum</mat-icon>
+      <h3>Selecione uma conversa</h3>
+      <p>Escolha uma sala à esquerda para começar</p>
+    </div>
+  </ng-template>
+
+  </div><!-- /chat-wrapper -->
+
+</div><!-- /chat-outer -->

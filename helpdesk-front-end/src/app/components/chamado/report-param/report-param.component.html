@@ -1,0 +1,83 @@
+<div class="dialog-wrapper">
+
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>assessment</mat-icon>
+      Relatório de Chamados
+    </span>
+
+    <div class="header-brand">
+      <div class="header-icon-badge">
+        <mat-icon class="header-icon">date_range</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>Gerar Relatório</h2>
+        <p class="header-subtitle">Defina o período para o relatório de chamados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form" (submit)="$event.preventDefault()">
+
+      <!-- Seção: Período -->
+      <div class="section-header">
+        <mat-icon class="section-icon">event</mat-icon>
+        <span>Período do relatório</span>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Data Início</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">event_available</mat-icon>
+          <input mask="00/00/0000" matInput placeholder="dd/MM/aaaa"
+                 [(ngModel)]="userReport.dataInicio" name="dataInicio"
+                 [formControl]="dataInicio" required />
+          <mat-error *ngIf="dataInicio.invalid && dataInicio.touched">
+            Informe uma data de início válida (dd/MM/aaaa)
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Data Fim</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">event_busy</mat-icon>
+          <input mask="00/00/0000" matInput placeholder="dd/MM/aaaa"
+                 [(ngModel)]="userReport.dataFim" name="dataFim"
+                 [formControl]="dataFim" required />
+          <mat-error *ngIf="dataFim.invalid && dataFim.touched">
+            Informe uma data final válida (dd/MM/aaaa)
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Aviso de intervalo inválido -->
+      <div class="date-warning"
+           *ngIf="dataInicio.touched && dataFim.touched && dataInicio.valid && dataFim.valid && !validaCampos()">
+        <mat-icon class="warning-icon">info_outline</mat-icon>
+        <span>A data de início deve ser menor ou igual à data final.</span>
+      </div>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button type="button" mat-stroked-button color="warn" class="btn-cancel" (click)="onNoClick()">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button type="button" mat-flat-button color="primary" class="btn-save"
+                (click)="gerarRelatorio()" [disabled]="!validaCampos()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Gerar Relatório
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William</span>
+  </footer>
+
+</div>

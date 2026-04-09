@@ -1,0 +1,344 @@
+<div class="container">
+    <section class="hero-panel">
+        <div class="hero-content">
+            <span class="page-badge">
+                <mat-icon>receipt_long</mat-icon>
+                Central de chamados
+            </span>
+            <h1>Gestao de Chamados</h1>
+            <p>Monitore solicitacoes, acompanhe status e execute acoes com uma visao clara e organizada.</p>
+
+            <div class="hero-meta" *ngIf="CHAMADO_DATA.length > 0">
+                <span class="meta-label">Distribuição por prioridade</span>
+                <ng-container *ngIf="totalPendentes > 0; else semAbertos">
+                <div class="dist-bar">
+                    <span class="dist-seg seg-baixa"
+                          [style.width.%]="totalPrioridadeBaixa / totalPendentes * 100"
+                          [matTooltip]="totalPrioridadeBaixa + ' Baixa'"></span>
+                    <span class="dist-seg seg-media"
+                          [style.width.%]="totalPrioridadeMedia / totalPendentes * 100"
+                          [matTooltip]="totalPrioridadeMedia + ' Média'"></span>
+                    <span class="dist-seg seg-alta"
+                          [style.width.%]="totalPrioridadeAlta / totalPendentes * 100"
+                          [matTooltip]="totalPrioridadeAlta + ' Alta'"></span>
+                    <span class="dist-seg seg-critica"
+                          [style.width.%]="totalPrioridadeCritica / totalPendentes * 100"
+                          [matTooltip]="totalPrioridadeCritica + ' Crítica'"></span>
+                </div>
+                <div class="dist-legend">
+                    <span class="legend-item">
+                        <i class="dot dot-baixa"></i>Baixa ({{ totalPrioridadeBaixa }})
+                    </span>
+                    <span class="legend-item">
+                        <i class="dot dot-media"></i>Média ({{ totalPrioridadeMedia }})
+                    </span>
+                    <span class="legend-item">
+                        <i class="dot dot-alta"></i>Alta ({{ totalPrioridadeAlta }})
+                    </span>
+                    <span class="legend-item">
+                        <i class="dot dot-critica"></i>Crítica ({{ totalPrioridadeCritica }})
+                    </span>
+                </div>
+
+                <div class="hero-status-footer">
+                    <div class="hero-urgency">
+                        <ng-container *ngIf="hasUrgentItems; else allGood">
+                            <span class="meta-label urgency-label">
+                                <mat-icon class="urgency-icon">notifications_active</mat-icon>
+                                Requer atenção
+                            </span>
+                            <div class="urgency-chips">
+                                <button *ngIf="totalAltaPrioridade > 0"
+                                        class="urgency-chip chip-alta"
+                                        (click)="onPriorityFilterChange('2')"
+                                        matTooltip="Clique para filtrar chamados de ALTA prioridade">
+                                    <mat-icon>trending_up</mat-icon>
+                                    {{ totalAltaPrioridade }} de alta prioridade
+                                </button>
+                                <button *ngIf="totalCriticaPrioridade > 0"
+                                        class="urgency-chip chip-critica"
+                                        (click)="onPriorityFilterChange('3')"
+                                        matTooltip="Clique para filtrar chamados CRÍTICOS">
+                                    <mat-icon>warning_amber</mat-icon>
+                                    {{ totalCriticaPrioridade }} crítico(s)
+                                </button>
+                            </div>
+                        </ng-container>
+
+                        <ng-template #allGood>
+                            <span class="meta-label urgency-label">
+                                <mat-icon class="urgency-icon">shield</mat-icon>
+                                Status geral
+                            </span>
+                            <div class="all-good">
+                                <mat-icon>check_circle</mat-icon>
+                                Nenhum chamado crítico em aberto
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <div class="hero-kpis">
+                        <span class="kpi-pill kpi-resolved"
+                              matTooltip="Percentual de chamados encerrados sobre o total">
+                            <mat-icon>check_circle_outline</mat-icon>
+                            {{ resolucaoPercent }}% resolvidos
+                        </span>
+                        <span class="kpi-pill kpi-pending"
+                              matTooltip="Chamados abertos + em andamento">
+                            <mat-icon>hourglass_bottom</mat-icon>
+                            {{ totalPendentes }} pendentes
+                        </span>
+                    </div>
+                </div>
+                </ng-container>
+
+                <ng-template #semAbertos>
+                    <div class="all-good">
+                        <mat-icon>check_circle</mat-icon>
+                        Todos os chamados foram encerrados
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+
+        <!-- ── Gráfico de Status (coluna central) ───────────────────────── -->
+        <div class="hero-chart" *ngIf="CHAMADO_DATA.length > 0">
+            <span class="meta-label chart-inner-title">Status dos Chamados</span>
+            <div class="hero-chart-body">
+                <div class="hero-chart-canvas">
+                    <canvas baseChart
+                            [data]="doughnutChartData"
+                            [options]="doughnutChartOptions"
+                            [type]="doughnutChartType"
+                            [plugins]="doughnutChartPlugins">
+                    </canvas>
+                </div>
+                <div class="hero-chart-legend">
+                    <div class="chart-legend-row">
+                        <span class="chart-dot chart-dot-aberto"></span>
+                        <span class="chart-legend-label">Abertos</span>
+                    </div>
+                    <div class="chart-legend-row">
+                        <span class="chart-dot chart-dot-andamento"></span>
+                        <span class="chart-legend-label">Em Andamento</span>
+                    </div>
+                    <div class="chart-legend-row">
+                        <span class="chart-dot chart-dot-encerrado"></span>
+                        <span class="chart-legend-label">Encerrados</span>
+                    </div>
+                    <div class="chart-legend-row">
+                        <span class="chart-dot chart-dot-critico"></span>
+                        <span class="chart-legend-label">Críticos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card stat-total">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">dashboard</mat-icon>
+                </div>
+                <span>Total</span>
+                <strong>{{ CHAMADO_DATA.length }}</strong>
+            </div>
+
+            <div class="stat-card stat-aberto" (click)="onStatusFilterChange('0')" matTooltip="Filtrar por Abertos">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">inbox</mat-icon>
+                </div>
+                <span>Abertos</span>
+                <strong>{{ totalAbertos }}</strong>
+            </div>
+
+            <div class="stat-card stat-andamento" (click)="onStatusFilterChange('1')" matTooltip="Filtrar por Em Andamento">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">pending_actions</mat-icon>
+                </div>
+                <span>Em Andamento</span>
+                <strong>{{ totalEmAndamento }}</strong>
+            </div>
+
+            <div class="stat-card stat-encerrado" (click)="onStatusFilterChange('2')" matTooltip="Filtrar por Encerrados">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">task_alt</mat-icon>
+                </div>
+                <span>Encerrados</span>
+                <strong>{{ totalEncerrados }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card mat-elevation-z8">
+        <div class="toolbar">
+            <div class="toolbar-filters">
+                <mat-form-field class="search-field" appearance="outline">
+                    <mat-label>Buscar chamado</mat-label>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput [(ngModel)]="searchValue" (keyup)="applyFilter($event)" placeholder="Ex. titulo, cliente ou tecnico">
+                    <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Limpar" (click)="searchValue=''; applyAllFilters()">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </mat-form-field>
+
+                <mat-form-field class="status-field" appearance="outline">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange($event)">
+                        <mat-option value="">TODOS</mat-option>
+                        <mat-option value="0">ABERTO</mat-option>
+                        <mat-option value="1">EM ANDAMENTO</mat-option>
+                        <mat-option value="2">ENCERRADO</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="priority-field" appearance="outline">
+                    <mat-label>Prioridade</mat-label>
+                    <mat-select [(ngModel)]="selectedPrioridade" (ngModelChange)="onPriorityFilterChange($event)">
+                        <mat-option value="">TODAS</mat-option>
+                        <mat-option value="0">BAIXA</mat-option>
+                        <mat-option value="1">MÉDIA</mat-option>
+                        <mat-option value="2">ALTA</mat-option>
+                        <mat-option value="3">CRÍTICA</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="toolbar-actions">
+                <button (click)="clearFilters()" class="clear-button" mat-stroked-button
+                        [disabled]="!hasActiveFilters"
+                        matTooltip="Remover todos os filtros aplicados">
+                    <mat-icon>filter_alt_off</mat-icon>
+                    Limpar filtros
+                </button>
+
+                <button (click)="reportParame()" class="report-button" mat-stroked-button color="primary">
+                    <mat-icon>summarize</mat-icon>
+                    Gerar relatorio
+                </button>
+
+                <button (click)="openCreate()" class="add-button" mat-raised-button color="primary">
+                    <mat-icon>add_task</mat-icon>
+                    Adicionar chamado
+                </button>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <div>
+                    <h2>Lista de chamados</h2>
+                    <span class="table-caption">Acompanhe prioridades, status e atribuicoes em tempo real</span>
+                </div>
+                <span *ngIf="hasActiveFilters" class="filter-indicator">
+                    <mat-icon>filter_list</mat-icon>
+                    {{ dataSource.filteredData.length }} resultado(s) filtrado(s)
+                </span>
+            </div>
+
+            <div class="table-wrapper">
+                <div *ngIf="isLoading" class="loading-overlay">
+                    <mat-spinner diameter="46"></mat-spinner>
+                    <span>Atualizando chamados...</span>
+                </div>
+
+                <cdk-virtual-scroll-viewport appendOnly itemSize="56" class="example-viewport">
+                    <table mat-table matSort class="professional-table" [dataSource]="dataSource">
+
+                        <ng-container matColumnDef="id">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let chamado">
+                                <span class="id-badge">#{{ chamado.id }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="titulo">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Titulo </th>
+                            <td mat-cell *matCellDef="let chamado">
+                                <span class="titulo-text">{{ chamado.titulo }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="classificacao">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Classificacao </th>
+                            <td mat-cell *matCellDef="let chamado">
+                                <span class="status-badge" [ngStyle]="{ backgroundColor: getClassificacaoColor(chamado.classificacao) }">
+                                    {{ returnClassificacao(chamado.classificacao) }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="tecnico">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tecnico </th>
+                            <td mat-cell *matCellDef="let chamado">{{ chamado.nomeTecnico }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="cliente">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Cliente </th>
+                            <td mat-cell *matCellDef="let chamado">{{ chamado.nomeCliente }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="dataAbertura">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Data de abertura </th>
+                            <td mat-cell *matCellDef="let chamado">{{ chamado.dataAbertura }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="prioridade">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Prioridade </th>
+                            <td mat-cell *matCellDef="let chamado">
+                                <span class="status-badge" [ngStyle]="{ backgroundColor: getColorBackground(chamado.prioridade) }">
+                                    {{ returnPrioridade(chamado.prioridade) }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                            <td mat-cell *matCellDef="let chamado">
+                                <span class="status-badge" [ngStyle]="{ backgroundColor: getColor(chamado.status) }">
+                                    {{ returnStatus(chamado.status) }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="acoes">
+                            <th mat-header-cell *matHeaderCellDef> Acoes </th>
+                            <td mat-cell *matCellDef="let chamado" class="actions-cell">
+                                <div class="actions-group">
+                                    <button type="button" mat-icon-button class="action-btn edit-action"
+                                            matTooltip="Editar chamado"
+                                            (click)="openEdit(chamado.id)">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+
+                                    <button type="button" mat-icon-button class="action-btn view-action"
+                                            matTooltip="Visualizar chamado"
+                                            (click)="openRed(chamado.id)">
+                                        <mat-icon>visibility</mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row class="mat-row" *matRowDef="let row; columns: displayedColumns;" [attr.data-row-id]="row.id"></tr>
+                    </table>
+                </cdk-virtual-scroll-viewport>
+
+                <div *ngIf="!isLoading && dataSource.filteredData.length === 0" class="empty-state">
+                    <mat-icon>inbox</mat-icon>
+                    <span>Nenhum chamado encontrado</span>
+                    <p>Tente ajustar os filtros ou termos de busca.</p>
+                    <button *ngIf="hasActiveFilters" mat-stroked-button color="primary" (click)="clearFilters()">
+                        <mat-icon>filter_alt_off</mat-icon>
+                        Limpar filtros
+                    </button>
+                </div>
+
+                <div class="table-footer">
+                    <mat-paginator class="pagination" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
