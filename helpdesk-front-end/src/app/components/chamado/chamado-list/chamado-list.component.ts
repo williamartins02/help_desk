@@ -350,10 +350,17 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     const previousStatus = chamado.status;
     chamado.status = newStatus;
     this.service.update(chamado).subscribe(() => {
-      this.toast.success(
-        `Status alterado para ${this.returnStatus(newStatus)}`,
-        `Chamado #${chamado.id}`
-      );
+      if (newStatus === '2') {
+        this.toast.success(
+          'Chamado encerrado! E-mail enviado com sucesso.',
+          `Chamado #${chamado.id}`
+        );
+      } else {
+        this.toast.success(
+          `Status alterado para ${this.returnStatus(newStatus)}`,
+          `Chamado #${chamado.id}`
+        );
+      }
       // findAll() já é chamado automaticamente via refresh$ do service
     }, (error) => {
       chamado.status = previousStatus;

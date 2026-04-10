@@ -30,24 +30,19 @@ const routes: Routes = [
 
   //Rota NAVEGADOR com filhos HOME/TECNICOS
   {
-    path: '', component: NavComponent, canActivate: [AuthGuard],//canActivate para acessar a rota apos fazer login para ter acesso as Filhas (HOME/Tecnico/CLiente)
+    path: '', component: NavComponent, canActivate: [AuthGuard],
     children: [
-      
-      {path: 'home', component: HomeComponent },
-
-      {path: 'tecnicos', component: TecnicoListComponent},
-      {path: 'tecnicos/telefones/:id', component: TecnicoTelefoneListComponent},
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeComponent },
+      { path: 'tecnicos', component: TecnicoListComponent },
+      { path: 'tecnicos/telefones/:id', component: TecnicoTelefoneListComponent },
       // {path: 'tecnicos/update/:id', component: TecnicoUpdateComponent},
-      
-      {path: 'clientes', component: ClienteListComponent},
-
-      {path: 'chamados', component: ChamadoListComponent},
-      {path: 'chart', component: LineChartComponent},
-      {path: 'chamados/relatorios', component: RelatorioChamadoComponent},
-
-      {path: 'chat', component: ChatComponent},
-      {path: 'usuarios', component: UsuariosListComponent},
-
+      { path: 'clientes', component: ClienteListComponent },
+      { path: 'chamados', component: ChamadoListComponent },
+      { path: 'chart', component: LineChartComponent },
+      { path: 'chamados/relatorios', component: RelatorioChamadoComponent },
+      { path: 'chat', component: ChatComponent },
+      { path: 'usuarios', component: UsuariosListComponent },
     ]
   }
 ];

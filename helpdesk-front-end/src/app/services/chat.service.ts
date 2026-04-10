@@ -187,9 +187,13 @@ export class ChatService {
           texto: '', type: 'USER_LEFT', username: this.username,
           color: '', timestamp: new Date().toISOString(), sala: 'geral', status: 'sent'
         };
-        this.client.publish({ destination: '/app/message', body: JSON.stringify(leftMsg) });
+        if (this.client && typeof this.client.publish === 'function') {
+          this.client.publish({ destination: '/app/message', body: JSON.stringify(leftMsg) });
+        }
       }
-      this.client.deactivate();
+      if (this.client && typeof this.client.deactivate === 'function') {
+        this.client.deactivate();
+      }
     }
   }
 

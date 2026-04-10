@@ -95,7 +95,11 @@ export class ChamadoUpdateComponent implements OnInit {
     this.chamadoService.update(this.chamado).subscribe(() =>{
       setTimeout(() => {
         matDialogRef.close();
-        this.toast.success("Edita com sucesso", "Chamado Cliente  " + this.chamado.nomeCliente);
+        if (this.chamado.status === '2') {
+          this.toast.success("Chamado encerrado! E-mail enviado com sucesso.", "Chamado Cliente  " + this.chamado.nomeCliente);
+        } else {
+          this.toast.success("Edita com sucesso", "Chamado Cliente  " + this.chamado.nomeCliente);
+        }
         this.router.navigate(['chamados']);
       },1000)
     },(error) => {

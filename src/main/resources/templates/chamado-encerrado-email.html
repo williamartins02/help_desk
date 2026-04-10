@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Chamado Encerrado</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            max-width: 540px;
+            margin: 40px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #0002;
+            padding: 0 0 32px 0;
+            overflow: hidden;
+        }
+        .logo-bar {
+            background: #1565c0;
+            padding: 24px 0 16px 0;
+            text-align: center;
+        }
+        .logo-bar img {
+            height: 48px;
+        }
+        .header {
+            color: #1565c0;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 32px 0 16px 0;
+            text-align: center;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid #e0e4ea;
+            margin: 0 32px 24px 32px;
+        }
+        .info {
+            margin: 0 32px 18px 32px;
+            display: flex;
+            align-items: baseline;
+        }
+        .label {
+            color: #6c7a89;
+            font-size: 13px;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+        .value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #222;
+            margin-left: 8px;
+        }
+        .status {
+            color: #fff;
+            background: #43a047;
+            padding: 4px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+        .footer {
+            margin: 40px 32px 0 32px;
+            color: #8a99a8;
+            font-size: 12px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .container { max-width: 98vw; margin: 0.5em auto; border-radius: 0; box-shadow: none; }
+            .info, .footer, .divider { margin-left: 12px; margin-right: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo-bar">
+        <!-- Ícone SVG do Help Desk -->
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+            <circle cx="24" cy="24" r="24" fill="#fff"/>
+            <rect x="10" y="18" width="28" height="16" rx="4" fill="#1565c0"/>
+            <rect x="16" y="14" width="16" height="8" rx="4" fill="#90caf9"/>
+            <circle cx="24" cy="26" r="3" fill="#fff"/>
+            <rect x="20" y="32" width="8" height="2" rx="1" fill="#90caf9"/>
+        </svg>
+    </div>
+    <div class="header">Encerramento de Chamado - Help Desk</div>
+    <hr class="divider" />
+    <div class="info" style="margin-top: 24px; display:block;">
+        <span class="label" style="min-width:0;font-size:15px;color:#1565c0;font-weight:600;">Prezado(a) {{nome}},</span>
+    </div>
+    <div class="info" style="margin-bottom: 24px; display:block;">
+        <span class="value" style="margin-left:0;">Agradecemos por utilizar o <b>Help Desk</b>. Informamos que o seu chamado foi encerrado com sucesso. Confira abaixo os detalhes do atendimento realizado:</span>
+    </div>
+    <div class="info"><span class="label">Número do chamado:</span> <span class="value">#{{numero}}</span></div>
+    <div class="info"><span class="label">Título:</span> <span class="value">{{titulo}}</span></div>
+    <div class="info"><span class="label">Descrição:</span> <span class="value">{{descricao}}</span></div>
+    <div class="info"><span class="label">Status:</span> <span class="status">{{status}}</span></div>
+    <div class="info"><span class="label">Data de abertura:</span> <span class="value">{{dataAbertura}}</span></div>
+    <div class="info"><span class="label">Data de encerramento:</span> <span class="value">{{dataEncerramento}}</span></div>
+    <div class="info"><span class="label">Tempo de resolução:</span> <span class="value">{{tempoResolucao}}</span></div>
+    <div class="info"><span class="label">Técnico responsável:</span> <span class="value">{{tecnico}}</span></div>
+    <hr class="divider" />
+    <div class="info" style="margin-bottom: 18px; display:block;">
+        <span class="label" style="min-width:140px;">Observações finais:</span> <span class="value">{{observacoes}}</span>
+    </div>
+    <div class="info" style="margin-bottom: 18px; display:block;">
+        <span class="value" style="margin-left:0;">Caso necessite de reabertura ou tenha dúvidas, entre em contato com nosso suporte pelo e-mail <a href="mailto:suporte@helpdesk.com.br">suporte@helpdesk.com.br</a> ou telefone (XX) XXXX-XXXX.</span>
+    </div>
+    <div class="footer">
+        Atenciosamente,<br/>
+        <b>Equipe Help Desk</b><br/>
+        <span style="color:#1565c0;font-weight:600;">Sistema de Atendimento Help Desk</span><br/>
+        <span style="color:#1565c0;font-size:13px;">A tecnologia a serviço do seu suporte.</span><br/>
+        <br/>
+        Esta é uma mensagem automática. Por favor, não responda este e-mail.<br/>
+        <span style="color:#8a99a8;">© {{anoAtual}} Help Desk. Todos os direitos reservados.</span>
+    </div>
+</div>
+</body>
+</html>

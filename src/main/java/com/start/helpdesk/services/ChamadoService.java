@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
-
 import com.start.helpdesk.services.exception.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.start.helpdesk.services.EncerrarChamadoEmail.ChamadoEmailService;
 import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.Cliente;
 import com.start.helpdesk.domain.Tecnico;
@@ -29,6 +28,8 @@ public class ChamadoService {
 	private TecnicoService tecnicoService;
 	@Autowired
 	private ClienteService clienteService;
+	@Autowired
+	private ChamadoEmailService chamadoEmailService;
 
 	public Chamado findById(Integer id) {
 		Optional<Chamado> object = chamadoRepository.findById(id);
@@ -59,8 +60,13 @@ public class ChamadoService {
 			throw new DataIntegrityViolationException(
 				"Chamado encerrado não pode ser reaberto. Crie um novo chamado se necessário.");
 		}
-		oldObject = newChamado(objectDTO);
-		return chamadoRepository.save(oldObject);
+								boolean vaiEncerrar = objectDTO.getStatus().equals(Status.ENCERRADO.getCodigo());
+								oldObject = newChamado(objectDTO);
+								Chamado salvo = chamadoRepository.save(oldObject);
+								if (vaiEncerrar) {
+									chamadoEmailService.sendChamadoEncerradoEmail(salvo);
+								}
+								return salvo;
 	}
 
 	/* metodo privado para ATUALIZAR ou CRIAR um novo chamado. */
