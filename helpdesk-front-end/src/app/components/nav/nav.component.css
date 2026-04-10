@@ -105,11 +105,24 @@
 
 /* Rota ativa */
 .nav-list a.active-link {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: #fff !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1a237e !important;
   font-weight: 600;
-  box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
 }
+
+.nav-list a.active-link .nav-icon {
+  opacity: 1;
+}
+
+/* ── Cor do ícone por rota (ativo) ───────────────────────────── */
+.link-home.active-link     .nav-icon { color: #f59e0b; }
+.link-tecnicos.active-link .nav-icon { color: #0288d1; }
+.link-clientes.active-link .nav-icon { color: #00897b; }
+.link-chamados.active-link .nav-icon { color: #e53935; }
+.link-chart.active-link    .nav-icon { color: #43a047; }
+.link-chat.active-link     .nav-icon { color: #7b1fa2; }
+.link-usuarios.active-link .nav-icon { color: #3949ab; }
 
 /* Ícone dos itens de nav */
 .nav-icon {

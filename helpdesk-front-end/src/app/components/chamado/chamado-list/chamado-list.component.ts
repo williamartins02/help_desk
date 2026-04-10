@@ -14,6 +14,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { Chamado } from "./../../../models/chamado";
 import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { ChamadoService } from "src/app/services/chamado.service";
 import { ChamadoUpdateComponent } from '../chamado-update/chamado-update.component';
 import { ChamadoReadComponent } from '../chamado-read/chamado-read.component';
@@ -90,11 +91,21 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     private service: ChamadoService,
     private toast: ToastrService,
     public dialogRef: MatDialogRef<ChamadoListComponent>,
+    private route: ActivatedRoute,
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
 
   ngOnInit(): void {
+    // Lê query params para aplicar filtros vindos de navegação externa (ex: alerta de críticos)
+    this.route.queryParams.subscribe(params => {
+      if (params['prioridade']) {
+        this.selectedPrioridade = params['prioridade'];
+      }
+      if (params['search']) {
+        this.searchValue = params['search'];
+      }
+    });
     this.findAll();
     this.refresh();
   }
@@ -212,6 +223,10 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.searchValue) {
       this.dataSource.filter = this.searchValue.trim().toLowerCase();
     }
+    // Sempre volta para a primeira página ao recarregar/filtrar dados
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
   }
 
   applyFilter(event: Event): void {
@@ -312,5 +327,38 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (classificacao == "1") return "#00897b";  // SOFTWARE → verde-azulado
     if (classificacao == "2") return "#039be5";  // REDES    → azul
     return "#8d6e63";                            // BANCO    → marrom
+  }
+
+  onEditChamado(chamado: Chamado) {
+    if (chamado.status == '2') {
+      this.toast.info(
+        'Este chamado está encerrado. Para novo atendimento, crie um novo chamado.',
+        'Chamado Encerrado',
+        {
+          timeOut: 5000,
+          positionClass: 'toast-top-center',
+          closeButton: true,
+        }
+      );
+      return;
+    }
+    this.openEdit(chamado.id);
+  }
+
+  // ── Alteração rápida de status pela listagem ──────────────────────────────
+  onInlineStatusChange(chamado: Chamado, newStatus: string): void {
+    const previousStatus = chamado.status;
+    chamado.status = newStatus;
+    this.service.update(chamado).subscribe(() => {
+      this.toast.success(
+        `Status alterado para ${this.returnStatus(newStatus)}`,
+        `Chamado #${chamado.id}`
+      );
+      // findAll() já é chamado automaticamente via refresh$ do service
+    }, (error) => {
+      chamado.status = previousStatus;
+      this.toast.error('Erro ao atualizar o status do chamado', 'ERROR');
+      return throwError(error);
+    });
   }
 }

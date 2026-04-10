@@ -129,7 +129,7 @@ table{width:100%}
 /* ── Cell content ─────────────────────────────────────────────────────────── */
 .id-badge{display:inline-flex;justify-content:center;min-width:52px;padding:.3rem .64rem;border-radius:999px;background:rgba(21,101,192,.1);color:#1565c0;font-weight:700}
 .titulo-text{font-weight:600;color:#263238}
-.status-badge{min-width:88px;padding:.37rem .75rem;border-radius:999px;display:inline-flex;justify-content:center;align-items:center;white-space:nowrap;font-size:.78rem;font-weight:700;color:#fff}
+.status-badge{min-width:130px;max-width:130px;height:28px;padding:0 .6rem;border-radius:999px;display:inline-flex;justify-content:center;align-items:center;white-space:nowrap;font-size:.72rem;font-weight:700;color:#fff;box-sizing:border-box}
 
 /* ── Action buttons ───────────────────────────────────────────────────────── */
 .actions-cell{width:128px}
@@ -137,6 +137,13 @@ table{width:100%}
 .action-btn{width:2.2rem;height:2.2rem;border-radius:.7rem}
 .edit-action{background:rgba(2,136,209,.12);color:#0288d1}
 .view-action{background:rgba(102,187,106,.15);color:#43a047}
+
+/* ── Inline status badge button ──────────────────────────────────────────── */
+.status-clickable{cursor:pointer;transition:opacity .18s,box-shadow .18s}
+.status-clickable:hover:not(.status-locked){opacity:.88;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.status-locked{cursor:default}
+.status-clickable .status-arrow{font-size:.85rem;width:.85rem;height:.85rem;margin-left:.1rem;opacity:.8;vertical-align:middle}
+.menu-status-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-right:.55rem;flex-shrink:0}
 
 /* ── Empty state ──────────────────────────────────────────────────────────── */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:3rem 1rem;color:#90a4ae}

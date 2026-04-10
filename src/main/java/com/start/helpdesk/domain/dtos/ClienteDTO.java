@@ -43,7 +43,7 @@ public class ClienteDTO implements Serializable {
 		protected String senha;
 		protected Set<Integer> perfis = new HashSet<>();
 		
-		@JsonFormat(pattern = "dd/MM/yyy")
+		@JsonFormat(pattern = "dd/MM/yyyy")
 		protected LocalDate dataCriacao = LocalDate.now();
 
 		@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")

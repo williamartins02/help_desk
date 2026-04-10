@@ -1,0 +1,468 @@
+<div class="dialog-container">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+  <div class="dialog-header" [style.background]="getHeaderGradient(usuario)">
+
+    <button mat-icon-button class="btn-close" (click)="close()" matTooltip="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="header-avatar-row">
+      <div class="header-avatar" [style.background]="getAvatarGradient(usuario)">
+        {{ getInitials(usuario.nome) }}
+      </div>
+      <div class="header-user-info">
+        <h2 class="header-nome">{{ usuario.nome }}</h2>
+        <div class="header-badges">
+          <span class="tipo-badge">{{ usuario.tipo === 'TECNICO' ? 'Técnico' : 'Cliente' }}</span>
+          <span *ngFor="let p of usuario.perfis" class="perfil-badge"
+                [style.background]="getPerfilBg(p)"
+                [style.color]="getPerfilColor(p)">
+            {{ getPerfilLabel(p) }}
+          </span>
+        </div>
+        <span class="header-id">ID #{{ usuario.id }}</span>
+      </div>
+    </div>
+
+    <!-- Mini Stats — clicáveis para filtrar chamados -->
+    <div class="header-stats-bar">
+
+      <button class="hstat hstat-btn"
+              [class.hstat-active]="statusFilter === null && activeTab === 1"
+              (click)="abrirChamadosPorStatus(null)"
+              matTooltip="Ver todos os chamados">
+        <span class="hstat-value">{{ totalChamados }}</span>
+        <span class="hstat-label">Chamados</span>
+      </button>
+
+      <div class="hstat-sep"></div>
+
+      <button class="hstat hstat-btn"
+              [class.hstat-active]="statusFilter === 0"
+              (click)="abrirChamadosPorStatus(0)"
+              matTooltip="Ver chamados abertos">
+        <span class="hstat-value red">{{ chamadosAbertos }}</span>
+        <span class="hstat-label">Abertos</span>
+      </button>
+
+      <div class="hstat-sep"></div>
+
+      <button class="hstat hstat-btn"
+              [class.hstat-active]="statusFilter === 1"
+              (click)="abrirChamadosPorStatus(1)"
+              matTooltip="Ver chamados em andamento">
+        <span class="hstat-value orange">{{ chamadosAndamento }}</span>
+        <span class="hstat-label">Andamento</span>
+      </button>
+
+      <div class="hstat-sep"></div>
+
+      <button class="hstat hstat-btn"
+              [class.hstat-active]="statusFilter === 2"
+              (click)="abrirChamadosPorStatus(2)"
+              matTooltip="Ver chamados encerrados">
+        <span class="hstat-value green">{{ chamadosEncerrados }}</span>
+        <span class="hstat-label">Encerrados</span>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ══ TABS ════════════════════════════════════════════════════════════════ -->
+  <mat-tab-group class="dialog-tabs" animationDuration="180ms" [(selectedIndex)]="activeTab">
+
+    <!-- ── Tab 1: Informações ────────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">person_outline</mat-icon>
+        Informações
+      </ng-template>
+
+      <div class="tab-body">
+
+        <div class="info-grid">
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#e3f2fd">
+              <mat-icon style="color:#1565c0">badge</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">ID</span>
+              <span class="info-value">#{{ usuario.id }}</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#e3f2fd">
+              <mat-icon style="color:#1565c0">person</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">Nome completo</span>
+              <span class="info-value">{{ usuario.nome || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#e8f5e9">
+              <mat-icon style="color:#2e7d32">email</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">E-mail</span>
+              <div class="info-value-row">
+                <span class="info-value">{{ usuario.email || '—' }}</span>
+                <button mat-icon-button class="btn-copy" *ngIf="usuario.email"
+                        (click)="copyToClipboard(usuario.email)" matTooltip="Copiar e-mail">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#fff3e0">
+              <mat-icon style="color:#e65100">fingerprint</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">CPF</span>
+              <div class="info-value-row">
+                <span class="info-value font-mono">
+                  {{ cpfVisible ? (usuario.cpf || '—') : maskCpf(usuario.cpf) }}
+                </span>
+                <button mat-icon-button class="btn-copy"
+                        (click)="cpfVisible = !cpfVisible"
+                        [matTooltip]="cpfVisible ? 'Ocultar CPF' : 'Revelar CPF'">
+                  <mat-icon>{{ cpfVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#f3e5f5">
+              <mat-icon style="color:#6a1b9a">manage_accounts</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">Tipo de conta</span>
+              <span class="info-value">
+                {{ usuario.tipo === 'TECNICO' ? 'Técnico de Suporte' : 'Cliente do Sistema' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon" style="background:#ede7f6">
+              <mat-icon style="color:#4527a0">calendar_today</mat-icon>
+            </div>
+            <div class="info-card-text">
+              <span class="info-label">Data de cadastro</span>
+              <span class="info-value">{{ formatDate(usuario.dataCriacao) }}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Perfis section -->
+        <div class="perfis-section">
+          <span class="section-title">
+            <mat-icon>security</mat-icon> Perfis de acesso
+          </span>
+          <div class="perfis-chips">
+            <span *ngFor="let p of usuario.perfis"
+                  class="perfil-chip-large"
+                  [style.background]="getPerfilBg(p)"
+                  [style.color]="getPerfilColor(p)"
+                  [style.border]="'1.5px solid ' + getPerfilColor(p) + '40'">
+              <mat-icon>{{ p === 'ROLE_ADMIN' ? 'admin_panel_settings' : (p === 'ROLE_TECNICO' ? 'engineering' : 'person') }}</mat-icon>
+              {{ getPerfilLabel(p) }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ── Tab 2: Chamados ───────────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">support_agent</mat-icon>
+        Chamados
+        <span class="tab-count" *ngIf="!loadingChamados && totalChamados > 0">{{ totalChamados }}</span>
+      </ng-template>
+
+      <div class="tab-body">
+
+        <!-- Loading -->
+        <div *ngIf="loadingChamados" class="state-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span>Carregando chamados...</span>
+        </div>
+
+        <!-- Banner de filtro ativo -->
+        <div class="status-filter-banner" *ngIf="!loadingChamados && statusFilter !== null"
+             [style.border-color]="statusFilterColor"
+             [style.background]="statusFilterColor + '12'">
+          <mat-icon [style.color]="statusFilterColor">filter_alt</mat-icon>
+          <span [style.color]="statusFilterColor">
+            Filtrando: <strong>{{ statusFilterLabel }}</strong>
+            ({{ statusFilter === 2 ? chamadosResolvidos.length : chamadosEmAtendimento.length }} resultado(s))
+          </span>
+          <button mat-icon-button class="btn-clear-filter"
+                  (click)="clearStatusFilter()" matTooltip="Remover filtro">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Sem chamados -->
+        <div *ngIf="!loadingChamados && chamados.length === 0" class="state-empty">
+          <mat-icon>inbox</mat-icon>
+          <span>Nenhum chamado vinculado a este usuário</span>
+        </div>
+
+        <!-- ══ VISÃO CLIENTE: agrupada por status ══ -->
+        <ng-container *ngIf="!loadingChamados && chamados.length > 0 && usuario.tipo === 'CLIENTE'">
+
+          <!-- Seção: Em Atendimento -->
+          <div class="section-header" *ngIf="chamadosEmAtendimento.length > 0">
+            <div class="section-header-dot pulsing"></div>
+            <span class="section-header-label">Em Atendimento</span>
+            <span class="section-header-count">{{ chamadosEmAtendimento.length }}</span>
+          </div>
+
+          <div class="chamados-list" *ngIf="chamadosEmAtendimento.length > 0">
+            <div class="chamado-card cliente-card" *ngFor="let c of chamadosEmAtendimento"
+                 (click)="openChamadoDetalhe(c, $event)" style="cursor:pointer">
+              <div class="chamado-status-bar" [style.background]="getStatusColor(c.status)"></div>
+              <div class="chamado-content">
+
+                <!-- Título + ID -->
+                <div class="chamado-header-row">
+                  <div class="chamado-titulo-wrap">
+                    <mat-icon class="chamado-status-icon" [style.color]="getStatusColor(c.status)">
+                      {{ getStatusIcon(c.status) }}
+                    </mat-icon>
+                    <span class="chamado-titulo">{{ c.titulo }}</span>
+                  </div>
+                  <span class="chamado-id">#{{ c.id }}</span>
+                </div>
+
+                <!-- Badges -->
+                <div class="chamado-badges-row">
+                  <span class="status-badge"
+                        [style.color]="getStatusColor(c.status)"
+                        [style.background]="getStatusBg(c.status)">
+                    {{ getStatusLabel(c.status) }}
+                  </span>
+                  <span class="prio-badge"
+                        [style.color]="getPrioridadeColor(c.prioridade)"
+                        [style.background]="getPrioridadeBg(c.prioridade)">
+                    <mat-icon>flag</mat-icon>
+                    {{ getPrioridadeLabel(c.prioridade) }}
+                  </span>
+                </div>
+
+                <!-- Bloco do técnico responsável (destaque para CLIENTE) -->
+                <div class="tecnico-responsavel" *ngIf="c.nomeTecnico; else semTecnico">
+                  <div class="tecnico-avatar">{{ getTecnicoInitials(c.nomeTecnico) }}</div>
+                  <div class="tecnico-info">
+                    <span class="tecnico-label">Técnico responsável</span>
+                    <span class="tecnico-nome">{{ c.nomeTecnico }}</span>
+                  </div>
+                  <span class="resolvendo-badge">
+                    <mat-icon>autorenew</mat-icon> Resolvendo
+                  </span>
+                </div>
+                <ng-template #semTecnico>
+                  <div class="sem-tecnico">
+                    <mat-icon>hourglass_empty</mat-icon>
+                    <span>Aguardando atribuição de técnico</span>
+                  </div>
+                </ng-template>
+
+                <!-- Data de abertura -->
+                <div class="chamado-meta-row" *ngIf="c.dataAbertura">
+                  <span class="meta-item">
+                    <mat-icon>schedule</mat-icon>
+                    Aberto em: {{ formatDate(c.dataAbertura) }}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Nenhum em atendimento -->
+          <div class="section-empty" *ngIf="chamadosEmAtendimento.length === 0">
+            <mat-icon>check_circle_outline</mat-icon>
+            <span>Nenhum chamado em aberto no momento</span>
+          </div>
+
+          <!-- Seção: Resolvidos -->
+          <div class="section-header resolved-header" *ngIf="chamadosResolvidos.length > 0">
+            <div class="section-header-dot resolved"></div>
+            <span class="section-header-label">Encerrados</span>
+            <span class="section-header-count">{{ chamadosResolvidos.length }}</span>
+          </div>
+
+          <div class="chamados-list" *ngIf="chamadosResolvidos.length > 0">
+            <div class="chamado-card resolved-card" *ngFor="let c of chamadosResolvidos"
+                 (click)="openChamadoDetalhe(c, $event)" style="cursor:pointer">
+              <div class="chamado-status-bar" [style.background]="getStatusColor(c.status)"></div>
+              <div class="chamado-content">
+
+                <div class="chamado-header-row">
+                  <div class="chamado-titulo-wrap">
+                    <mat-icon class="chamado-status-icon" [style.color]="getStatusColor(c.status)">
+                      {{ getStatusIcon(c.status) }}
+                    </mat-icon>
+                    <span class="chamado-titulo resolved-titulo">{{ c.titulo }}</span>
+                  </div>
+                  <span class="chamado-id">#{{ c.id }}</span>
+                </div>
+
+                <div class="chamado-badges-row">
+                  <span class="status-badge"
+                        [style.color]="getStatusColor(c.status)"
+                        [style.background]="getStatusBg(c.status)">
+                    {{ getStatusLabel(c.status) }}
+                  </span>
+                  <span class="prio-badge"
+                        [style.color]="getPrioridadeColor(c.prioridade)"
+                        [style.background]="getPrioridadeBg(c.prioridade)">
+                    <mat-icon>flag</mat-icon>
+                    {{ getPrioridadeLabel(c.prioridade) }}
+                  </span>
+                </div>
+
+                <div class="chamado-meta-row">
+                  <span class="meta-item" *ngIf="c.dataAbertura">
+                    <mat-icon>schedule</mat-icon>
+                    Aberto: {{ formatDate(c.dataAbertura) }}
+                  </span>
+                  <span class="meta-item resolved-date" *ngIf="c.dataFechamento">
+                    <mat-icon>check_circle</mat-icon>
+                    Resolvido: {{ formatDate(c.dataFechamento) }}
+                  </span>
+                  <span class="meta-item" *ngIf="c.nomeTecnico">
+                    <mat-icon>engineering</mat-icon>
+                    {{ c.nomeTecnico }}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- ══ VISÃO TÉCNICO: lista simples com cliente em destaque ══ -->
+        <div *ngIf="!loadingChamados && chamados.length > 0 && usuario.tipo === 'TECNICO'"
+             class="chamados-list">
+
+          <!-- Sem resultado após filtro -->
+          <div *ngIf="chamadosTecnicoFiltrados.length === 0" class="state-empty">
+            <mat-icon>search_off</mat-icon>
+            <span>Nenhum chamado com status "{{ statusFilterLabel }}"</span>
+          </div>
+
+          <div class="chamado-card" *ngFor="let c of chamadosTecnicoFiltrados"
+               (click)="openChamadoDetalhe(c, $event)" style="cursor:pointer">
+            <div class="chamado-status-bar" [style.background]="getStatusColor(c.status)"></div>
+            <div class="chamado-content">
+              <div class="chamado-header-row">
+                <div class="chamado-titulo-wrap">
+                  <mat-icon class="chamado-status-icon" [style.color]="getStatusColor(c.status)">
+                    {{ getStatusIcon(c.status) }}
+                  </mat-icon>
+                  <span class="chamado-titulo">{{ c.titulo }}</span>
+                </div>
+                <span class="chamado-id">#{{ c.id }}</span>
+              </div>
+
+              <div class="chamado-badges-row">
+                <span class="status-badge"
+                      [style.color]="getStatusColor(c.status)"
+                      [style.background]="getStatusBg(c.status)">
+                  {{ getStatusLabel(c.status) }}
+                </span>
+                <span class="prio-badge"
+                      [style.color]="getPrioridadeColor(c.prioridade)"
+                      [style.background]="getPrioridadeBg(c.prioridade)">
+                  <mat-icon>flag</mat-icon>
+                  {{ getPrioridadeLabel(c.prioridade) }}
+                </span>
+              </div>
+
+              <div class="chamado-meta-row">
+                <span class="meta-item" *ngIf="c.dataAbertura">
+                  <mat-icon>schedule</mat-icon>
+                  Aberto: {{ formatDate(c.dataAbertura) }}
+                </span>
+                <span class="meta-item" *ngIf="c.dataFechamento">
+                  <mat-icon>check_circle</mat-icon>
+                  Fechado: {{ formatDate(c.dataFechamento) }}
+                </span>
+                <span class="meta-item" *ngIf="c.nomeCliente">
+                  <mat-icon>person</mat-icon>
+                  {{ c.nomeCliente }}
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ── Tab 3: Atividade ──────────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">timeline</mat-icon>
+        Atividade
+      </ng-template>
+
+      <div class="tab-body">
+
+        <div *ngIf="loadingChamados" class="state-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+
+        <div *ngIf="!loadingChamados" class="timeline">
+          <div class="timeline-item" *ngFor="let ev of activityTimeline; let last = last">
+            <div class="tl-track">
+              <div class="tl-dot" [style.background]="ev.color + '20'"
+                                  [style.border-color]="ev.color">
+                <mat-icon [style.color]="ev.color">{{ ev.icon }}</mat-icon>
+              </div>
+              <div class="tl-line" *ngIf="!last"></div>
+            </div>
+            <div class="tl-body">
+              <span class="tl-label">{{ ev.label }}</span>
+              <span class="tl-sub">{{ ev.sub }}</span>
+              <span class="tl-date">
+                <mat-icon>schedule</mat-icon>{{ ev.date }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+  <div class="dialog-footer">
+    <div class="footer-info">
+      <mat-icon>info_outline</mat-icon>
+      <span>Dados consultados em tempo real</span>
+    </div>
+    <button mat-stroked-button class="btn-fechar" (click)="close()">
+      <mat-icon>close</mat-icon> Fechar
+    </button>
+  </div>
+
+</div>
+

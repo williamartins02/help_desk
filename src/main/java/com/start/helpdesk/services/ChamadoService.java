@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.start.helpdesk.services.exception.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,14 @@ public class ChamadoService {
 		return chamadoRepository.findAll();
 	}
 
+	public List<Chamado> findByClienteId(Integer clienteId) {
+		return chamadoRepository.findByClienteId(clienteId);
+	}
+
+	public List<Chamado> findByTecnicoId(Integer tecnicoId) {
+		return chamadoRepository.findByTecnicoId(tecnicoId);
+	}
+
 	public Chamado create(@Valid ChamadoDTO objectDTO) {
 		return chamadoRepository.save(newChamado(objectDTO));
 	}
@@ -45,6 +54,11 @@ public class ChamadoService {
 	public Chamado update(Integer id, @Valid ChamadoDTO objectDTO) {
 		objectDTO.setId(id);
 		Chamado oldObject = findById(id);
+		/* Chamado ENCERRADO não pode ser reaberto; um novo chamado deve ser criado */
+		if (oldObject.getStatus() == Status.ENCERRADO) {
+			throw new DataIntegrityViolationException(
+				"Chamado encerrado não pode ser reaberto. Crie um novo chamado se necessário.");
+		}
 		oldObject = newChamado(objectDTO);
 		return chamadoRepository.save(oldObject);
 	}

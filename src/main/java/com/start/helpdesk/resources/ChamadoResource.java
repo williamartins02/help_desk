@@ -48,6 +48,22 @@ public class ChamadoResource {
 		return ResponseEntity.ok().body(listDTO);
 	}
 
+	/* BUSCANDO chamados por cliente */
+	@GetMapping("/cliente/{id}")
+	public ResponseEntity<List<ChamadoDTO>> findByCliente(@PathVariable Integer id) {
+		List<ChamadoDTO> listDTO = service.findByClienteId(id).stream()
+				.map(ChamadoDTO::new).collect(Collectors.toList());
+		return ResponseEntity.ok().body(listDTO);
+	}
+
+	/* BUSCANDO chamados por técnico */
+	@GetMapping("/tecnico/{id}")
+	public ResponseEntity<List<ChamadoDTO>> findByTecnico(@PathVariable Integer id) {
+		List<ChamadoDTO> listDTO = service.findByTecnicoId(id).stream()
+				.map(ChamadoDTO::new).collect(Collectors.toList());
+		return ResponseEntity.ok().body(listDTO);
+	}
+
 	/*CRIANDO um chamado novo*/
 	@PostMapping
 	public ResponseEntity<ChamadoDTO> create(@Valid @RequestBody ChamadoDTO objectDTO) {

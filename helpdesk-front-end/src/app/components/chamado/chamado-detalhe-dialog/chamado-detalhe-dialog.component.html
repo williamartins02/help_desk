@@ -1,0 +1,279 @@
+<div class="dialog-wrap">
+
+  <!-- ══ ALERTA: CRÍTICO ═══════════════════════════════════════════════════ -->
+  <div class="alert-banner alert-critico" *ngIf="isCritico">
+    <div class="pulse-ring"></div>
+    <mat-icon>warning_amber</mat-icon>
+    <div class="alert-text">
+      <strong>Chamado Crítico</strong>
+      <span>Este chamado exige atenção e resolução imediata</span>
+    </div>
+  </div>
+
+  <!-- ══ ALERTA: ALTA PRIORIDADE ═══════════════════════════════════════════ -->
+  <div class="alert-banner alert-alta" *ngIf="!isCritico && isAltaPrioridade">
+    <mat-icon>trending_up</mat-icon>
+    <div class="alert-text">
+      <strong>Alta Prioridade</strong>
+      <span>Acompanhamento e resolução prioritários</span>
+    </div>
+  </div>
+
+  <!-- ══ HEADER ═════════════════════════════════════════════════════════════ -->
+  <div class="dialog-header" [style.background]="getHeaderGradient()">
+
+    <button mat-icon-button class="btn-close" (click)="close()" matTooltip="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="header-body">
+      <div class="header-icon-wrap" [class.spinning]="isEmAndamento" [class.bounce]="isEncerrado">
+        <mat-icon>{{ getStatusIcon() }}</mat-icon>
+      </div>
+      <div class="header-info">
+        <span class="header-id">Chamado #{{ chamado.id }}</span>
+        <h2 class="header-titulo">{{ chamado.titulo }}</h2>
+      </div>
+    </div>
+
+    <div class="header-badges">
+      <span class="hbadge">
+        <mat-icon>{{ getStatusIcon() }}</mat-icon>
+        {{ getStatusLabel() }}
+      </span>
+      <span class="hbadge">
+        <mat-icon>{{ getPrioridadeIcon() }}</mat-icon>
+        {{ getPrioridadeLabel() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ══ CORPO — 2 colunas ═══════════════════════════════════════════════ -->
+  <div class="dialog-body">
+
+    <!-- ── COLUNA ESQUERDA: status + linha do tempo ──────────────────────── -->
+    <div class="col-left">
+
+      <!-- Em Andamento -->
+      <div class="progress-section" *ngIf="isEmAndamento">
+        <div class="progress-header-row">
+          <mat-icon class="spin-icon">autorenew</mat-icon>
+          <span>Em atendimento — aguarde a resolução</span>
+        </div>
+        <mat-progress-bar mode="indeterminate" class="progress-bar"></mat-progress-bar>
+      </div>
+
+      <!-- Encerrado -->
+      <div class="encerrado-section" *ngIf="isEncerrado">
+        <div class="encerrado-icon-wrap"><mat-icon>check_circle</mat-icon></div>
+        <div class="encerrado-info">
+          <span class="encerrado-title">Encerrado com sucesso</span>
+          <span class="encerrado-sub" *ngIf="chamado.nomeTecnico">
+            <mat-icon>engineering</mat-icon> {{ chamado.nomeTecnico }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Aberto -->
+      <div class="aberto-section" *ngIf="isAberto">
+        <mat-icon>inbox</mat-icon>
+        <span>Aguardando atribuição de técnico</span>
+      </div>
+
+      <!-- Linha do Tempo -->
+      <div class="timeline-section">
+        <span class="section-label">
+          <mat-icon>timeline</mat-icon>
+          Linha do Tempo
+        </span>
+
+        <div class="timeline">
+
+          <!-- Etapa 1: Aberto -->
+          <div class="tl-item tl-done">
+            <div class="tl-track">
+              <div class="tl-dot done"><mat-icon>radio_button_checked</mat-icon></div>
+              <div class="tl-line" [class.active]="isEmAndamento || isEncerrado"></div>
+            </div>
+            <div class="tl-body">
+              <span class="tl-label">Chamado Aberto</span>
+              <span class="tl-date" *ngIf="chamado.dataAbertura">
+                <mat-icon>schedule</mat-icon>{{ formatDate(chamado.dataAbertura) }}
+              </span>
+              <span class="tl-date muted" *ngIf="!chamado.dataAbertura">Data não registrada</span>
+            </div>
+          </div>
+
+          <!-- Etapa 2: Em Andamento -->
+          <div class="tl-item"
+               [class.tl-active]="isEmAndamento"
+               [class.tl-done]="isEncerrado"
+               [class.tl-pending]="isAberto">
+            <div class="tl-track">
+              <div class="tl-dot"
+                   [class.active]="isEmAndamento"
+                   [class.done]="isEncerrado"
+                   [class.pending]="isAberto">
+                <mat-icon *ngIf="isEmAndamento" class="spin-icon">autorenew</mat-icon>
+                <mat-icon *ngIf="isEncerrado">check</mat-icon>
+                <mat-icon *ngIf="isAberto">radio_button_unchecked</mat-icon>
+              </div>
+              <div class="tl-line" [class.active]="isEncerrado"></div>
+            </div>
+            <div class="tl-body">
+              <span class="tl-label">Em Atendimento</span>
+              <span class="tl-date" *ngIf="isEmAndamento">
+                <mat-icon>autorenew</mat-icon>Em progresso...
+              </span>
+              <span class="tl-date" *ngIf="isEncerrado">
+                <mat-icon>check_circle_outline</mat-icon>Concluído
+              </span>
+              <span class="tl-date muted" *ngIf="isAberto">Aguardando início</span>
+            </div>
+          </div>
+
+          <!-- Etapa 3: Encerrado -->
+          <div class="tl-item"
+               [class.tl-done]="isEncerrado"
+               [class.tl-pending]="!isEncerrado">
+            <div class="tl-track">
+              <div class="tl-dot"
+                   [class.done]="isEncerrado"
+                   [class.pending]="!isEncerrado">
+                <mat-icon *ngIf="isEncerrado">check_circle</mat-icon>
+                <mat-icon *ngIf="!isEncerrado">radio_button_unchecked</mat-icon>
+              </div>
+            </div>
+            <div class="tl-body">
+              <span class="tl-label">Encerrado</span>
+              <span class="tl-date" *ngIf="isEncerrado && chamado.dataFechamento">
+                <mat-icon>event_available</mat-icon>{{ formatDate(chamado.dataFechamento) }}
+              </span>
+              <span class="tl-date muted" *ngIf="!isEncerrado">Pendente</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COLUNA DIREITA: informações + observações ──────────────────────── -->
+    <div class="col-right">
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <div class="info-icon" style="background:#e8eaf6">
+            <mat-icon style="color:#3949ab">tag</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">ID do Chamado</span>
+            <span class="info-value">#{{ chamado.id }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" [style.background]="getStatusBg()">
+            <mat-icon [style.color]="getStatusColor()">{{ getStatusIcon() }}</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Status</span>
+            <span class="info-value" [style.color]="getStatusColor()" [style.fontWeight]="'700'">
+              {{ getStatusLabel() }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" [style.background]="getPrioridadeBg()">
+            <mat-icon [style.color]="getPrioridadeColor()">{{ getPrioridadeIcon() }}</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Prioridade</span>
+            <span class="info-value" [style.color]="getPrioridadeColor()" [style.fontWeight]="'700'">
+              {{ getPrioridadeLabel() }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" style="background:#e8eaf6">
+            <mat-icon style="color:#3949ab">{{ getClassificacaoIcon() }}</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Classificação</span>
+            <span class="info-value">{{ getClassificacaoLabel() }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="chamado.nomeCliente">
+          <div class="info-icon" style="background:#e3f2fd">
+            <mat-icon style="color:#1565c0">person</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Cliente</span>
+            <span class="info-value">{{ chamado.nomeCliente }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" [style.background]="chamado.nomeTecnico ? '#e8f5e9' : '#fff8e1'">
+            <mat-icon [style.color]="chamado.nomeTecnico ? '#2e7d32' : '#f9a825'">
+              {{ chamado.nomeTecnico ? 'engineering' : 'hourglass_empty' }}
+            </mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Técnico responsável</span>
+            <span class="info-value" [class.muted]="!chamado.nomeTecnico">
+              {{ chamado.nomeTecnico || 'Aguardando atribuição' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="chamado.dataAbertura">
+          <div class="info-icon" style="background:#fff3e0">
+            <mat-icon style="color:#e65100">schedule</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Aberto em</span>
+            <span class="info-value">{{ formatDate(chamado.dataAbertura) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="isEncerrado && chamado.dataFechamento">
+          <div class="info-icon" style="background:#e8f5e9">
+            <mat-icon style="color:#2e7d32">event_available</mat-icon>
+          </div>
+          <div class="info-text">
+            <span class="info-label">Encerrado em</span>
+            <span class="info-value">{{ formatDate(chamado.dataFechamento) }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Observações -->
+      <div class="obs-section" *ngIf="chamado.observacoes">
+        <span class="obs-label">
+          <mat-icon>notes</mat-icon>
+          Observações
+        </span>
+        <p class="obs-text">{{ chamado.observacoes }}</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+  <div class="dialog-footer">
+    <span class="footer-info">
+      <mat-icon>info_outline</mat-icon>
+      Dados do chamado em tempo real
+    </span>
+    <button mat-stroked-button class="btn-fechar" (click)="close()">
+      <mat-icon>close</mat-icon> Fechar
+    </button>
+  </div>
+
+</div>
+

@@ -34,6 +34,9 @@ export class ChamadoUpdateComponent implements OnInit {
     nomeTecnico:   '',
   }
  
+  /** Status original carregado do servidor — usado para bloquear edição apenas de chamados já encerrados */
+  private originalStatus: string = '';
+
   clientes: Cliente[] = [];
   tecnicos: Tecnico[] = [];
 
@@ -75,6 +78,7 @@ export class ChamadoUpdateComponent implements OnInit {
   findById(): void{
     this.chamadoService.findById(this.data.id).subscribe((resposta) =>{
       this.chamado = resposta;
+      this.originalStatus = resposta.status;
     },(error) => {
       this.toast.error("ao chamar Tecnico ID", "ERROR");
       return throwError(error.error.error);
@@ -82,9 +86,13 @@ export class ChamadoUpdateComponent implements OnInit {
   }
 
   update(): void{
+    if (this.isEncerrado) {
+      this.toast.error("Chamados encerrados não podem ser alterados. Crie um novo chamado se necessário.", "Chamado Encerrado");
+      return;
+    }
     this.onNoClick();
     const matDialogRef = this.genericDialog.loadingMessage("Editando Chamado...");
-     this.chamadoService.update(this.chamado).subscribe(() =>{
+    this.chamadoService.update(this.chamado).subscribe(() =>{
       setTimeout(() => {
         matDialogRef.close();
         this.toast.success("Edita com sucesso", "Chamado Cliente  " + this.chamado.nomeCliente);
@@ -115,6 +123,18 @@ export class ChamadoUpdateComponent implements OnInit {
         return throwError(error.error.error);
       }
     );
+  }
+
+  /** Retorna true apenas se o chamado JÁ estava encerrado ao ser carregado */
+  get isEncerrado(): boolean {
+    return this.originalStatus == '2';
+  }
+
+  /** Cor do status atual — consistente com a listagem */
+  getStatusColor(status: string): string {
+    if (status == '0') return '#1976d2';  // ABERTO       → azul
+    if (status == '1') return '#f57c00';  // EM ANDAMENTO → âmbar/laranja
+    return '#9e9e9e';                      // ENCERRADO    → cinza
   }
 
   /**Retornando status como string*/
@@ -166,7 +186,16 @@ export class ChamadoUpdateComponent implements OnInit {
   onNoClick(): void {
     this.dialogRef.close();
   }
+
+  showEncerradoMsg() {
+    this.toast.info(
+      'Este chamado está encerrado. Para novo atendimento, crie um novo chamado.',
+      'Chamado Encerrado',
+      {
+        timeOut: 5000,
+        positionClass: 'toast-top-center',
+        closeButton: true,
+      }
+    );
+  }
 }
-
-
-

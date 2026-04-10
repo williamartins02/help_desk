@@ -7,6 +7,8 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { MatDialog } from '@angular/material/dialog';
+import { UsuarioDetalheDialogComponent } from '../usuario-detalhe-dialog/usuario-detalhe-dialog.component';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -20,7 +22,7 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
   searchValue  = '';
   selectedTipo = '';
 
-  displayedColumns = ['avatar', 'nome', 'email', 'cpf', 'perfis', 'tipo', 'dataCriacao'];
+  displayedColumns = ['avatar', 'nome', 'email', 'cpf', 'perfis', 'tipo', 'dataCriacao', 'acoes'];
   dataSource = new MatTableDataSource<IUsuario>([]);
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -28,12 +30,18 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
 
   constructor(
     private service: UsuarioService,
-    private toast:   ToastrService
+    private toast:   ToastrService,
+    private dialog:  MatDialog
   ) {}
 
-  ngOnInit(): void { this.findAll(); }
+  ngOnInit(): void {
+    this.setupFilterPredicate();
+    this.findAll();
+  }
 
   ngAfterViewInit(): void {
+    // Paginator/sort may be null here if inside *ngIf="!isLoading".
+    // They are connected after data loads via setTimeout in findAll().
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort      = this.sort;
   }
@@ -46,6 +54,13 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
         this.USUARIO_DATA = data;
         this.applyFilters();
         this.isLoading = false;
+        // Paginator and sort live inside *ngIf="!isLoading".
+        // After setting isLoading=false Angular renders them; we connect them
+        // in the next macrotask so the DOM is already updated.
+        setTimeout(() => {
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort      = this.sort;
+        });
       },
       () => {
         this.toast.error('Erro ao carregar usuários', 'ERROR');
@@ -54,24 +69,47 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
     );
   }
 
+  // ── FilterPredicate ───────────────────────────────────────────────────────
+  /**
+   * Configures the custom filterPredicate on the shared dataSource instance.
+   * Called once during initialisation so it is never lost across filter cycles.
+   *
+   * Fixes applied:
+   *  1. Null-safety – nome/email can be null in the database.
+   *  2. Accent normalisation – "joao" now matches "João".
+   *  3. CPF guard – the digit-only comparison is skipped when the search term
+   *     contains no digits, preventing the empty-string-includes-any-string
+   *     bug that made ALL rows match every non-numeric search term.
+   */
+  private setupFilterPredicate(): void {
+    this.dataSource.filterPredicate = (data: IUsuario, f: string) => {
+      // Normalise: lowercase + strip diacritics (accents)
+      const normalize = (s: string): string =>
+        (s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      const term       = normalize(f);
+      const cpfDigits  = (data.cpf ?? '').replace(/\D/g, '');
+      const termDigits = f.replace(/\D/g, '');
+
+      return normalize(data.nome).includes(term)                       // by name
+          || normalize(data.email).includes(term)                      // by e-mail
+          || (termDigits.length > 0 && cpfDigits.includes(termDigits)); // by CPF (digits only)
+    };
+  }
+
   // ── Filtros ───────────────────────────────────────────────────────────────
   applyFilters(): void {
+    // 1. Apply tipo filter in memory.
     let filtered = [...this.USUARIO_DATA];
     if (this.selectedTipo) {
       filtered = filtered.filter(u => u.tipo === this.selectedTipo);
     }
-    this.dataSource = new MatTableDataSource<IUsuario>(filtered);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort      = this.sort;
-    this.dataSource.filterPredicate = (data, f) => {
-      const s = f.toLowerCase();
-      return data.nome.toLowerCase().includes(s) ||
-             data.email.toLowerCase().includes(s) ||
-             (data.cpf || '').replace(/\D/g, '').includes(s.replace(/\D/g, ''));
-    };
-    if (this.searchValue.trim()) {
-      this.dataSource.filter = this.searchValue.trim().toLowerCase();
-    }
+
+    // 2. Update the shared dataSource data (avoids losing paginator/sort references).
+    this.dataSource.data = filtered;
+
+    // 3. Apply text filter via filterPredicate (set once in setupFilterPredicate).
+    this.dataSource.filter = this.searchValue.trim().toLowerCase();
   }
 
   applySearch(event: Event): void {
@@ -88,6 +126,19 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
     this.searchValue  = '';
     this.selectedTipo = '';
     this.applyFilters();
+  }
+
+  // ── Modal de detalhes ─────────────────────────────────────────────────────
+  openDetalhes(usuario: IUsuario, event?: Event): void {
+    event?.stopPropagation();
+    this.dialog.open(UsuarioDetalheDialogComponent, {
+      data:      { usuario },
+      width:     '700px',
+      maxWidth:  '96vw',
+      maxHeight: '90vh',
+      panelClass: 'usuario-detalhe-panel',
+      autoFocus: false
+    });
   }
 
   // ── Contadores ────────────────────────────────────────────────────────────
@@ -131,7 +182,20 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
 
   formatDate(d: string): string {
     if (!d) return '—';
-    return d; // já vem formatado pelo @JsonFormat do backend
+    // Se já estiver no formato dd/MM/yyyy, retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d;
+    // Se vier no formato yyyy-MM-dd, converte para dd/MM/yyyy
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const [y, m, day] = d.split('-');
+      return `${day}/${m}/${y}`;
+    }
+    // Se vier no formato ISO (yyyy-MM-ddTHH:mm:ss), pega só a data
+    if (/^\d{4}-\d{2}-\d{2}T/.test(d)) {
+      const [date] = d.split('T');
+      const [y, m, day] = date.split('-');
+      return `${day}/${m}/${y}`;
+    }
+    return d;
   }
 }
 

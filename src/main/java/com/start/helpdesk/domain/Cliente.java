@@ -44,7 +44,7 @@ public class Cliente extends Pessoa {
 		this.email =  object.getEmail();
 		this.senha =  object.getSenha();
 		this.perfis = object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
-		this.dataCriacao = object.getDataCriacao();
+		// dataCriacao e dataHoraCriacao são gerenciados pelo servidor via @CreationTimestamp
 	}
 
 	public Cliente(Integer id, String nome, String cpf, String email, String senha) {

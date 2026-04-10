@@ -1,0 +1,34 @@
+<svg width="141" height="110" viewBox="0 0 141 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_101_2)">
+<path d="M87.5 10C70.917 10 57.5 23.417 57.5 40V90H47.5V40C47.5 17.909 65.409 0 87.5 0C109.591 0 127.5 17.909 127.5 40V90H117.5V40C117.5 23.417 104.083 10 87.5 10Z" fill="#4F4F4F"/>
+<path d="M57.5 90V40C57.5 23.417 70.917 10 87.5 10V10C104.083 10 117.5 23.417 117.5 40V90" fill="#BDBDBD"/>
+<rect x="47.5" y="80" width="80" height="20" rx="10" fill="#828282"/>
+<rect x="47.5" y="90" width="80" height="10" fill="#4F4F4F"/>
+<path d="M127.5 40H137.5V70C137.5 81.046 128.546 90 117.5 90H57.5C46.454 90 37.5 81.046 37.5 70V40H47.5V70C47.5 75.523 51.977 80 57.5 80H117.5C123.023 80 127.5 75.523 127.5 70V40Z" fill="#4F4F4F"/>
+<path d="M137.5 40H127.5V70C127.5 75.523 123.023 80 117.5 80H57.5C51.977 80 47.5 75.523 47.5 70V40H37.5" fill="#BDBDBD"/>
+<rect x="127.5" y="40" width="10" height="30" fill="#828282"/>
+<rect x="37.5" y="40" width="10" height="30" fill="#828282"/>
+<path d="M10 70H30V90H20C14.477 90 10 85.523 10 80V70Z" fill="#4F4F4F"/>
+<path d="M30 70V90H20C14.477 90 10 85.523 10 80V70H30Z" fill="#828282"/>
+<path d="M30 70H10V80C10 85.523 14.477 90 20 90H30V70Z" fill="#BDBDBD"/>
+<path d="M30 90H20C14.477 90 10 85.523 10 80V70" stroke="#4F4F4F" stroke-width="2"/>
+<rect x="20" y="90" width="10" height="20" fill="#4F4F4F"/>
+<rect x="20" y="100" width="10" height="10" fill="#828282"/>
+<path d="M60 20H110C115.523 20 120 24.477 120 30V80H50V30C50 24.477 54.477 20 60 20Z" fill="#87CEEB"/>
+<path d="M60 20H110C115.523 20 120 24.477 120 30V80H50V30C50 24.477 54.477 20 60 20Z" fill="url(#paint0_linear_101_2)"/>
+<rect x="70" y="40" width="10" height="5" fill="#FF6347"/>
+<rect x="70" y="50" width="10" height="5" fill="#FF6347"/>
+<path d="M85 42.5L90 47.5L100 37.5" stroke="#FF6347" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M85 52.5L90 57.5L100 47.5" stroke="#FF6347" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_101_2" x1="85" y1="20" x2="85" y2="80" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.3"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<clipPath id="clip0_101_2">
+<rect width="141" height="110" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+

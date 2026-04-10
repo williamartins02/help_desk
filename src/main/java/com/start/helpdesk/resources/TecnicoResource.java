@@ -59,9 +59,9 @@ public class TecnicoResource {
 	@PostMapping
 	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO) {
 		Tecnico newObject = service.create(objectDTO);
+		TecnicoDTO dto = new TecnicoDTO(newObject);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObject.getId()).toUri();
-		
-		return ResponseEntity.created(uri).build();
+		return ResponseEntity.created(uri).body(dto);
 	}
 
 	/* EndPoint (ATUALIZAR) criando um tecnico novo. */

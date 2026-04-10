@@ -64,9 +64,10 @@ authenticate(creds: Credenciais){
    return this.http.post(`${API_CONFIG.baseUrl}/auth/reset-password`, { token, newPassword });
  }
 
- /*Metodo para limpar o (toke) */
- logout(){
-   localStorage.clear();
- }
+  /*Metodo para limpar o (toke) */
+  logout(){
+    localStorage.clear();
+    sessionStorage.removeItem('alertaChamadosCriticosExibido');
+  }
 
 }

@@ -1,0 +1,58 @@
+
+<div class="dialog-wrapper" role="alertdialog">
+
+  <!-- Header gradiente padrão do sistema -->
+  <div class="dialog-header">
+    <div class="header-brand">
+      <div class="header-icon-badge">
+        <mat-icon class="header-icon">warning_amber</mat-icon>
+      </div>
+      <div class="header-text">
+        <h3 class="dialog-title">Atenção, {{ userName }}!</h3>
+        <p class="dialog-subtitle">Chamados críticos em aberto</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="onClose()" aria-label="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body (card-lift) -->
+  <div class="dialog-body">
+
+    <div class="alert-body-content">
+      <div class="alert-main-row">
+        <div class="alert-count-block">
+          <span class="alert-count">{{ count }}</span>
+        </div>
+        <div class="alert-text-block">
+          <p class="alert-message">
+            <strong>chamado{{ count > 1 ? 's' : '' }} crítico{{ count > 1 ? 's' : '' }}</strong>
+            em aberto que precisa{{ count > 1 ? 'm' : '' }} ser
+            resolvido{{ count > 1 ? 's' : '' }} com urgência!
+          </p>
+          <p class="alert-oldest">
+            <mat-icon class="oldest-icon">schedule</mat-icon>
+            O mais antigo está aberto há <strong>{{ oldestTimeText }}</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <div class="footer-left">
+        <mat-checkbox [(ngModel)]="dontShowAgain" color="primary">
+          Não mostrar novamente hoje
+        </mat-checkbox>
+      </div>
+      <div class="footer-right">
+        <button mat-stroked-button class="btn-cancel" (click)="onClose()">Fechar</button>
+        <button mat-flat-button color="warn" class="btn-view" (click)="onViewCritical()">
+          <mat-icon>visibility</mat-icon>
+          Ver chamados críticos
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

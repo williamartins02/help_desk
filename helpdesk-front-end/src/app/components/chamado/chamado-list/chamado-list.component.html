@@ -294,9 +294,41 @@
                         <ng-container matColumnDef="status">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
                             <td mat-cell *matCellDef="let chamado">
-                                <span class="status-badge" [ngStyle]="{ backgroundColor: getColor(chamado.status) }">
+                                <!-- Status editável (não encerrado) -->
+                                <span *ngIf="chamado.status != '2'"
+                                      class="status-badge status-clickable"
+                                      [ngStyle]="{ backgroundColor: getColor(chamado.status) }"
+                                      [matMenuTriggerFor]="statusMenu"
+                                      matTooltip="Clique para alterar o status">
+                                    {{ returnStatus(chamado.status) }}
+                                    <mat-icon class="status-arrow">arrow_drop_down</mat-icon>
+                                </span>
+                                <!-- Status travado (encerrado) -->
+                                <span *ngIf="chamado.status == '2'"
+                                      class="status-badge status-locked"
+                                      [ngStyle]="{ backgroundColor: getColor(chamado.status) }"
+                                      matTooltip="Chamado encerrado">
                                     {{ returnStatus(chamado.status) }}
                                 </span>
+                                <mat-menu #statusMenu="matMenu">
+                                    <button mat-menu-item
+                                            [disabled]="chamado.status == '0'"
+                                            (click)="onInlineStatusChange(chamado, '0')">
+                                        <span class="menu-status-dot" style="background:#1976d2"></span>
+                                        ABERTO
+                                    </button>
+                                    <button mat-menu-item
+                                            [disabled]="chamado.status == '1'"
+                                            (click)="onInlineStatusChange(chamado, '1')">
+                                        <span class="menu-status-dot" style="background:#f57c00"></span>
+                                        EM ANDAMENTO
+                                    </button>
+                                    <button mat-menu-item
+                                            (click)="onInlineStatusChange(chamado, '2')">
+                                        <span class="menu-status-dot" style="background:#9e9e9e"></span>
+                                        ENCERRADO
+                                    </button>
+                                </mat-menu>
                             </td>
                         </ng-container>
 
@@ -305,8 +337,8 @@
                             <td mat-cell *matCellDef="let chamado" class="actions-cell">
                                 <div class="actions-group">
                                     <button type="button" mat-icon-button class="action-btn edit-action"
-                                            matTooltip="Editar chamado"
-                                            (click)="openEdit(chamado.id)">
+                                            [matTooltip]="chamado.status == '2' ? 'Chamado encerrado não pode ser reaberto. Crie um novo chamado.' : 'Editar chamado'"
+                                            (click)="onEditChamado(chamado)">
                                         <mat-icon>edit</mat-icon>
                                     </button>
 

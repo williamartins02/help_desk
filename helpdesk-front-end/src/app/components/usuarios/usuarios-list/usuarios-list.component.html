@@ -1,90 +1,115 @@
-<div class="page-wrapper">
+<div class="container">
 
-  <!-- ══ Stats Row ══════════════════════════════════════════════════════════ -->
-  <div class="stats-row">
+  <!-- ══ Hero Panel ══════════════════════════════════════════════════════════ -->
+  <section class="hero-panel">
+    <div class="hero-content">
+      <span class="page-badge">
+        <mat-icon>manage_accounts</mat-icon>
+        Gestão de Usuários
+      </span>
+      <h1>Usuários do Sistema</h1>
+      <p>Visualize, filtre e acompanhe todos os usuários cadastrados — técnicos, clientes e administradores.</p>
 
-    <div class="stat-card all mat-elevation-z3">
-      <div class="stat-icon-wrap"><mat-icon>groups</mat-icon></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ USUARIO_DATA.length }}</span>
-        <span class="stat-label">Total Usuários</span>
+      <div class="hero-pills" *ngIf="USUARIO_DATA.length > 0">
+        <span class="pill pill-admin">
+          <mat-icon>admin_panel_settings</mat-icon>
+          {{ totalAdmin }} admin{{ totalAdmin !== 1 ? 's' : '' }}
+        </span>
+        <span class="pill pill-tecnico">
+          <mat-icon>engineering</mat-icon>
+          {{ totalTecnico }} técnico{{ totalTecnico !== 1 ? 's' : '' }}
+        </span>
+        <span class="pill pill-cliente">
+          <mat-icon>person</mat-icon>
+          {{ totalCliente }} cliente{{ totalCliente !== 1 ? 's' : '' }}
+        </span>
       </div>
     </div>
 
-    <div class="stat-card admin mat-elevation-z3">
-      <div class="stat-icon-wrap"><mat-icon>admin_panel_settings</mat-icon></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ totalAdmin }}</span>
-        <span class="stat-label">Administradores</span>
+    <div class="hero-stats">
+      <div class="stat-card stat-all">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">groups</mat-icon></div>
+        <span>Total cadastrados</span>
+        <strong>{{ USUARIO_DATA.length }}</strong>
+      </div>
+      <div class="stat-card stat-admin">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">admin_panel_settings</mat-icon></div>
+        <span>Administradores</span>
+        <strong>{{ totalAdmin }}</strong>
+      </div>
+      <div class="stat-card stat-tecnico">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">engineering</mat-icon></div>
+        <span>Técnicos</span>
+        <strong>{{ totalTecnico }}</strong>
+      </div>
+      <div class="stat-card stat-cliente">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person</mat-icon></div>
+        <span>Clientes</span>
+        <strong>{{ totalCliente }}</strong>
       </div>
     </div>
+  </section>
 
-    <div class="stat-card tecnico mat-elevation-z3">
-      <div class="stat-icon-wrap"><mat-icon>badge</mat-icon></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ totalTecnico }}</span>
-        <span class="stat-label">Técnicos</span>
+  <!-- ══ Table Card ══════════════════════════════════════════════════════════ -->
+  <section class="content-card mat-elevation-z4">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+
+      <div class="tipo-tabs">
+        <button class="tipo-tab" [class.active]="selectedTipo === ''" (click)="onTipoChange('')">
+          <mat-icon>groups</mat-icon>
+          <span>Todos</span>
+          <span class="tab-count all-count">{{ USUARIO_DATA.length }}</span>
+        </button>
+        <button class="tipo-tab" [class.active]="selectedTipo === 'TECNICO'" (click)="onTipoChange('TECNICO')">
+          <mat-icon>engineering</mat-icon>
+          <span>Técnicos</span>
+          <span class="tab-count tecnico-count">{{ totalTecnico }}</span>
+        </button>
+        <button class="tipo-tab" [class.active]="selectedTipo === 'CLIENTE'" (click)="onTipoChange('CLIENTE')">
+          <mat-icon>person</mat-icon>
+          <span>Clientes</span>
+          <span class="tab-count cliente-count">{{ totalCliente }}</span>
+        </button>
       </div>
-    </div>
 
-    <div class="stat-card cliente mat-elevation-z3">
-      <div class="stat-icon-wrap"><mat-icon>person</mat-icon></div>
-      <div class="stat-info">
-        <span class="stat-value">{{ totalCliente }}</span>
-        <span class="stat-label">Clientes</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══ Table Card ═════════════════════════════════════════════════════════ -->
-  <mat-card class="table-card mat-elevation-z4">
-
-    <!-- Header -->
-    <div class="card-header">
-      <div class="header-left">
-        <div class="header-icon-wrap"><mat-icon>manage_accounts</mat-icon></div>
-        <div>
-          <h2 class="header-title">Usuários Cadastrados</h2>
-          <span class="header-sub">Todos os usuários ativos no sistema</span>
+      <div class="toolbar-right">
+        <div class="search-wrap">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input class="search-input"
+                 [placeholder]="selectedTipo === 'TECNICO' ? 'Buscar técnico por nome, e-mail ou CPF...'
+                               : selectedTipo === 'CLIENTE' ? 'Buscar cliente por nome, e-mail ou CPF...'
+                               : 'Buscar usuário por nome, e-mail ou CPF...'"
+                 [value]="searchValue"
+                 (input)="applySearch($event)"/>
+          <button *ngIf="searchValue" mat-icon-button class="btn-clear"
+                  (click)="searchValue=''; applyFilters()" matTooltip="Limpar busca">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
+
+        <span class="result-chip" *ngIf="!isLoading">
+          <mat-icon>filter_list</mat-icon>
+          {{ dataSource.filteredData.length }} resultado(s)
+        </span>
+
+        <button mat-icon-button class="btn-refresh" (click)="findAll()" matTooltip="Recarregar lista">
+          <mat-icon>refresh</mat-icon>
+        </button>
       </div>
-      <button mat-stroked-button class="btn-refresh" (click)="findAll()" matTooltip="Recarregar">
-        <mat-icon>refresh</mat-icon>
-      </button>
     </div>
 
-    <!-- Filter bar -->
-    <div class="filter-bar">
-
-      <!-- Busca -->
-      <div class="search-wrap">
-        <mat-icon class="search-prefix">search</mat-icon>
-        <input class="search-input"
-               placeholder="Buscar por nome, e-mail ou CPF..."
-               [value]="searchValue"
-               (input)="applySearch($event)"/>
-        <button *ngIf="searchValue" mat-icon-button class="btn-clear" (click)="searchValue=''; applyFilters()">
-          <mat-icon>close</mat-icon>
-        </button>
+    <!-- Table header -->
+    <div class="table-header">
+      <div>
+        <h2>Lista de usuários</h2>
+        <p>Acompanhe perfis, tipos e datas de cadastro em tempo real.</p>
       </div>
-
-      <!-- Filtros por tipo -->
-      <div class="tipo-pills">
-        <button class="pill" [class.active]="selectedTipo === ''"         (click)="onTipoChange('')">
-          <mat-icon>people</mat-icon> Todos
-        </button>
-        <button class="pill tecnico" [class.active]="selectedTipo === 'TECNICO'" (click)="onTipoChange('TECNICO')">
-          <mat-icon>badge</mat-icon> Técnicos
-        </button>
-        <button class="pill cliente" [class.active]="selectedTipo === 'CLIENTE'" (click)="onTipoChange('CLIENTE')">
-          <mat-icon>person</mat-icon> Clientes
-        </button>
-        <button *ngIf="hasFilters" mat-icon-button class="btn-clear-all" (click)="clearFilters()" matTooltip="Limpar filtros">
-          <mat-icon>filter_alt_off</mat-icon>
-        </button>
-      </div>
-
+      <span *ngIf="hasFilters" class="filter-indicator">
+        <mat-icon>filter_list</mat-icon>
+        {{ dataSource.filteredData.length }} resultado(s) filtrado(s)
+      </span>
     </div>
 
     <!-- Loading -->
@@ -94,7 +119,7 @@
     </div>
 
     <!-- Table -->
-    <div class="table-wrap" *ngIf="!isLoading">
+    <div class="table-wrapper" *ngIf="!isLoading">
       <mat-table [dataSource]="dataSource" matSort class="usuarios-table">
 
         <!-- Avatar -->
@@ -174,12 +199,26 @@
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></mat-row>
+        <!-- Ações -->
+        <ng-container matColumnDef="acoes">
+          <mat-header-cell *matHeaderCellDef class="col-acoes"></mat-header-cell>
+          <mat-cell *matCellDef="let u" class="col-acoes">
+            <button class="btn-view" (click)="openDetalhes(u, $event)" matTooltip="Ver detalhes" matTooltipPosition="left">
+              <mat-icon>person_search</mat-icon>
+              <span>Detalhes</span>
+            </button>
+          </mat-cell>
+        </ng-container>
 
-        <!-- Sem dados -->
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                 class="table-row"
+                 (click)="openDetalhes(row)"
+                 matTooltip="Clique para ver detalhes"
+                 matTooltipShowDelay="600"></mat-row>
+
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell no-data-row" colspan="7">
+          <td class="mat-cell no-data-row" colspan="8">
             <mat-icon>search_off</mat-icon>
             <span>Nenhum usuário encontrado para o filtro aplicado</span>
           </td>
@@ -193,6 +232,6 @@
       </mat-paginator>
     </div>
 
-  </mat-card>
+  </section>
 </div>
 

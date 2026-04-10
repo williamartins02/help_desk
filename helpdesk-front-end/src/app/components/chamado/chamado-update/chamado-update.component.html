@@ -18,6 +18,16 @@
 
   <!-- ── Corpo — card lift sobre o header ── -->
   <div class="dialog-body">
+
+    <!-- Banner de chamado encerrado -->
+    <div *ngIf="isEncerrado" class="encerrado-banner">
+      <mat-icon class="encerrado-icon">lock</mat-icon>
+      <div class="encerrado-text">
+        <strong>Chamado Encerrado</strong>
+        <span>Este chamado foi finalizado e não pode ser reaberto. Caso precise de novo atendimento, crie um novo chamado.</span>
+      </div>
+    </div>
+
     <form class="main-form" (ngSubmit)="update()">
       <!-- Seção: Dados do chamado -->
       <div class="section-header">
@@ -32,17 +42,33 @@
           <mat-label>Título do chamado</mat-label>
           <input matInput placeholder="Ex.: Trocar teclado"
                  [(ngModel)]="chamado.titulo" name="titulo"
-                 [formControl]="titulo" required />
+                 [formControl]="titulo" required
+                 [readonly]="isEncerrado" />
         </mat-form-field>
 
         <!-- Linha 2: Status (2 colunas — único campo editável nesta linha) -->
-        <mat-form-field class="field field-wide" appearance="outline">
+
+        <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status" [disabled]="true">
+              <mat-option value="0">ABERTO</mat-option>
+              <mat-option value="1">EM ANDAMENTO</mat-option>
+              <mat-option value="2">ENCERRADO</mat-option>
+            </mat-select>
+            <span matSuffix class="status-dot-indicator"
+                  [ngStyle]="{ backgroundColor: getStatusColor(chamado.status) }"></span>
+          </mat-form-field>
+        </div>
+        <mat-form-field class="field" appearance="outline" *ngIf="!isEncerrado">
           <mat-label>Status</mat-label>
           <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status">
             <mat-option value="0">ABERTO</mat-option>
             <mat-option value="1">EM ANDAMENTO</mat-option>
             <mat-option value="2">ENCERRADO</mat-option>
           </mat-select>
+          <span matSuffix class="status-dot-indicator"
+                [ngStyle]="{ backgroundColor: getStatusColor(chamado.status) }"></span>
         </mat-form-field>
 
         <!-- Linha 3: Prioridade | Classificação (somente leitura) -->
@@ -69,19 +95,39 @@
         </mat-form-field>
 
         <!-- Linha 4: Técnico | Cliente -->
-        <mat-form-field class="field" appearance="outline">
+        <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>{{ chamado.nomeTecnico || 'Técnico' }}</mat-label>
+            <mat-select [(ngModel)]="chamado.tecnico" name="tecnico"
+                        [formControl]="tecnico" required [disabled]="true">
+              <mat-option>NENHUM</mat-option>
+              <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-form-field class="field" appearance="outline" *ngIf="!isEncerrado">
           <mat-label>{{ chamado.nomeTecnico || 'Técnico' }}</mat-label>
           <mat-select [(ngModel)]="chamado.tecnico" name="tecnico"
-                      [formControl]="tecnico" required>
+                      [formControl]="tecnico" required [disabled]="isEncerrado">
             <mat-option>NENHUM</mat-option>
             <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field class="field" appearance="outline">
+        <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>{{ chamado.nomeCliente || 'Cliente' }}</mat-label>
+            <mat-select [(ngModel)]="chamado.cliente" name="cliente"
+                        [formControl]="cliente" required [disabled]="true">
+              <mat-option>NENHUM</mat-option>
+              <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-form-field class="field" appearance="outline" *ngIf="!isEncerrado">
           <mat-label>{{ chamado.nomeCliente || 'Cliente' }}</mat-label>
           <mat-select [(ngModel)]="chamado.cliente" name="cliente"
-                      [formControl]="cliente" required>
+                      [formControl]="cliente" required [disabled]="isEncerrado">
             <mat-option>NENHUM</mat-option>
             <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
           </mat-select>
@@ -105,6 +151,7 @@
           class="observacoes"
           matInput
           placeholder="Ex.: Trocar bateria de notebook..."
+          [readonly]="isEncerrado"
         ></textarea>
       </mat-form-field>
 
@@ -125,7 +172,9 @@
           mat-flat-button
           color="primary"
           class="btn-save"
-          [disabled]="!validaCampos()"
+          [disabled]="!validaCampos() || isEncerrado"
+          [matTooltip]="isEncerrado ? 'Chamado encerrado não pode ser editado' : ''"
+          (click)="isEncerrado ? showEncerradoMsg() : null"
         >
           <mat-icon>save</mat-icon>
           Salvar Alterações

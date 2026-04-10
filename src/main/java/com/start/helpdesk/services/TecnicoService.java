@@ -53,14 +53,17 @@ public class TecnicoService {
 	/*METODO -> validação para UPDATE*/
 	public Tecnico update(Integer id, @Valid TecnicoDTO objectDTO) {
 		objectDTO.setId(id);
-		Tecnico Object = findById(id);
+		Tecnico existingObject = findById(id);
 		   /*Verificando se usuario editou uma nova  senha ou não.*/
-		   if(!objectDTO.getSenha().equals(Object.getSenha())) {//se senha for diferente da senha salva, criar uma criptografia nova.
+		   if(!objectDTO.getSenha().equals(existingObject.getSenha())) {//se senha for diferente da senha salva, criar uma criptografia nova.
 			   objectDTO.setSenha(bCryptPasswordEncoder.encode(objectDTO.getSenha()));
 		   }  
 		validationCpfEmail(objectDTO);
-		Object = new Tecnico(objectDTO);
-		return tecnicoRepository.save(Object);
+		Tecnico updatedObject = new Tecnico(objectDTO);
+		// Preserva a data de criação original — não deve ser alterada em atualizações
+		updatedObject.setDataCriacao(existingObject.getDataCriacao());
+		updatedObject.setDataHoraCriacao(existingObject.getDataHoraCriacao());
+		return tecnicoRepository.save(updatedObject);
 	}
 	
 	/*METODO -> (DELETE)*/

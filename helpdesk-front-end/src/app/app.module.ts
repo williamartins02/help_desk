@@ -1,5 +1,4 @@
-
- import { GenericDialogComponent} from './components/molecules/generic-dialog/generic-dialog.component';
+import { GenericDialogComponent} from './components/molecules/generic-dialog/generic-dialog.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
 
@@ -40,6 +39,7 @@ import { MatCheckboxModule }   from '@angular/material/checkbox';
 import { MatToolbarModule }    from '@angular/material/toolbar';
 import { MatSidenavModule }    from '@angular/material/sidenav';
 import { MatSelectModule }     from '@angular/material/select';
+import { MatMenuModule }       from '@angular/material/menu';
 import { MatRadioModule }      from '@angular/material/radio';
 import { MatInputModule }      from '@angular/material/input';
 import { MatIconModule }       from '@angular/material/icon';
@@ -76,12 +76,16 @@ import { ChatComponent }                  from './components/chat/chat/chat.comp
 import { ChatBubbleComponent }            from './components/chat/chat-bubble/chat-bubble.component';
 import { FloatingChatComponent }          from './components/chat/floating-chat/floating-chat.component';
 import { UsuariosListComponent }          from './components/usuarios/usuarios-list/usuarios-list.component';
+
+import { UsuarioDetalheDialogComponent }   from './components/usuarios/usuario-detalhe-dialog/usuario-detalhe-dialog.component';
+import { ChamadoDetalheDialogComponent }  from './components/chamado/chamado-detalhe-dialog/chamado-detalhe-dialog.component';
 import { DeleteDialogComponent }          from './components/molecules/delete/delete-dialog/delete-dialog.component';
 import { ClienteCreateComponent }         from './components/cliente/cliente-create/cliente-create.component';
 import { ClienteListComponent }           from './components/cliente/cliente-list/cliente-list.component';
 import { ClienteUpdateComponent }         from './components/cliente/cliente-update/cliente-update.component';
 import { ClienteDeleteComponent }         from './components/cliente/cliente-delete/cliente-delete.component';
 import { SharedModule } from './components/shared/shared.module';
+import { CriticalAlertDialogComponent } from './components/molecules/critical-alert-dialog/critical-alert-dialog.component';
 
 
 @NgModule({
@@ -116,6 +120,8 @@ import { SharedModule } from './components/shared/shared.module';
     ReportParamComponent,
 
     GenericDialogComponent,
+    ChamadoDetalheDialogComponent,
+    CriticalAlertDialogComponent,
 
     LineChartComponent,
 
@@ -124,6 +130,10 @@ import { SharedModule } from './components/shared/shared.module';
     FloatingChatComponent,
 
     UsuariosListComponent,
+
+    UsuarioDetalheDialogComponent,
+
+    ChamadoDetalheDialogComponent,
 
     DeleteDialogComponent,
 
@@ -149,6 +159,7 @@ import { SharedModule } from './components/shared/shared.module';
     MatToolbarModule,
     MatSidenavModule,
     MatSelectModule,
+    MatMenuModule,
     MatRadioModule,
     MatInputModule,
     MatIconModule,
@@ -189,4 +200,3 @@ import { SharedModule } from './components/shared/shared.module';
 })
 export class AppModule { }
 
- 

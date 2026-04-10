@@ -59,11 +59,15 @@ public abstract class Pessoa implements Serializable {
 	protected Set<Integer> perfis = new HashSet<>(); //HashSet: evita ter dois perfils repetido.
 	
 	
-	@JsonFormat(pattern = "dd/MM/yyy")
-	protected LocalDate dataCriacao = LocalDate.now();
-
-	/** Horário exato de criação — preenchido automaticamente pelo Hibernate */
+	/** Data de criação — preenchida automaticamente pelo Hibernate no INSERT */
 	@CreationTimestamp
+	@Column(updatable = false)
+	@JsonFormat(pattern = "dd/MM/yyyy")
+	protected LocalDate dataCriacao;
+
+	/** Horário exato de criação — preenchido automaticamente pelo Hibernate no INSERT */
+	@CreationTimestamp
+	@Column(updatable = false)
 	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
 	protected LocalDateTime dataHoraCriacao;
 

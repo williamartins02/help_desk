@@ -1,45 +1,45 @@
 <div
-  class="dialog-wrapper"
-  [ngClass]="[
+        class="dialog-wrapper"
+        [ngClass]="[
     'dialog-wrapper--' + type,
     loading ? 'dialog-wrapper--loading' : '',
     (title || icon || loading) ? 'dialog-wrapper--has-header' : 'dialog-wrapper--headerless'
   ]"
-  role="alertdialog"
-  [attr.aria-labelledby]="title ? titleId : null"
-  [attr.aria-describedby]="content ? contentId : null"
-  [attr.aria-busy]="loading"
+        role="alertdialog"
+        [attr.aria-labelledby]="title ? titleId : null"
+        [attr.aria-describedby]="content ? contentId : null"
+        [attr.aria-busy]="loading"
 >
 
-  <!-- ── Gradient header ── -->
-  <div class="dialog-header" *ngIf="title || icon || loading">
+    <!-- ── Gradient header ── -->
+    <div class="dialog-header" *ngIf="title || icon || loading">
 
-    <div class="header-brand">
-      <div class="header-icon-badge" *ngIf="icon || loading">
-        <mat-spinner *ngIf="loading" [diameter]="26" class="header-spinner"></mat-spinner>
-        <mat-icon *ngIf="icon && !loading" class="header-icon">{{ icon }}</mat-icon>
-      </div>
+        <div class="header-brand">
+            <div class="header-icon-badge" *ngIf="icon || loading">
+                <mat-spinner *ngIf="loading" [diameter]="26" class="header-spinner"></mat-spinner>
+                <mat-icon *ngIf="icon && !loading" class="header-icon">{{ icon }}</mat-icon>
+            </div>
 
-      <div class="header-text" *ngIf="title">
-        <h3 [id]="titleId" mat-dialog-title class="dialog-title">{{ title }}</h3>
-      </div>
+            <div class="header-text" *ngIf="title">
+                <h3 [id]="titleId" mat-dialog-title class="dialog-title">{{ title }}</h3>
+            </div>
+        </div>
+
     </div>
 
-  </div>
+    <!-- ── Body (card-lift) ── -->
+    <div class="dialog-body">
 
-  <!-- ── Body (card-lift) ── -->
-  <div class="dialog-body">
+        <mat-dialog-content class="dialog-content" *ngIf="content">
+            <p [id]="contentId" class="dialog-text">{{ content }}</p>
+        </mat-dialog-content>
 
-    <mat-dialog-content class="dialog-content" *ngIf="content">
-      <p [id]="contentId" class="dialog-text">{{ content }}</p>
-    </mat-dialog-content>
+        <mat-dialog-actions *ngIf="btnOK" class="dialog-actions">
+            <button mat-flat-button color="primary" mat-dialog-close class="btn-ok">
+                OK
+            </button>
+        </mat-dialog-actions>
 
-    <mat-dialog-actions *ngIf="btnOK" class="dialog-actions">
-      <button mat-flat-button color="primary" mat-dialog-close class="btn-ok">
-        OK
-      </button>
-    </mat-dialog-actions>
-
-  </div>
+    </div>
 
 </div>

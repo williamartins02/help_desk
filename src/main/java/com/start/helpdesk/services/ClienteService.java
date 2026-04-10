@@ -46,13 +46,16 @@ public class ClienteService {
 	
 	public Cliente update(Integer id, @Valid ClienteDTO objClienteDTO) {
 		objClienteDTO.setId(id);
-		Cliente objCliente = findById(id);
-			if(!objClienteDTO.getSenha().equals(objCliente.getSenha())) {
+		Cliente existingCliente = findById(id);
+			if(!objClienteDTO.getSenha().equals(existingCliente.getSenha())) {
 				objClienteDTO.setSenha(bCryptPasswordEncoder.encode(objClienteDTO.getSenha()));
 			}
 		validationCpfEmail(objClienteDTO);
-		objCliente = new Cliente(objClienteDTO);
-		return clienteRepository.save(objCliente);
+		Cliente updatedCliente = new Cliente(objClienteDTO);
+		// Preserva a data de criação original — não deve ser alterada em atualizações
+		updatedCliente.setDataCriacao(existingCliente.getDataCriacao());
+		updatedCliente.setDataHoraCriacao(existingCliente.getDataHoraCriacao());
+		return clienteRepository.save(updatedCliente);
 	}
 	
 	public void delete(Integer id) {

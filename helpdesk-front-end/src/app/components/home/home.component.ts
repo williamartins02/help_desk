@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { forkJoin, of, Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -13,6 +14,10 @@ import { Chamado } from '../../models/chamado';
 import { Cliente } from '../../models/cliente';
 import { Tecnico } from '../../models/tecnico';
 import { Telefone } from '../../models/telefone';
+
+import { MatDialog } from '@angular/material/dialog';
+import { GenericDialogComponent } from '../molecules/generic-dialog/generic-dialog.component';
+import { CriticalAlertDialogComponent } from '../molecules/critical-alert-dialog/critical-alert-dialog.component';
 
 interface Atividade {
   icon: string;
@@ -30,6 +35,14 @@ interface Atividade {
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  /**
+   * Remove accents, trim, and lowercase a string for robust comparison.
+   */
+  private normalize(str: string): string {
+    return str
+      ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase()
+      : '';
+  }
 
   nomeUsuario = 'Usuário';
   chamados:   Chamado[]  = [];
@@ -83,6 +96,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private jwtHelper = new JwtHelperService();
   private refreshSub: Subscription;
+  private alertDialogRef: any;
 
   constructor(
     private chamadoService:  ChamadoService,
@@ -90,12 +104,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     private usuarioService:  UsuarioService,
     private clienteService:  ClienteService,
     private tecnicoService:  TecnicoService,
-    private telefoneService: TelefoneService
+    private telefoneService: TelefoneService,
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadUserInfo();
-    this.loadDados(true);   // carregamento inicial → mostra spinner
     // Escuta refresh$ de todos os serviços para recarregar o feed imediatamente
     this.refreshSub = new Subscription();
     this.refreshSub.add(this.chamadoService.refresh$.subscribe(() => this.loadDados(false)));
@@ -103,9 +118,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.refreshSub.add(this.tecnicoService.refresh$.subscribe(() => this.loadDados(false)));
     this.refreshSub.add(this.telefoneService.refresh$.subscribe(() => this.loadDados(false)));
     // ── Polling em tempo real ──────────────────────────────────
-    // A cada 30s: recarrega todos os dados silenciosamente (sem spinner)
     this.reloadInterval = setInterval(() => this.loadDados(false), 30000);
-    // A cada 60s: recalcula apenas os textos de tempo relativo (entre os polls)
     this.timerInterval  = setInterval(() => this.atualizarTempos(), 60000);
   }
 
@@ -118,12 +131,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   // ── User info ─────────────────────────────────────────────
   private loadUserInfo(): void {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      this.loadDados(true);
+      return;
+    }
 
     try {
       const decoded = this.jwtHelper.decodeToken(token);
       const email: string = decoded?.sub || decoded?.email || '';
-      if (!email) return;
+      if (!email) {
+        this.loadDados(true);
+        return;
+      }
 
       // /user/all retorna IUsuario[] com o campo 'nome' cadastrado
       this.usuarioService.findAll().subscribe(
@@ -132,11 +151,16 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.nomeUsuario = match?.nome
             ? match.nome.trim()          // nome completo: "William Martins Gonçalves"
             : this.emailFallback(email);
+          this.loadDados(true);
         },
-        () => { this.nomeUsuario = this.emailFallback(email); }
+        () => {
+          this.nomeUsuario = this.emailFallback(email);
+          this.loadDados(true);
+        }
       );
     } catch {
       this.nomeUsuario = 'Usuário';
+      this.loadDados(true);
     }
   }
 
@@ -150,8 +174,10 @@ export class HomeComponent implements OnInit, OnDestroy {
    * showSpinner=true  → carregamento inicial (mostra spinner)
    * showSpinner=false → polling silencioso (não mostra spinner, só atualiza dados)
    */
-  loadDados(showSpinner = true): void {
-    if (showSpinner) { this.isLoading = true; } else { this.isRefreshing = true; }
+  public loadDados(showSpinner: boolean): void {
+    if (showSpinner) { this.isLoading = true; }
+    else             { this.isRefreshing = true; }
+
     forkJoin({
       chamados:  this.chamadoService.findAll().pipe(catchError(() => of([]))),
       clientes:  this.clienteService.findAll().pipe(catchError(() => of([]))),
@@ -168,9 +194,92 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.ultimaAtualizacao = new Date();
         this.buildChart();
         this.buildAtividades();
+
+        // ── ALERTA MODAL DE CHAMADOS CRÍTICOS ──
+        this.exibirAlertaChamadosCriticos();
       },
       error: () => { this.isLoading = false; this.isRefreshing = false; }
     });
+  }
+
+  /**
+   * Retorna a quantidade de chamados críticos atribuídos ao técnico logado.
+   * Considera apenas chamados com prioridade 3 (crítica), não encerrados, e técnico igual ao usuário logado.
+   */
+  get totalCriticosDoTecnico(): number {
+    return this.chamados.filter(c =>
+      c.prioridade == '3' &&
+      c.status != '2' &&
+      c.nomeTecnico &&
+      this.normalize(c.nomeTecnico) === this.normalize(this.nomeUsuario)
+    ).length;
+  }
+
+  /**
+   * Exibe o alerta modal de chamados críticos atribuídos ao técnico logado, apenas uma vez por sessão.
+   */
+  private exibirAlertaChamadosCriticos(): void {
+    const normalizedNomeUsuario = this.normalize(this.nomeUsuario);
+
+    // Filtra chamados críticos, não encerrados, atribuídos ao técnico logado
+    const criticosDoTecnico = this.chamados.filter(c =>
+      c.prioridade == '3' &&
+      c.status != '2' &&
+      this.normalize(c.nomeTecnico || '') === normalizedNomeUsuario
+    );
+
+    // Só exibe se houver chamados críticos atribuídos ao técnico logado
+    if (criticosDoTecnico.length === 0) { return; }
+
+    // Só exibe uma vez por sessão (reseta ao fazer login novamente)
+    if (sessionStorage.getItem('alertaChamadosCriticosExibido')) { return; }
+
+    sessionStorage.setItem('alertaChamadosCriticosExibido', '1');
+
+    // Encontra o timestamp da data de abertura do chamado crítico mais antigo
+    let oldestTimestamp = 0;
+    for (const c of criticosDoTecnico) {
+      if (c.dataAbertura) {
+        const parsed = this.parseDate(c.dataAbertura);
+        if (parsed) {
+          const ts = parsed.getTime();
+          // Queremos o mais antigo → menor timestamp
+          if (oldestTimestamp === 0 || ts < oldestTimestamp) {
+            oldestTimestamp = ts;
+          }
+        }
+      }
+    }
+
+    this.alertDialogRef = this.dialog.open(CriticalAlertDialogComponent, {
+      width: '500px',
+      maxWidth: '94vw',
+      data: {
+        count: criticosDoTecnico.length,
+        userName: this.nomeUsuario,
+        oldestOpenedAt: oldestTimestamp
+      },
+      panelClass: 'critical-alert-dialog-panel',
+      disableClose: true
+    });
+
+    // Ao fechar o dialog, verifica se o usuário clicou em "Ver chamados críticos"
+    this.alertDialogRef.afterClosed().subscribe((result: any) => {
+      this.alertDialogRef = null;
+      if (result?.action === 'view') {
+        this.router.navigate(['/chamados'], {
+          queryParams: { prioridade: '3', search: this.nomeUsuario }
+        });
+      }
+    });
+
+    // Fecha automaticamente após 8 segundos (mais tempo para leitura)
+    setTimeout(() => {
+      if (this.alertDialogRef) {
+        this.alertDialogRef.close();
+        this.alertDialogRef = null;
+      }
+    }, 8000);
   }
 
   // ── Period selector ───────────────────────────────────────
@@ -455,3 +564,5 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `há ${mo} meses`;
   }
 }
+
+
