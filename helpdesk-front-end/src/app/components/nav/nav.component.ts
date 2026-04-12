@@ -1,15 +1,18 @@
-import { ToastrService } from 'ngx-toastr';
-import { AuthenticationService } from './../../services/authentication.service';
-import { Router, Routes } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
+import { MatDrawer } from '@angular/material/sidenav';
+import { AuthenticationService } from '../../services/authentication.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.css']
 })
-export class NavComponent implements OnInit {
+export class NavComponent implements OnInit, AfterViewInit {
+  @ViewChild('drawer') drawer!: MatDrawer;
+  isMenuOpen = false;
 
   constructor(
     private router: Router,
@@ -20,6 +23,14 @@ export class NavComponent implements OnInit {
   //Metodo que inicia
   ngOnInit(): void {
     // Removido redirecionamento automático para 'home'.
+  }
+
+  ngAfterViewInit() {
+    if (this.drawer) {
+      this.drawer.openedChange.subscribe((opened: boolean) => {
+        this.isMenuOpen = opened;
+      });
+    }
   }
 
   /*Metodo para DESLOGAR e limpar o TOKEN do usuario do locaStorage */

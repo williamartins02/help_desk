@@ -1,4 +1,6 @@
 <mat-toolbar class="header-toolbar mat-elevation-z6">
+  <!-- Hamburger menu button slot (projected from parent) -->
+  <span class="header-menu-slot"><ng-content></ng-content></span>
 
   <!-- ── Marca / Brand ── -->
   <div class="header-brand">
@@ -23,7 +25,6 @@
 
   <!-- ── Direita / Usuário + Relógio ── -->
   <div class="header-right">
-
     <div class="header-datetime">
       <mat-icon class="datetime-icon">access_time</mat-icon>
       <div class="datetime-text">
@@ -31,9 +32,7 @@
         <span class="date">{{ currentTime | date:'dd/MM/yyyy' }}</span>
       </div>
     </div>
-
     <div class="header-divider"></div>
-
     <div class="user-chip">
       <div class="user-avatar">{{ getUserInitial() }}</div>
       <div class="user-details">
@@ -41,6 +40,5 @@
         <span class="user-email">{{ userEmail }}</span>
       </div>
     </div>
-
   </div>
 </mat-toolbar>

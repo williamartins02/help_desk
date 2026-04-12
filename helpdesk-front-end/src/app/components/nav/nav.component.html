@@ -1,6 +1,11 @@
 <mat-drawer-container class="container" autosize>
-  <mat-drawer #drawer class="sidenav" mode="side">
+  <!-- Botão hambúrguer sempre visível, flutuante, alinhado ao topo do menu lateral -->
+  <button class="floating-menu-toggle" mat-icon-button (click)="drawer.toggle()" aria-label="Alternar menu"
+        [class.menu-open]="isMenuOpen">
+    <mat-icon>menu</mat-icon>
+  </button>
 
+  <mat-drawer #drawer class="sidenav" mode="side">
     <!-- ── Seção de identidade ── -->
     <div class="brand-header">
       <div class="brand-icon-wrap">
@@ -17,43 +22,35 @@
 
     <!-- ── Itens de navegação ── -->
     <mat-nav-list class="nav-list">
-
       <a mat-list-item routerLink="home" routerLinkActive="active-link" class="link-home"
          [routerLinkActiveOptions]="{exact: true}">
         <mat-icon class="nav-icon">home</mat-icon>
         <span class="nav-label">Home</span>
       </a>
-
       <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="link-tecnicos">
         <mat-icon class="nav-icon">engineering</mat-icon>
         <span class="nav-label">Equipe Técnica</span>
       </a>
-
       <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="link-clientes">
         <mat-icon class="nav-icon">group</mat-icon>
         <span class="nav-label">Base de Clientes</span>
       </a>
-
       <a mat-list-item routerLink="chamados" routerLinkActive="active-link" class="link-chamados">
         <mat-icon class="nav-icon">receipt_long</mat-icon>
         <span class="nav-label">Central de Chamados</span>
       </a>
-
       <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="link-chart">
         <mat-icon class="nav-icon">bar_chart</mat-icon>
         <span class="nav-label">Gráfico</span>
       </a>
-
       <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="link-chat">
         <mat-icon class="nav-icon">forum</mat-icon>
         <span class="nav-label">Conversas</span>
       </a>
-
       <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="link-usuarios">
         <mat-icon class="nav-icon">manage_accounts</mat-icon>
         <span class="nav-label">Gestão de Usuários</span>
       </a>
-
     </mat-nav-list>
 
     <!-- ── Espaçador flexível ── -->
@@ -67,22 +64,20 @@
         <span class="nav-label">Sair</span>
       </a>
     </div>
-
   </mat-drawer>
 
-  <div class="sidenav-content">
+  <!-- HEADER SEMPRE NO TOPO -->
+  <div class="header-wrapper">
     <app-header></app-header>
-    <button class="menu-toggle" mat-icon-button (click)="drawer.toggle()" aria-label="Alternar menu">
-      <mat-icon>menu</mat-icon>
-    </button>
-    <router-outlet></router-outlet>
   </div>
 
+  <!-- MAIN CONTENT BELOW HEADER -->
+  <div class="sidenav-content">
+    <router-outlet></router-outlet>
+  </div>
 </mat-drawer-container>
 
-<!-- ── Widget flutuante de chat (visível em todas as páginas) ── -->
+<!-- Widget flutuante de chat (visível em todas as páginas) -->
 <app-chat-bubble></app-chat-bubble>
-
-<!-- ── Janelas de DM flutuantes (abertas via bubble ou notificação) ── -->
+<!-- Janelas de DM flutuantes (abertas via bubble ou notificação) -->
 <app-floating-chat></app-floating-chat>
-

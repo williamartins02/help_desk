@@ -205,3 +205,39 @@
   box-shadow: 0 6px 20px rgba(21, 101, 192, 0.48) !important;
   transform: scale(1.06);
 }
+
+/* ── Floating Menu Toggle ───────────────────────────────── */
+
+.floating-menu-toggle {
+  position: fixed;
+  top: 6.5rem;
+  left: 1.5rem;
+  z-index: 5000;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
+  border-radius: 0.75rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s, transform 0.18s;
+  pointer-events: auto;
+}
+
+.floating-menu-toggle.menu-open {
+  left: 16rem; /* largura do menu + espaçamento */
+}
+
+@media (max-width: 600px) {
+  .floating-menu-toggle {
+    top: 0.7rem;
+    left: 0.7rem;
+    width: 40px;
+    height: 40px;
+  }
+  .floating-menu-toggle.menu-open {
+    left: 13.5rem; /* largura do menu em telas pequenas */
+  }
+}

@@ -1,14 +1,15 @@
 /* ── Toolbar base ── */
 .header-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
   background: linear-gradient(90deg, #0d47a1 0%, #1565c0 25%, #0288d1 65%, #00bcd4 100%);
   color: #fff;
   height: 4rem;
   padding: 0 1.5rem;
-  position: relative;
-  overflow: hidden;
-  width: 100vw;
-  min-width: 0;
-  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 @media (max-width: 600px) {
@@ -249,3 +250,95 @@
     display: none;
   }
 }
+
+.header-toolbar > ng-content, .header-toolbar .menu-toggle {
+  margin-right: 0.5rem;
+  margin-left: -0.5rem;
+  order: -1;
+}
+
+.header-wrapper {
+  width: 100vw;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sidenav-content {
+  margin-top: 4rem;
+  min-height: calc(100vh - 4rem);
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .sidenav-content {
+    margin-top: 3.2rem;
+    min-height: calc(100vh - 3.2rem);
+  }
+}
+
+.header-menu-slot {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-right: 0.5rem;
+}
+
+.header-menu-toggle {
+  position: relative;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
+  border-radius: 0.75rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.2s, transform 0.18s;
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+.header-menu-toggle:hover {
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.48) !important;
+  transform: scale(1.06) translateY(-50%);
+}
+
+@media (max-width: 600px) {
+  .header-menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Botão de menu flutuante fixo na lateral esquerda */
+.floating-menu-toggle {
+  position: fixed;
+  top: 80px; /* ajuste a altura conforme desejar */
+  left: 16px;
+  z-index: 2000;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
+  border-radius: 0.75rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.2s, transform 0.18s;
+  cursor: pointer;
+}
+
+.floating-menu-toggle:hover {
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.48) !important;
+  transform: scale(1.06);
+}
+
+/* Remover ocultação antiga do botão flutuante */
+.floating-menu-toggle { display: flex !important; }
