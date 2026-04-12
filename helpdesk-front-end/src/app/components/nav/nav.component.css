@@ -10,7 +10,9 @@
   flex-direction: column !important;
   background: linear-gradient(180deg, #0d47a1 0%, #1565c0 20%, #0288d1 60%, #00bcd4 100%);
   box-shadow: 4px 0 28px rgba(15, 23, 42, 0.22);
-  overflow: hidden;
+  overflow-x: hidden; /* Impede scroll horizontal */
+  overflow-y: visible; /* Permite crescimento vertical sem scroll */
+  height: 100vh; /* Garante altura total da tela */
 }
 
 /* ── Brand header ────────────────────────────────────────── */
@@ -185,6 +187,15 @@
   flex-direction: column;
   min-height: 100%;
   background: #f4f7fb;
+  margin-top: 1.5rem;
+  /* Espaço extra para afastar do header */
+}
+
+@media (max-width: 600px) {
+  .sidenav-content {
+    margin-top: 3.2rem;
+    padding-top: 1.5rem;
+  }
 }
 
 /* ── Menu toggle ─────────────────────────────────────────── */
