@@ -28,6 +28,10 @@ import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.ChamadoDTO;
 import com.start.helpdesk.services.ChamadoService;
 import com.start.helpdesk.services.TecnicoService;
+import com.start.helpdesk.services.PessoaService;
+import com.start.helpdesk.domain.Pessoa;
+import com.start.helpdesk.domain.enums.Perfil;
+import com.start.helpdesk.services.exception.UnauthorizedException;
 
 
 @RestController
@@ -39,6 +43,9 @@ public class ChamadoResource {
 	
 	@Autowired
 	private TecnicoService tecnicoService;
+
+    @Autowired
+    private PessoaService pessoaService;
 
 
 	/*Buscando chamado por ID findById*/
@@ -59,25 +66,26 @@ public class ChamadoResource {
 			email = authentication.getPrincipal().toString();
 		}
 
-		// Check if user is Técnico
-		Tecnico tecnico = null;
-		try {
-			tecnico = tecnicoService.findByEmail(email);
-		} catch (Exception e) {
-			// Not a técnico, ignore
+		Pessoa pessoa = pessoaService.findByEmail(email);
+		if (pessoa == null) {
+			throw new UnauthorizedException("Usuário não autenticado");
 		}
 
-		List<ChamadoDTO> listDTO;
-		if (tecnico != null) {
-			// If técnico, return only their chamados
-			listDTO = service.findByTecnicoId(tecnico.getId()).stream()
-					.map(ChamadoDTO::new).collect(Collectors.toList());
-		} else {
-			// Otherwise, return all chamados
-			List<Chamado> listChamado = service.findAll();
-			listDTO = listChamado.stream().map(object -> new ChamadoDTO(object)).collect(Collectors.toList());
-		}
-		return ResponseEntity.ok().body(listDTO);
+			List<ChamadoDTO> listDTO;
+			if (pessoa.getPerfis().contains(Perfil.ADMIN)) {
+				// ADMIN: retorna todos os chamados, prioridade máxima
+				List<Chamado> listChamado = service.findAll();
+				listDTO = listChamado.stream().map(ChamadoDTO::new).collect(Collectors.toList());
+			} else if (pessoa.getPerfis().contains(Perfil.TECNICO)) {
+				// Somente técnico (sem ADMIN): retorna apenas seus chamados
+				Tecnico tecnico = tecnicoService.findByEmail(email);
+				listDTO = service.findByTecnicoId(tecnico.getId()).stream()
+						.map(ChamadoDTO::new).collect(Collectors.toList());
+			} else {
+				// CLIENTE ou outro perfil: não autorizado
+				throw new UnauthorizedException("Acesso não permitido para este perfil");
+			}
+			return ResponseEntity.ok().body(listDTO);
 	}
 
 	/* BUSCANDO chamados por cliente */
@@ -117,6 +125,24 @@ public class ChamadoResource {
 	/*CRIANDO um chamado novo*/
 	@PostMapping
 	public ResponseEntity<ChamadoDTO> create(@Valid @RequestBody ChamadoDTO objectDTO) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String email;
+		if (authentication.getPrincipal() instanceof UserDetails) {
+			email = ((UserDetails) authentication.getPrincipal()).getUsername();
+		} else {
+			email = authentication.getPrincipal().toString();
+		}
+		Pessoa pessoa = pessoaService.findByEmail(email);
+		if (pessoa == null) {
+			throw new UnauthorizedException("Usuário não autenticado");
+		}
+			// ADMIN pode criar para qualquer técnico
+			if (!pessoa.getPerfis().contains(Perfil.ADMIN)) {
+				// Se não for ADMIN, mas for TECNICO, só pode criar para si mesmo
+				if (pessoa.getPerfis().contains(Perfil.TECNICO) && !objectDTO.getTecnico().equals(pessoa.getId())) {
+					throw new UnauthorizedException("Técnico só pode criar chamados para si mesmo");
+				}
+			}
 		Chamado object = service.create(objectDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(object.getId()).toUri();
 		return ResponseEntity.created(uri).build();
@@ -125,6 +151,27 @@ public class ChamadoResource {
 	/*ATUALIZANDO um chamado*/
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<ChamadoDTO> update(@PathVariable Integer id, @Valid @RequestBody ChamadoDTO objectDTO) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String email;
+		if (authentication.getPrincipal() instanceof UserDetails) {
+			email = ((UserDetails) authentication.getPrincipal()).getUsername();
+		} else {
+			email = authentication.getPrincipal().toString();
+		}
+		Pessoa pessoa = pessoaService.findByEmail(email);
+		if (pessoa == null) {
+			throw new UnauthorizedException("Usuário não autenticado");
+		}
+			// ADMIN pode editar qualquer chamado
+			if (!pessoa.getPerfis().contains(Perfil.ADMIN)) {
+				// Se não for ADMIN, mas for TECNICO, só pode editar os próprios
+				if (pessoa.getPerfis().contains(Perfil.TECNICO)) {
+					Chamado chamado = service.findById(id);
+					if (!chamado.getTecnico().getId().equals(pessoa.getId())) {
+						throw new UnauthorizedException("Técnico só pode editar chamados atribuídos a si mesmo");
+					}
+				}
+			}
 		Chamado newObject = service.update(id, objectDTO);
 		return ResponseEntity.ok().body(new ChamadoDTO(newObject));
 	}

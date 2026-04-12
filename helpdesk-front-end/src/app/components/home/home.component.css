@@ -172,7 +172,12 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 1rem 1.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+  box-sizing: border-box;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .panel-title {
@@ -189,6 +194,12 @@
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .period-btns {
@@ -218,6 +229,19 @@
   flex: 1 1 0;
   min-height: 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 1.5rem;
+}
+
+/* Centraliza a legenda do Chart.js */
+.chartjs-legend {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 0.5rem !important;
 }
 
 /* ── Vertical divider ────────────────────────────────────── */
@@ -449,7 +473,7 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1100px) {
-  .panel-right { flex: 0 0 52%; }
+  .panel-right { flex: 0 0 52%; padding: 1.2rem 0.7rem 1rem 0.7rem; }
 }
 
 @media (max-width: 960px) {
@@ -457,11 +481,16 @@
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .dashboard-card { flex-direction: column; min-height: 500px; }
   .panel-divider { width: auto; height: 1px; }
-  .panel-right { flex: none; min-height: 280px; }
+  .panel-right { flex: none; min-height: 280px; padding: 1rem 0.5rem 1rem 0.5rem; }
   .chart-wrap { height: 240px; flex: none; }
   .act-list { max-height: 280px; flex: none; }
   .bottom-row { grid-template-columns: 1fr 1fr; }
   .avisos-card { grid-column: 1 / -1; }
+}
+
+@media (max-width: 700px) {
+  .panel-right { max-width: 100%; }
+  .chart-header { max-width: 100%; }
 }
 
 @media (max-width: 560px) {

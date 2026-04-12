@@ -6,6 +6,23 @@
   padding: 0 1.5rem;
   position: relative;
   overflow: hidden;
+  width: 100vw;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .header-toolbar {
+    padding: 0 0.5rem;
+    height: 3.2rem;
+  }
+  .header-brand {
+    gap: 0.3rem;
+  }
+  .brand-icon {
+    width: 2rem;
+    height: 2rem;
+  }
 }
 
 /* Shimmer overlay sutil */
