@@ -9,6 +9,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { UsuarioDetalheDialogComponent } from '../usuario-detalhe-dialog/usuario-detalhe-dialog.component';
+import { AuthenticationService } from '../../../services/authentication.service';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -28,15 +29,19 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort)      sort:      MatSort;
 
+  currentUserEmail: string = '';
+  currentUserIsAdmin: boolean = false;
+
   constructor(
     private service: UsuarioService,
     private toast:   ToastrService,
-    private dialog:  MatDialog
+    private dialog:  MatDialog,
+    private auth:    AuthenticationService
   ) {}
 
   ngOnInit(): void {
     this.setupFilterPredicate();
-    this.findAll();
+    this.setCurrentUserInfo();
   }
 
   ngAfterViewInit(): void {
@@ -46,12 +51,30 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
     this.dataSource.sort      = this.sort;
   }
 
+  setCurrentUserInfo(): void {
+    // Recupera permissões e e-mail do usuário logado
+    const permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+    this.currentUserIsAdmin = permissions.includes('ROLE_ADMIN');
+    // O e-mail pode estar no token ou em outro local, aqui tentamos obter do token JWT
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      this.currentUserEmail = payload.sub || '';
+    }
+    this.findAll();
+  }
+
   // ── Dados ─────────────────────────────────────────────────────────────────
   findAll(): void {
     this.isLoading = true;
     this.service.findAll().subscribe(
       data => {
-        this.USUARIO_DATA = data;
+        // Aplica regra de negócio: ADMIN vê todos, TÉCNICO vê só a si mesmo
+        if (this.currentUserIsAdmin) {
+          this.USUARIO_DATA = data;
+        } else {
+          this.USUARIO_DATA = data.filter(u => u.email === this.currentUserEmail);
+        }
         this.applyFilters();
         this.isLoading = false;
         // Paginator and sort live inside *ngIf="!isLoading".

@@ -11,5 +11,8 @@ export class UsuarioService {
   findAll(): Observable<IUsuario[]> {
     return this.http.get<IUsuario[]>(`${API_CONFIG.baseUrl}/user/all`);
   }
-}
 
+  findAllForChat(): Observable<IUsuario[]> {
+    return this.http.get<IUsuario[]>(`${API_CONFIG.baseUrl}/user/all-chat`);
+  }
+}

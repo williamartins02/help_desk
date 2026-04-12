@@ -128,7 +128,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       if (params['openUser']) this.openUserIdParam = params['openUser'];
     });
 
-    this.usuarioService.findAll().subscribe(users => {
+    this.usuarioService.findAllForChat().subscribe(users => {
       this.usuarios = users;
       // Discover my own ID to build canonical P2P room IDs
       const me = users.find(u => u.email === this.mensagem.username);

@@ -150,7 +150,7 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
   }
 
   private _carregarUsuarios(): void {
-    this.usuarioService.findAll().subscribe({
+    this.usuarioService.findAllForChat().subscribe({
       next: users => {
         this.usuarios = users;
         const me = users.find(u => u.email === this.myEmail);

@@ -1,6 +1,5 @@
 package com.start.helpdesk.resources.chatResource;
 
-import com.start.helpdesk.domain.Pessoa;
 import com.start.helpdesk.domain.dtos.PessoaDTO;
 import com.start.helpdesk.repositories.PessoaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +41,43 @@ public class UserResource {
     }
 
     /**
+     * Lista todos os usuários cadastrados (Técnicos + Clientes) para o chat.
+     * Acessível por qualquer usuário autenticado (ADMIN ou TÉCNICO).
+     * Não aplicar restrição de perfil.
+     */
+    @GetMapping("/all-chat")
+    public ResponseEntity<List<PessoaDTO>> findAllForChat() {
+        List<PessoaDTO> dto = pessoaRepository.findAll().stream()
+                .map(PessoaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
      * Lista todos os usuários cadastrados (Técnicos + Clientes).
      * Acessível por qualquer usuário autenticado.
      */
     @GetMapping("/all")
-    public ResponseEntity<List<PessoaDTO>> findAll() {
-        List<Pessoa> pessoas = pessoaRepository.findAll();
-        List<PessoaDTO> dto = pessoas.stream()
-                .map(PessoaDTO::new)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<PessoaDTO>> findAll(org.springframework.security.core.Authentication authentication) {
+        // Recupera o usuário autenticado
+        String email = authentication.getName();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        List<PessoaDTO> dto;
+        if (isAdmin) {
+            // ADMIN vê todos
+            dto = pessoaRepository.findAll().stream()
+                    .map(PessoaDTO::new)
+                    .collect(Collectors.toList());
+        } else {
+            // Técnico vê apenas seu próprio perfil
+            dto = pessoaRepository.findByEmail(email)
+                    .map(PessoaDTO::new)
+                    .map(List::of)
+                    .orElse(List.of());
+        }
         return ResponseEntity.ok(dto);
     }
 }
