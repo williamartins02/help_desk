@@ -87,8 +87,11 @@ public class TecnicoService {
 		    }
 	}
 
+	public Tecnico findByEmail(String email) {
+	    Optional<Tecnico> tecnico = tecnicoRepository.findByEmail(email);
+	    return tecnico.orElseThrow(() -> new ObjectnotFoundException("Técnico não encontrado para o e-mail: " + email));
+	}
 
-	
 
 	
 }

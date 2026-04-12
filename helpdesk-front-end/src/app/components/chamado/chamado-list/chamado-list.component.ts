@@ -14,6 +14,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { Chamado } from "./../../../models/chamado";
 import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild } from "@angular/core";
+import { AuthenticationService } from 'src/app/services/authentication.service';
 import { ActivatedRoute } from "@angular/router";
 import { ChamadoService } from "src/app/services/chamado.service";
 import { ChamadoUpdateComponent } from '../chamado-update/chamado-update.component';
@@ -86,12 +87,15 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   private genericDialog: GenericDialog;
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
 
+  usuarioLogado: any;
+
   constructor(
     public dialog: MatDialog,
     private service: ChamadoService,
     private toast: ToastrService,
     public dialogRef: MatDialogRef<ChamadoListComponent>,
     private route: ActivatedRoute,
+    private authService: AuthenticationService
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
@@ -106,8 +110,37 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchValue = params['search'];
       }
     });
-    this.findAll();
+
+    // Recupera usuário logado do token
+    const token = localStorage.getItem('token');
+    if (token) {
+      const jwtHelper = this.authService.jwtService;
+      const decoded = jwtHelper.decodeToken(token);
+      this.usuarioLogado = {
+        id: decoded.id,
+        tipo: decoded.tipo,
+        email: decoded.sub,
+        perfis: decoded.authorities || []
+      };
+    }
+
+    if (this.usuarioLogado && this.usuarioLogado.tipo === 'TECNICO') {
+      this.findAllByTecnico();
+    } else {
+      this.findAll();
+    }
     this.refresh();
+  }
+
+  findAllByTecnico(): void {
+    this.service.findMyChamados().subscribe((resposta) => {
+      this.CHAMADO_DATA = resposta;
+      this.applyAllFilters();
+      this.updateDoughnutChart();
+    }, (error) => {
+      this.toast.error('Erro ao listar chamados do técnico', 'ERROR');
+      return throwError(error.error.error);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -158,7 +191,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.totalAbertos + this.totalEmAndamento;
   }
 
-  get hasActiveFilters(): boolean {
+  get hasActiveFilters() {
     return this.selectedStatus !== '' || this.selectedPrioridade !== '' || this.searchValue.trim() !== '';
   }
 
@@ -200,7 +233,11 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   refresh(): void {
     this.refreshTable = this.service.refresh$.subscribe(() => {
       this.isLoading = true;
-      this.findAll();
+      if (this.usuarioLogado && this.usuarioLogado.tipo === 'TECNICO') {
+        this.findAllByTecnico();
+      } else {
+        this.findAll();
+      }
       setTimeout(() => { this.isLoading = false; }, 900);
     }, (error) => {
       this.toast.error('Ao carregar a lista', 'ERROR');

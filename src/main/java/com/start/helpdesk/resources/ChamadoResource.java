@@ -11,6 +11,9 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.start.helpdesk.domain.Chamado;
+import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.ChamadoDTO;
 import com.start.helpdesk.services.ChamadoService;
+import com.start.helpdesk.services.TecnicoService;
 
 
 @RestController
@@ -32,6 +37,9 @@ public class ChamadoResource {
 	@Autowired
 	private ChamadoService service;
 	
+	@Autowired
+	private TecnicoService tecnicoService;
+
 
 	/*Buscando chamado por ID findById*/
 	@GetMapping(value = "/{id}")
@@ -43,8 +51,32 @@ public class ChamadoResource {
 	/*BUSCANDO uma lista de chamado findAll*/
 	@GetMapping
 	public ResponseEntity<List<ChamadoDTO>> findAll() {
-		List<Chamado> listChamado = service.findAll();
-		List<ChamadoDTO> listDTO = listChamado.stream().map(object -> new ChamadoDTO(object)).collect(Collectors.toList());
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String email;
+		if (authentication.getPrincipal() instanceof UserDetails) {
+			email = ((UserDetails) authentication.getPrincipal()).getUsername();
+		} else {
+			email = authentication.getPrincipal().toString();
+		}
+
+		// Check if user is Técnico
+		Tecnico tecnico = null;
+		try {
+			tecnico = tecnicoService.findByEmail(email);
+		} catch (Exception e) {
+			// Not a técnico, ignore
+		}
+
+		List<ChamadoDTO> listDTO;
+		if (tecnico != null) {
+			// If técnico, return only their chamados
+			listDTO = service.findByTecnicoId(tecnico.getId()).stream()
+					.map(ChamadoDTO::new).collect(Collectors.toList());
+		} else {
+			// Otherwise, return all chamados
+			List<Chamado> listChamado = service.findAll();
+			listDTO = listChamado.stream().map(object -> new ChamadoDTO(object)).collect(Collectors.toList());
+		}
 		return ResponseEntity.ok().body(listDTO);
 	}
 
@@ -62,6 +94,24 @@ public class ChamadoResource {
 		List<ChamadoDTO> listDTO = service.findByTecnicoId(id).stream()
 				.map(ChamadoDTO::new).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDTO);
+	}
+
+	/**
+	 * Endpoint seguro: retorna apenas chamados do técnico autenticado
+	 */
+	@GetMapping("/tecnico/me")
+	public ResponseEntity<List<ChamadoDTO>> findMyChamados() {
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String email;
+	    if (authentication.getPrincipal() instanceof UserDetails) {
+	        email = ((UserDetails) authentication.getPrincipal()).getUsername();
+	    } else {
+	        email = authentication.getPrincipal().toString();
+	    }
+	    Tecnico tecnico = tecnicoService.findByEmail(email);
+	    List<ChamadoDTO> listDTO = service.findByTecnicoId(tecnico.getId()).stream()
+	            .map(ChamadoDTO::new).collect(Collectors.toList());
+	    return ResponseEntity.ok().body(listDTO);
 	}
 
 	/*CRIANDO um chamado novo*/

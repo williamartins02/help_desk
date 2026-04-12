@@ -32,6 +32,10 @@ export class ChamadoService {
     return this.http.get<Chamado[]>(`${API_CONFIG.baseUrl}/chamados/tecnico/${tecnicoId}`);
   }
 
+  findMyChamados(): Observable<Chamado[]> {
+    return this.http.get<Chamado[]>(`${API_CONFIG.baseUrl}/chamados/tecnico/me`);
+  }
+
   create(chamados: Chamado): Observable<Chamado> {
     return this.http.post<Chamado>(`${API_CONFIG.baseUrl}/chamados`, chamados)
       .pipe(
