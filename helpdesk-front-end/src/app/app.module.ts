@@ -1,3 +1,4 @@
+import { NewBadgeComponent } from './components/molecules/new-badge/new-badge.component';
 import { GenericDialogComponent} from './components/molecules/generic-dialog/generic-dialog.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
@@ -139,6 +140,7 @@ import { CriticalAlertDialogComponent } from './components/molecules/critical-al
 
     ForgotPasswordComponent,
     ResetPasswordComponent,
+    NewBadgeComponent,
 
   ],
   imports: [

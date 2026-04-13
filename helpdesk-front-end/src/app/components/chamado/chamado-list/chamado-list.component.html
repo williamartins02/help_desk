@@ -11,85 +11,85 @@
             <div class="hero-meta" *ngIf="CHAMADO_DATA.length > 0">
                 <span class="meta-label">Distribuição por prioridade</span>
                 <ng-container *ngIf="totalPendentes > 0; else semAbertos">
-                <div class="dist-bar">
+                    <div class="dist-bar">
                     <span class="dist-seg seg-baixa"
                           [style.width.%]="totalPrioridadeBaixa / totalPendentes * 100"
                           [matTooltip]="totalPrioridadeBaixa + ' Baixa'"></span>
-                    <span class="dist-seg seg-media"
-                          [style.width.%]="totalPrioridadeMedia / totalPendentes * 100"
-                          [matTooltip]="totalPrioridadeMedia + ' Média'"></span>
-                    <span class="dist-seg seg-alta"
-                          [style.width.%]="totalPrioridadeAlta / totalPendentes * 100"
-                          [matTooltip]="totalPrioridadeAlta + ' Alta'"></span>
-                    <span class="dist-seg seg-critica"
-                          [style.width.%]="totalPrioridadeCritica / totalPendentes * 100"
-                          [matTooltip]="totalPrioridadeCritica + ' Crítica'"></span>
-                </div>
-                <div class="dist-legend">
+                        <span class="dist-seg seg-media"
+                              [style.width.%]="totalPrioridadeMedia / totalPendentes * 100"
+                              [matTooltip]="totalPrioridadeMedia + ' Média'"></span>
+                        <span class="dist-seg seg-alta"
+                              [style.width.%]="totalPrioridadeAlta / totalPendentes * 100"
+                              [matTooltip]="totalPrioridadeAlta + ' Alta'"></span>
+                        <span class="dist-seg seg-critica"
+                              [style.width.%]="totalPrioridadeCritica / totalPendentes * 100"
+                              [matTooltip]="totalPrioridadeCritica + ' Crítica'"></span>
+                    </div>
+                    <div class="dist-legend">
                     <span class="legend-item">
                         <i class="dot dot-baixa"></i>Baixa ({{ totalPrioridadeBaixa }})
                     </span>
-                    <span class="legend-item">
+                        <span class="legend-item">
                         <i class="dot dot-media"></i>Média ({{ totalPrioridadeMedia }})
                     </span>
-                    <span class="legend-item">
+                        <span class="legend-item">
                         <i class="dot dot-alta"></i>Alta ({{ totalPrioridadeAlta }})
                     </span>
-                    <span class="legend-item">
+                        <span class="legend-item">
                         <i class="dot dot-critica"></i>Crítica ({{ totalPrioridadeCritica }})
                     </span>
-                </div>
+                    </div>
 
-                <div class="hero-status-footer">
-                    <div class="hero-urgency">
-                        <ng-container *ngIf="hasUrgentItems; else allGood">
+                    <div class="hero-status-footer">
+                        <div class="hero-urgency">
+                            <ng-container *ngIf="hasUrgentItems; else allGood">
                             <span class="meta-label urgency-label">
                                 <mat-icon class="urgency-icon">notifications_active</mat-icon>
                                 Requer atenção
                             </span>
-                            <div class="urgency-chips">
-                                <button *ngIf="totalAltaPrioridade > 0"
-                                        class="urgency-chip chip-alta"
-                                        (click)="onPriorityFilterChange('2')"
-                                        matTooltip="Clique para filtrar chamados de ALTA prioridade">
-                                    <mat-icon>trending_up</mat-icon>
-                                    {{ totalAltaPrioridade }} de alta prioridade
-                                </button>
-                                <button *ngIf="totalCriticaPrioridade > 0"
-                                        class="urgency-chip chip-critica"
-                                        (click)="onPriorityFilterChange('3')"
-                                        matTooltip="Clique para filtrar chamados CRÍTICOS">
-                                    <mat-icon>warning_amber</mat-icon>
-                                    {{ totalCriticaPrioridade }} crítico(s)
-                                </button>
-                            </div>
-                        </ng-container>
+                                <div class="urgency-chips">
+                                    <button *ngIf="totalAltaPrioridade > 0"
+                                            class="urgency-chip chip-alta"
+                                            (click)="onPriorityFilterChange('2')"
+                                            matTooltip="Clique para filtrar chamados de ALTA prioridade">
+                                        <mat-icon>trending_up</mat-icon>
+                                        {{ totalAltaPrioridade }} de alta prioridade
+                                    </button>
+                                    <button *ngIf="totalCriticaPrioridade > 0"
+                                            class="urgency-chip chip-critica"
+                                            (click)="onPriorityFilterChange('3')"
+                                            matTooltip="Clique para filtrar chamados CRÍTICOS">
+                                        <mat-icon>warning_amber</mat-icon>
+                                        {{ totalCriticaPrioridade }} crítico(s)
+                                    </button>
+                                </div>
+                            </ng-container>
 
-                        <ng-template #allGood>
+                            <ng-template #allGood>
                             <span class="meta-label urgency-label">
                                 <mat-icon class="urgency-icon">shield</mat-icon>
                                 Status geral
                             </span>
-                            <div class="all-good">
-                                <mat-icon>check_circle</mat-icon>
-                                Nenhum chamado crítico em aberto
-                            </div>
-                        </ng-template>
-                    </div>
+                                <div class="all-good">
+                                    <mat-icon>check_circle</mat-icon>
+                                    Nenhum chamado crítico em aberto
+                                </div>
+                            </ng-template>
+                        </div>
 
-                    <div class="hero-kpis">
+                        <div class="hero-kpis">
                         <span class="kpi-pill kpi-resolved"
                               matTooltip="Percentual de chamados encerrados sobre o total">
                             <mat-icon>check_circle_outline</mat-icon>
                             {{ resolucaoPercent }}% resolvidos
                         </span>
-                        <span class="kpi-pill kpi-pending"
-                              matTooltip="Chamados abertos + em andamento">
+                            <span class="kpi-pill kpi-pending"
+                                  matTooltip="Chamados abertos + em andamento">
                             <mat-icon>hourglass_bottom</mat-icon>
-                            {{ totalPendentes }} pendentes
+                                {{ totalPendentes }} pendentes
                         </span>
+                        </div>
                     </div>
-                </div>
                 </ng-container>
 
                 <ng-template #semAbertos>
@@ -373,4 +373,3 @@
         </div>
     </section>
 </div>
-

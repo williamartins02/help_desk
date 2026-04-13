@@ -316,6 +316,7 @@ table {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    position: relative; /* Ensure child absolute elements are positioned relative to this */
 }
 
 .main-cell strong {
@@ -439,6 +440,16 @@ table {
     margin: 0;
     color: #78909c;
     line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .new-badge.big-center {
+    font-size: 0.88em;
+    min-width: 44px;
+    max-width: 90px;
+    padding: 0.13em 0.5em;
+    top: -1.3em;
+  }
 }
 
 @media (max-width: 900px) {
@@ -582,4 +593,16 @@ button:focus-visible {
     outline: 2px solid #1565c0;
     outline-offset: 3px;
     border-radius: 6px;
+}
+
+/* ── Highlight row animation ───────────────────────────────── */
+@keyframes highlightFade {
+  0%   { background: #fffbe7; }
+  60%  { background: #fffbe7; }
+  100% { background: inherit; }
+}
+
+.highlight-row {
+  animation: highlightFade 2.2s ease-in-out 1;
+  background: #fffbe7 !important;
 }

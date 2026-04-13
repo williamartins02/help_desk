@@ -1,5 +1,5 @@
 import { GenericDialog } from '../../../models/dialog/generic-dialog/generic-dialog';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { TecnicoService } from '../../../services/tecnico.service';
@@ -10,6 +10,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { TecnicoCreateComponent } from '../tecnico-create/tecnico-create.component';
 import { TecnicoUpdateComponent } from '../tecnico-update/tecnico-update.component';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-tecnico-list',
@@ -28,25 +29,40 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   dataSource = new MatTableDataSource<Tecnico>(this.TECNICO_DATA);
   /*Paninação da tabela tecnico*/
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   private genericDialog: GenericDialog;
+
+  highlightId: string | null = null;
+  isNew: boolean = false;
+  hideNewBadge = false;
 
   constructor(
     private service:  TecnicoService,
     private toast:    ToastrService,
     private router:   Router,
     public dialog:    MatDialog,
+    private route:    ActivatedRoute
   ) {
     this.genericDialog = new GenericDialog(dialog);
-   }
+  }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      this.highlightId = params.get('highlightId');
+      this.isNew = params.get('new') === 'true';
+      if (this.isNew) {
+        this.hideNewBadge = false;
+        setTimeout(() => this.hideNewBadge = true, 300000); // 5 minutos
+      }
+    });
     this.findAll();
     this.refresh();
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   /*Destruindo uma sessão */
@@ -94,6 +110,10 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
+    }
+
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
     }
 
     if (this.searchTerm) {

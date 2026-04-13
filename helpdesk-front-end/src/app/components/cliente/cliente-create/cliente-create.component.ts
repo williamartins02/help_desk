@@ -58,11 +58,11 @@ export class ClienteCreateComponent implements OnInit {
   create(): void {
     this.onNoClick();
     const matDialogRef = this.genericDialog.loadingMessage("Salvando Cliente...");
-    this.service.create(this.cliente).subscribe(() => {
+    this.service.create(this.cliente).subscribe((novoCliente) => {
       setTimeout(() => {
         matDialogRef.close();
         this.toast.success('Cadastrado(a) com sucesso',  'Cliente ' + this.cliente.nome);
-        this.router.navigate(['/clientes']);//assim que salvar voltar para pagina ListClientes
+        this.router.navigate(['/clientes'], { queryParams: { highlightId: novoCliente.id, new: true } });
       },1000)
     }, (err) => {
       matDialogRef.close();

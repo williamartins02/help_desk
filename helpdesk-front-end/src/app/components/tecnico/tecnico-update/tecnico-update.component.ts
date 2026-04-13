@@ -69,8 +69,8 @@ export class TecnicoUpdateComponent implements OnInit {
     this.service.update(this.tecnico).subscribe(() => {
       setTimeout(() => {
         matDialogRef.close();
-          this.toast.success('Atualizado com sucesso', 'Técnico(a) ' + this.tecnico.nome);
-          this.router.navigate(['/tecnicos']);
+        this.toast.success('Atualizado com sucesso', 'Técnico(a) ' + this.tecnico.nome);
+        this.router.navigate(['/tecnicos'], { queryParams: { highlightId: this.tecnico.id } });
       },1000)
     },(err) => {
       matDialogRef.close();

@@ -3,7 +3,7 @@ import { ClienteService } from './../../../services/cliente.service';
 import { GenericDialog } from './../../../models/dialog/generic-dialog/generic-dialog';
 import { Cliente } from './../../../models/cliente';
 
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ClienteUpdateComponent } from '../cliente-update/cliente-update.component';
 import { ClienteDeleteComponent } from '../cliente-delete/cliente-delete.component';
 import { Subscription, throwError } from 'rxjs';
@@ -14,6 +14,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ClienteCreateComponent } from '../cliente-create/cliente-create.component';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-cliente-list',
@@ -48,25 +49,46 @@ export class ClienteListComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new MatTableDataSource<Cliente>(this.CLIENTE_DATA);
   /*Paninação da tabela cliente*/
   @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   private genericDialog: GenericDialog;
+  highlightId: string | null = null;
+  isNew: boolean = false;
+  hideNewBadge = false;
+
   constructor(
-    public  dialogRef: MatDialogRef<ClienteListComponent>,
-    private service:   ClienteService,
-    private toast:     ToastrService,
-    public  dialog:    MatDialog,
-    private router:    Router,
+      public  dialogRef: MatDialogRef<ClienteListComponent>,
+      private service:   ClienteService,
+      private toast:     ToastrService,
+      public  dialog:    MatDialog,
+      private router:    Router,
+      private route:     ActivatedRoute,
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      this.highlightId = params.get('highlightId');
+      this.isNew = params.get('new') === 'true';
+      if (this.isNew) {
+        this.hideNewBadge = false;
+        setTimeout(() => this.hideNewBadge = true, 300000); // 5 minutos
+      }
+    });
     this.findAll();
     this.refresh();
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    // Garante que o filtro dinâmico funcione sempre para nome, CPF e e-mail
+    this.dataSource.filterPredicate = (cliente: Cliente, filter: string) => {
+      const normalizedFilter = filter.trim().toLowerCase();
+      return [cliente.id, cliente.nome, cliente.cpf, cliente.email]
+        .some((value) => `${value ?? ''}`.toLowerCase().includes(normalizedFilter));
+    };
   }
 
   ngOnDestroy(): void {
@@ -107,6 +129,9 @@ export class ClienteListComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
+    }
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
     }
     if (this.searchTerm) {
       this.dataSource.filter = this.searchTerm;
@@ -198,5 +223,9 @@ export class ClienteListComponent implements OnInit, AfterViewInit, OnDestroy {
       panelClass: 'custom-dialog-container',
       data: { id },
     });
+  }
+
+  isHighlightedNew(id: any): boolean {
+    return String(id) === String(this.highlightId) && this.isNew && !this.hideNewBadge;
   }
 }

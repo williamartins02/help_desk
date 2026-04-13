@@ -90,12 +90,12 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   usuarioLogado: any;
 
   constructor(
-    public dialog: MatDialog,
-    private service: ChamadoService,
-    private toast: ToastrService,
-    public dialogRef: MatDialogRef<ChamadoListComponent>,
-    private route: ActivatedRoute,
-    private authService: AuthenticationService
+      public dialog: MatDialog,
+      private service: ChamadoService,
+      private toast: ToastrService,
+      public dialogRef: MatDialogRef<ChamadoListComponent>,
+      private route: ActivatedRoute,
+      private authService: AuthenticationService
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
@@ -298,12 +298,12 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   // ── Dialogs ───────────────────────────────────────────────────────────────
   openCreate(): void {
     this.dialog.open(ChamadoCreateComponent, { width: "720px" })
-      .afterClosed().subscribe(() => {});
+        .afterClosed().subscribe(() => {});
   }
 
   reportParame(): void {
     this.dialog.open(ReportParamComponent, { width: "520px" })
-      .afterClosed().subscribe(() => {});
+        .afterClosed().subscribe(() => {});
   }
 
   openEdit(id: Number): void {
@@ -369,13 +369,13 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   onEditChamado(chamado: Chamado) {
     if (chamado.status == '2') {
       this.toast.info(
-        'Este chamado está encerrado. Para novo atendimento, crie um novo chamado.',
-        'Chamado Encerrado',
-        {
-          timeOut: 5000,
-          positionClass: 'toast-top-center',
-          closeButton: true,
-        }
+          'Este chamado está encerrado. Para novo atendimento, crie um novo chamado.',
+          'Chamado Encerrado',
+          {
+            timeOut: 5000,
+            positionClass: 'toast-top-center',
+            closeButton: true,
+          }
       );
       return;
     }
@@ -389,13 +389,13 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.service.update(chamado).subscribe(() => {
       if (newStatus === '2') {
         this.toast.success(
-          'Chamado encerrado! E-mail enviado com sucesso.',
-          `Chamado #${chamado.id}`
+            'Chamado encerrado! E-mail enviado com sucesso.',
+            `Chamado #${chamado.id}`
         );
       } else {
         this.toast.success(
-          `Status alterado para ${this.returnStatus(newStatus)}`,
-          `Chamado #${chamado.id}`
+            `Status alterado para ${this.returnStatus(newStatus)}`,
+            `Chamado #${chamado.id}`
         );
       }
       // findAll() já é chamado automaticamente via refresh$ do service

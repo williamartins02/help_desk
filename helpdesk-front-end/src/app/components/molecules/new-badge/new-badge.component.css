@@ -1,0 +1,25 @@
+.new-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.08em auto 0.08em auto;
+  padding: 0.13em 0.8em;
+  font-size: 0.92em;
+  font-weight: 700;
+  color: #207c3c;
+  background: #e6fbe9;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(32,124,60,0.07);
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  animation: fadeInNew 0.5s;
+  transition: opacity 0.6s;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes fadeInNew {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+

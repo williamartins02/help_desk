@@ -53,12 +53,11 @@ export class TecnicoCreateComponent implements OnInit {
   public create(): void{
     this.onNoClick();
     const matDialogRef = this.genericDialog.loadingMessage("Salvando técnico...");
-    this.service.create(this.tecnico).subscribe(() => {
+    this.service.create(this.tecnico).subscribe((created) => {
         setTimeout(() => {
           matDialogRef.close();
-          this.router.navigate(["/tecnicos"]); //assim que salvar voltar para pagina ListTecnicos
-          this.toast.success("Cadastrado(a) com sucesso","Técnico(a) " + this.tecnico.nome
-          );
+          this.router.navigate(["/tecnicos"], { queryParams: { highlightId: created.id, new: true } });
+          this.toast.success("Cadastrado(a) com sucesso","Técnico(a) " + this.tecnico.nome);
         },1000)
       },(err) => {
         matDialogRef.close();
