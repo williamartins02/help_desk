@@ -51,12 +51,12 @@
                         placeholder="Pesquise por ID, nome, CPF ou e-mail"
                     >
                     <button
-                        *ngIf="searchTerm"
-                        type="button"
-                        mat-icon-button
-                        matSuffix
-                        aria-label="Limpar busca"
-                        (click)="clearFilter(input)"
+                            *ngIf="searchTerm"
+                            type="button"
+                            mat-icon-button
+                            matSuffix
+                            aria-label="Limpar busca"
+                            (click)="clearFilter(input)"
                     >
                         <mat-icon>close</mat-icon>
                     </button>
@@ -72,24 +72,24 @@
 
             <div class="toolbar-actions">
                 <button
-                    type="button"
-                    mat-icon-button
-                    class="refresh-btn"
-                    [disabled]="isLoading"
-                    (click)="manualRefresh()"
-                    matTooltip="Atualizar lista"
-                    aria-label="Atualizar lista de técnicos"
+                        type="button"
+                        mat-icon-button
+                        class="refresh-btn"
+                        [disabled]="isLoading"
+                        (click)="manualRefresh()"
+                        matTooltip="Atualizar lista"
+                        aria-label="Atualizar lista de técnicos"
                 >
                     <mat-icon [class.is-spinning]="isLoading">refresh</mat-icon>
                 </button>
 
                 <button
-                    *appShowForRoles="['ROLE_ADMIN', 'ROLE_TECNICO']"
-                    (click)="openCreate()"
-                    class="add-button"
-                    mat-raised-button
-                    color="primary"
-                    aria-label="Adicionar novo técnico"
+                        *appShowForRoles="['ROLE_ADMIN', 'ROLE_TECNICO']"
+                        (click)="openCreate()"
+                        class="add-button"
+                        mat-raised-button
+                        color="primary"
+                        aria-label="Adicionar novo técnico"
                 >
                     <mat-icon>person_add</mat-icon>
                     Adicionar Técnico
@@ -149,37 +149,37 @@
                                 <td mat-cell *matCellDef="let tecnico" class="actions-cell">
                                     <div class="actions-group">
                                         <button
-                                            type="button"
-                                            mat-icon-button
-                                            class="action-btn edit-action"
-                                            matTooltip="Editar técnico"
-                                            matTooltipShowDelay="400"
-                                            [attr.aria-label]="'Editar técnico ' + tecnico.nome"
-                                            (click)="openEdit(tecnico.id)"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn edit-action"
+                                                matTooltip="Editar técnico"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Editar técnico ' + tecnico.nome"
+                                                (click)="openEdit(tecnico.id)"
                                         >
                                             <mat-icon>edit</mat-icon>
                                         </button>
 
                                         <button
-                                            type="button"
-                                            mat-icon-button
-                                            class="action-btn delete-action"
-                                            matTooltip="Excluir técnico"
-                                            matTooltipShowDelay="400"
-                                            [attr.aria-label]="'Excluir técnico ' + tecnico.nome"
-                                            (click)="delete(tecnico.id)"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn delete-action"
+                                                matTooltip="Excluir técnico"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Excluir técnico ' + tecnico.nome"
+                                                (click)="delete(tecnico.id)"
                                         >
                                             <mat-icon>delete_forever</mat-icon>
                                         </button>
 
                                         <button
-                                            type="button"
-                                            mat-icon-button
-                                            class="action-btn phone-action"
-                                            matTooltip="Visualizar telefones"
-                                            matTooltipShowDelay="400"
-                                            [attr.aria-label]="'Ver telefones de ' + tecnico.nome"
-                                            [routerLink]="['/tecnicos/telefones', tecnico.id]"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn phone-action"
+                                                matTooltip="Visualizar telefones"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Ver telefones de ' + tecnico.nome"
+                                                [routerLink]="['/tecnicos/telefones', tecnico.id]"
                                         >
                                             <mat-icon>phone_iphone</mat-icon>
                                         </button>
@@ -206,8 +206,8 @@
                         <h3>{{ hasActiveFilter ? 'Nenhum técnico encontrado' : 'Nenhum técnico cadastrado' }}</h3>
                         <p>
                             {{ hasActiveFilter
-                                ? 'Tente buscar por outro nome, CPF, e-mail ou limpe o filtro aplicado.'
-                                : 'Quando houver técnicos cadastrados, eles aparecerão organizados nesta lista.' }}
+                            ? 'Tente buscar por outro nome, CPF, e-mail ou limpe o filtro aplicado.'
+                            : 'Quando houver técnicos cadastrados, eles aparecerão organizados nesta lista.' }}
                         </p>
 
                         <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(input)">

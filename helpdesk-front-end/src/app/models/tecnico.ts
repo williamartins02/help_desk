@@ -7,14 +7,14 @@ export interface Tecnico {
     perfis: number[];
     dataCriacao: any;
     dataHoraCriacao?: string;
-  }
+}
 
-  export interface IPessoa {
+export interface IPessoa {
     id?:         any;
     nome:     string;
     cpf:      string;
     email:    string;
     senha:    string;
-  }
-  
-  
+}
+
+

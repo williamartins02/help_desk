@@ -115,7 +115,7 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     }
 
-    delete(id: number): void { 
+    delete(id: number): void {
       const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
       const deleteDialogRef = this.genericDialog.deleteWarningMessage();
       deleteDialogRef.afterClosed().subscribe(deleteConfirmation => {
