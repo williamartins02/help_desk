@@ -169,4 +169,26 @@
 
   </div>
 
+  <!-- ── Ranking dos Técnicos ────────────────────────────────── -->
+  <div class="ranking-btn-row">
+    <button mat-raised-button color="primary" (click)="openRankingModal()">
+      <mat-icon>emoji_events</mat-icon>
+      Ranking dos Técnicos
+    </button>
+  </div>
+
+  <div *ngIf="isRankingLoading" class="ranking-loading">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Carregando ranking...</span>
+  </div>
+  <div *ngIf="rankingError" class="ranking-error">
+    <mat-icon color="warn">error</mat-icon>
+    {{ rankingError }}
+  </div>
+  <app-tecnico-ranking-modal
+    [ranking]="rankingTecnicos"
+    [show]="showRankingModal"
+    [close]="closeRankingModal.bind(this)">
+  </app-tecnico-ranking-modal>
+
 </section>

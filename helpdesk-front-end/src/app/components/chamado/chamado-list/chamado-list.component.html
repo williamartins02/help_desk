@@ -255,6 +255,7 @@
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Titulo </th>
                             <td mat-cell *matCellDef="let chamado">
                                 <span class="titulo-text">{{ chamado.titulo }}</span>
+                                <app-new-badge [show]="isHighlightedNew(chamado.id)" marginLeft="0.5em"></app-new-badge>
                             </td>
                         </ng-container>
 

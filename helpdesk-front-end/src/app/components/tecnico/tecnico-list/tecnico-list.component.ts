@@ -38,11 +38,11 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   hideNewBadge = false;
 
   constructor(
-    private service:  TecnicoService,
-    private toast:    ToastrService,
-    private router:   Router,
-    public dialog:    MatDialog,
-    private route:    ActivatedRoute
+      private service:  TecnicoService,
+      private toast:    ToastrService,
+      private router:   Router,
+      public dialog:    MatDialog,
+      private route:    ActivatedRoute
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
@@ -105,7 +105,7 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.filterPredicate = (tecnico: Tecnico, filter: string) => {
       const normalizedFilter = filter.trim().toLowerCase();
       return [tecnico.id, tecnico.nome, tecnico.cpf, tecnico.email]
-        .some((value) => `${value ?? ''}`.toLowerCase().includes(normalizedFilter));
+          .some((value) => `${value ?? ''}`.toLowerCase().includes(normalizedFilter));
     };
 
     if (this.paginator) {
@@ -121,44 +121,44 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-    /*METODO Criando um service para lista uma LIST TECNICO*/
-    findAll(): void {
-      this.isLoading = true;
-      this.service.findAll().subscribe((resposta) => {
-        this.TECNICO_DATA = resposta
-        this.configureDataSource(this.TECNICO_DATA);
-        this.isLoading = false;
-      }, (error) => {
-        this.isLoading = false;
-        this.toast.error('Na listagem dos tecnicos, procurar suporte', 'ERROR')
-        return throwError(error);
-      })
-    }
+  /*METODO Criando um service para lista uma LIST TECNICO*/
+  findAll(): void {
+    this.isLoading = true;
+    this.service.findAll().subscribe((resposta) => {
+      this.TECNICO_DATA = resposta
+      this.configureDataSource(this.TECNICO_DATA);
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+      this.toast.error('Na listagem dos tecnicos, procurar suporte', 'ERROR')
+      return throwError(error);
+    })
+  }
 
-    delete(id: number): void {
-      const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
-      const deleteDialogRef = this.genericDialog.deleteWarningMessage();
-      deleteDialogRef.afterClosed().subscribe(deleteConfirmation => {
-          if(!deleteConfirmation) {
-            return;
-          }
-        const matDialogRef = this.genericDialog.loadingMessage("Deletando Técnico...");
-        this.service.delete(id).subscribe(() => {
-            setTimeout(() => {
-              matDialogRef.close();
-              this.toast.success('Deletado com sucesso', 'Técnico ' + (tecnicoSelecionado?.nome ?? 'selecionado'));
-              this.router.navigate(['/tecnicos']);
-            },1000)
-        }, (err) => {
+  delete(id: number): void {
+    const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
+    const deleteDialogRef = this.genericDialog.deleteWarningMessage();
+    deleteDialogRef.afterClosed().subscribe(deleteConfirmation => {
+      if(!deleteConfirmation) {
+        return;
+      }
+      const matDialogRef = this.genericDialog.loadingMessage("Deletando Técnico...");
+      this.service.delete(id).subscribe(() => {
+        setTimeout(() => {
           matDialogRef.close();
-            if (err.error.errors)
-              err.error.errors.forEach((element) => {
-                this.toast.error(element.message);
-              });
-          this.toast.error(err.error.message)
-        })
+          this.toast.success('Deletado com sucesso', 'Técnico ' + (tecnicoSelecionado?.nome ?? 'selecionado'));
+          this.router.navigate(['/tecnicos']);
+        },1000)
+      }, (err) => {
+        matDialogRef.close();
+        if (err.error.errors)
+          err.error.errors.forEach((element) => {
+            this.toast.error(element.message);
+          });
+        this.toast.error(err.error.message)
       })
-    }
+    })
+  }
 
   /*Metodo para filtrar*/
   applyFilter(event: Event): void {

@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.TecnicoDTO;
+import com.start.helpdesk.domain.dtos.TecnicoRankingDTO;
 import com.start.helpdesk.services.TecnicoService;
 
 @RestController
@@ -80,5 +81,14 @@ public class TecnicoResource {
 		service.delete(id);
 		
 		return ResponseEntity.noContent().build();
+	}
+
+	/**
+	 * Endpoint para obter o ranking dos técnicos do mês.
+	 */
+	@GetMapping("/ranking")
+	public ResponseEntity<List<TecnicoRankingDTO>> getRankingTecnicosMes() {
+		List<TecnicoRankingDTO> ranking = service.getRankingTecnicosMes();
+		return ResponseEntity.ok().body(ranking);
 	}
 }

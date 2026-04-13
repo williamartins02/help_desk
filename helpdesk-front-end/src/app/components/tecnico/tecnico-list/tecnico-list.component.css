@@ -443,13 +443,13 @@ table {
 }
 
 @media (max-width: 600px) {
-  .new-badge.big-center {
-    font-size: 0.88em;
-    min-width: 44px;
-    max-width: 90px;
-    padding: 0.13em 0.5em;
-    top: -1.3em;
-  }
+    .new-badge.big-center {
+        font-size: 0.88em;
+        min-width: 44px;
+        max-width: 90px;
+        padding: 0.13em 0.5em;
+        top: -1.3em;
+    }
 }
 
 @media (max-width: 900px) {
@@ -597,12 +597,12 @@ button:focus-visible {
 
 /* ── Highlight row animation ───────────────────────────────── */
 @keyframes highlightFade {
-  0%   { background: #fffbe7; }
-  60%  { background: #fffbe7; }
-  100% { background: inherit; }
+    0%   { background: #fffbe7; }
+    60%  { background: #fffbe7; }
+    100% { background: inherit; }
 }
 
 .highlight-row {
-  animation: highlightFade 2.2s ease-in-out 1;
-  background: #fffbe7 !important;
+    animation: highlightFade 2.2s ease-in-out 1;
+    background: #fffbe7 !important;
 }

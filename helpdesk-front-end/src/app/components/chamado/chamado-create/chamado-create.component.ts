@@ -67,13 +67,19 @@ export class ChamadoCreateComponent implements OnInit {
   create(): void{
     this.onNoClick();
     const matDialogRef = this.genericDialog.loadingMessage("Salvando Chamado...");
-     this.chamadoService.create(this.chamado).subscribe(() =>{
+    this.chamadoService.create(this.chamado).subscribe((novoChamado) => {
       setTimeout(() => {
         matDialogRef.close();
         this.toast.success("Chamado criando com sucesso", "Novo chamado");
-        this.router.navigate(['chamados']);
-      },1000)
-    },(error) => {
+        // Redireciona para a lista de chamados com os parâmetros highlightId e new=true
+        this.router.navigate(['chamados'], {
+          queryParams: {
+            highlightId: novoChamado?.id,
+            new: 'true'
+          }
+        });
+      }, 1000);
+    }, (error) => {
       this.toast.error("Ao adicionar um chamado", "ERROR");
       return throwError(error.error.error);
     });

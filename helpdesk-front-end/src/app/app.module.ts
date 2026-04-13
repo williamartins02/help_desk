@@ -13,6 +13,7 @@ import { ChamadoCreateComponent } from './components/chamado/chamado-create/cham
 
 import { TecnicoListComponent }   from './components/tecnico/tecnico-list/tecnico-list.component';
 import { TecnicoCreateComponent } from './components/tecnico/tecnico-create/tecnico-create.component';
+import { TecnicoRankingModalComponent } from './components/tecnico/tecnico-ranking-modal.component';
 
 import { AuthInterceptorProvider } from './interceptors/auth.interceptor';
 import { NgModule } from '@angular/core';
@@ -30,36 +31,37 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { ChatService } from './services/chat.service';
 
-//Imports para componetes do Angular Material
-import { MatButtonModule }     from '@angular/material/button';
-import { MatTableModule }      from '@angular/material/table';
-import { MatFormFieldModule }  from '@angular/material/form-field';
-import { MatPaginatorModule }  from '@angular/material/paginator';
-import { MatSnackBarModule }   from '@angular/material/snack-bar';
-import { MatCheckboxModule }   from '@angular/material/checkbox';
-import { MatToolbarModule }    from '@angular/material/toolbar';
-import { MatSidenavModule }    from '@angular/material/sidenav';
-import { MatSelectModule }     from '@angular/material/select';
-import { MatMenuModule }       from '@angular/material/menu';
-import { MatRadioModule }      from '@angular/material/radio';
-import { MatInputModule }      from '@angular/material/input';
-import { MatIconModule }       from '@angular/material/icon';
-import { MatListModule }       from '@angular/material/list';
-import { MatCardModule }       from '@angular/material/card';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import {ScrollingModule}       from '@angular/cdk/scrolling';
+// Angular Material modules
+import { MatButtonModule } from '@angular/material/button';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSortModule } from '@angular/material/sort';
 
 
 
 //component do projeto.
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-
 import { ToastrModule }                   from 'ngx-toastr';
 import { NgxMaskModule }                  from 'ngx-mask';
-import {MatProgressBarModule}             from '@angular/material/progress-bar';
-import {MatTabsModule}                    from '@angular/material/tabs';
-import { TecnicoUpdateComponent }         from './components/tecnico/tecnico-update/tecnico-update.component';
+import {TecnicoUpdateComponent }         from './components/tecnico/tecnico-update/tecnico-update.component';
 import { TecnicoTelefoneListComponent }   from './components/tecnico/telefone-tecnico/tecnico-telefone-list/tecnico-telefone-list.component';
 import { TecnicoTelefoneUpdateComponent } from './components/tecnico/telefone-tecnico/tecnico-telefone-update/tecnico-telefone-update.component';
 import { TecnicoTelefoneCreateComponent } from './components/tecnico/telefone-tecnico/tecnico-telefone-create/tecnico-telefone-create.component';
@@ -68,9 +70,6 @@ import { ChamadoUpdateComponent}         from './components/chamado/chamado-upda
 import { ChamadoReadComponent }           from './components/chamado/chamado-read/chamado-read.component';
 import { RelatorioChamadoComponent }      from './components/chamado/relatorio-chamado/relatorio-chamado.component';
 import { ReportParamComponent }           from './components/chamado/report-param/report-param.component';
-import {MatDatepickerModule}              from '@angular/material/datepicker';
-import {MatTooltipModule}                 from '@angular/material/tooltip';
-import {MatSortModule}                    from '@angular/material/sort';
 import { LineChartComponent }             from './components/chamado/chart/line-chart/line-chart.component';
 import { NgChartsModule }                 from 'ng2-charts';
 import { ChatComponent }                  from './components/chat/chat/chat.component';
@@ -87,6 +86,7 @@ import { ClienteUpdateComponent }         from './components/cliente/cliente-upd
 import { ClienteDeleteComponent }         from './components/cliente/cliente-delete/cliente-delete.component';
 import { SharedModule } from './components/shared/shared.module';
 import { CriticalAlertDialogComponent } from './components/molecules/critical-alert-dialog/critical-alert-dialog.component';
+import { MatDialogRef } from '@angular/material/dialog';
 
 
 @NgModule({
@@ -100,7 +100,7 @@ import { CriticalAlertDialogComponent } from './components/molecules/critical-al
     TecnicoCreateComponent,
     TecnicoUpdateComponent,
     TecnicoListComponent,
-    
+    TecnicoRankingModalComponent,
 
     ClienteCreateComponent,
     ClienteListComponent,
@@ -144,14 +144,11 @@ import { CriticalAlertDialogComponent } from './components/molecules/critical-al
 
   ],
   imports: [
-    
-    MatCardModule,
-    NgChartsModule,
     BrowserModule,
     CommonModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    //Angular material
+    // Angular Material
     MatButtonModule,
     MatTableModule,
     MatFormFieldModule,
@@ -176,16 +173,14 @@ import { CriticalAlertDialogComponent } from './components/molecules/critical-al
     MatTooltipModule,
     MatSortModule,
     FormsModule,
+    ReactiveFormsModule,
+    NgChartsModule,
     SharedModule,
-    //Configuração para Service ToastrModule
-    ToastrModule.forRoot({ timeOut: 4000, closeButton: true, progressBar: true}),
+    // Configuração para Service ToastrModule
+    ToastrModule.forRoot({ timeOut: 4000, closeButton: true, progressBar: true }),
     NgxMaskModule.forRoot({
       dropSpecialCharacters: false // Ao salvar, vai manter a mascara
     }),
-    //form reactive
-    FormsModule,
-    ReactiveFormsModule,
-    //requisições Http
     HttpClientModule,
   ],
 

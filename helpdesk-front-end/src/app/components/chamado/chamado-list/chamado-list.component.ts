@@ -89,6 +89,10 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   usuarioLogado: any;
 
+  highlightId: string | null = null;
+  isNew: boolean = false;
+  hideNewBadge = false;
+
   constructor(
       public dialog: MatDialog,
       private service: ChamadoService,
@@ -102,12 +106,18 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     // Lê query params para aplicar filtros vindos de navegação externa (ex: alerta de críticos)
-    this.route.queryParams.subscribe(params => {
-      if (params['prioridade']) {
-        this.selectedPrioridade = params['prioridade'];
+    this.route.queryParamMap.subscribe(params => {
+      this.highlightId = params.get('highlightId');
+      this.isNew = params.get('new') === 'true';
+      if (this.isNew) {
+        this.hideNewBadge = false;
+        setTimeout(() => this.hideNewBadge = true, 300000); // 5 minutos
       }
-      if (params['search']) {
-        this.searchValue = params['search'];
+      if (params.get('prioridade')) {
+        this.selectedPrioridade = params.get('prioridade')!;
+      }
+      if (params.get('search')) {
+        this.searchValue = params.get('search')!;
       }
     });
 
@@ -404,5 +414,9 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toast.error('Erro ao atualizar o status do chamado', 'ERROR');
       return throwError(error);
     });
+  }
+
+  isHighlightedNew(id: any): boolean {
+    return String(id) === String(this.highlightId) && this.isNew && !this.hideNewBadge;
   }
 }

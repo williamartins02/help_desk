@@ -1,0 +1,142 @@
+.ranking-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ranking-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 480px;
+  max-width: 95vw;
+  padding: 0 0 24px 0;
+  position: relative;
+  animation: fadeIn 0.2s;
+}
+.ranking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+  color: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 18px 24px 14px 24px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.close-btn {
+  color: #fff;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+.ranking-section {
+  padding: 18px 24px 0 24px;
+}
+.ranking-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ranking-item {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.06);
+}
+.rank-1 .medal-icon { color: #ffd700; filter: drop-shadow(0 0 2px #bfa500); }
+.rank-2 .medal-icon { color: #c0c0c0; filter: drop-shadow(0 0 2px #888); }
+.rank-3 .medal-icon { color: #cd7f32; filter: drop-shadow(0 0 2px #a65c1a); }
+.medal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 16px;
+  font-size: 1.2rem;
+}
+.rank-pos {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 2px;
+}
+.tecnico-info {
+  display: flex;
+  flex-direction: column;
+}
+.rank-color-1 { color: #1976d2; font-weight: 700; }
+.rank-color-2 { color: #555; font-weight: 700; }
+.rank-color-3 { color: #1976d2; font-weight: 700; }
+.tecnico-nome {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.tecnico-chamados {
+  font-size: 0.98rem;
+  color: #666;
+}
+.timeline-section {
+  margin: 24px 24px 0 24px;
+}
+.timeline-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+.timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  margin-bottom: 8px;
+}
+.timeline-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+.timeline-icon .material-icons {
+  font-size: 2rem;
+  color: #1976d2;
+  margin-bottom: 2px;
+}
+.timeline-label {
+  font-size: 0.95rem;
+  color: #1976d2;
+  font-weight: 500;
+}
+.timeline-num {
+  font-size: 0.95rem;
+  color: #1976d2;
+  font-weight: 500;
+}
+.timeline-line {
+  flex: 1;
+  height: 3px;
+  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+  margin: 0 2px;
+  border-radius: 2px;
+}
+.ranking-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

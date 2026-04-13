@@ -1,5 +1,8 @@
 package com.start.helpdesk.services;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.start.helpdesk.domain.Pessoa;
 import com.start.helpdesk.domain.Tecnico;
 import com.start.helpdesk.domain.dtos.TecnicoDTO;
+import com.start.helpdesk.domain.dtos.TecnicoRankingDTO;
+import com.start.helpdesk.repositories.ChamadoRepository;
 import com.start.helpdesk.repositories.PessoaRepository;
 import com.start.helpdesk.repositories.TecnicoRepository;
 import com.start.helpdesk.services.exception.DataIntegrityViolationException;
@@ -28,7 +33,9 @@ public class TecnicoService {
 	private PessoaRepository pessoaRepository;
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
-	
+	@Autowired
+	private ChamadoRepository chamadoRepository;
+
 	/*METODO -> Buscando ID do tecnico no banco*/
 	public Tecnico findById(Integer id) {
 		Optional<Tecnico> tecnicoObj = tecnicoRepository.findById(id);
@@ -92,8 +99,45 @@ public class TecnicoService {
 	    return tecnico.orElseThrow(() -> new ObjectnotFoundException("Técnico não encontrado para o e-mail: " + email));
 	}
 
+	/**
+	 * Retorna o ranking dos técnicos do mês atual, ordenado por desempenho.
+	 */
+	public List<TecnicoRankingDTO> getRankingTecnicosMes() {
+        LocalDate now = LocalDate.now();
+        int mes = now.getMonthValue();
+        int ano = now.getYear();
+        List<Tecnico> tecnicos = tecnicoRepository.findRankingTecnicosByChamadosResolvidos(mes, ano);
+        List<TecnicoRankingDTO> ranking = new ArrayList<>();
+        for (Tecnico t : tecnicos) {
+            // Conta chamados resolvidos no mês
+            long resolvidosMes = t.getChamados().stream()
+                .filter(c -> c.getStatus() != null && c.getStatus().getCodigo() == 2 && c.getDataFechamento() != null &&
+                    c.getDataFechamento().getMonthValue() == mes && c.getDataFechamento().getYear() == ano)
+                .count();
+            // Avaliação média fictícia (ajustar se houver campo real)
+            double avaliacaoMedia = 0.0; // TODO: calcular se houver avaliações
+            // Evolução dos últimos 6 meses
+            List<TecnicoRankingDTO.EvolucaoDTO> evolucao = new ArrayList<>();
+            for (int i = 5; i >= 0; i--) {
+                YearMonth ym = YearMonth.now().minusMonths(i);
+                int m = ym.getMonthValue();
+                int y = ym.getYear();
+                long resolvidos = t.getChamados().stream()
+                    .filter(c -> c.getStatus() != null && c.getStatus().getCodigo() == 2 && c.getDataFechamento() != null &&
+                        c.getDataFechamento().getMonthValue() == m && c.getDataFechamento().getYear() == y)
+                    .count();
+                evolucao.add(new TecnicoRankingDTO.EvolucaoDTO(ym.toString(), (int)resolvidos, 0.0));
+            }
+            ranking.add(new TecnicoRankingDTO(
+                t.getId(),
+                t.getNome(),
+                t.getEmail(),
+                (int)resolvidosMes,
+                avaliacaoMedia,
+                evolucao
+            ));
+        }
+        return ranking;
+    }
 
-	
 }
-
-	
