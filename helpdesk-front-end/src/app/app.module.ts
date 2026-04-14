@@ -86,6 +86,7 @@ import { ClienteUpdateComponent }         from './components/cliente/cliente-upd
 import { ClienteDeleteComponent }         from './components/cliente/cliente-delete/cliente-delete.component';
 import { SharedModule } from './components/shared/shared.module';
 import { CriticalAlertDialogComponent } from './components/molecules/critical-alert-dialog/critical-alert-dialog.component';
+import { RankingDialogComponent } from './components/molecules/ranking-dialog/ranking-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
 
 
@@ -121,6 +122,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     GenericDialogComponent,
     ChamadoDetalheDialogComponent,
     CriticalAlertDialogComponent,
+    RankingDialogComponent,
 
     LineChartComponent,
 

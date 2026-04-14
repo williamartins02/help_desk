@@ -91,13 +91,16 @@
 .logout-item {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   border-radius: 0.75rem !important;
   margin-bottom: 0.15rem;
   color: rgba(255, 255, 255, 0.85) !important;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   padding: 0 0.85rem !important;
   min-height: 46px;
+  height: 46px;
   text-decoration: none;
+  overflow: hidden;
 }
 
 .nav-list a:hover {
@@ -146,6 +149,9 @@
   font-size: 0.875rem;
   letter-spacing: 0.15px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Espaçador ───────────────────────────────────────────── */
@@ -185,16 +191,13 @@
 .sidenav-content {
   display: flex;
   flex-direction: column;
-  /*min-height: 100%;*/
   background: #f4f7fb;
-  margin-top: 1.5rem;
-  /* Espaço extra para afastar do header */
+  /* sem margin-top: o header sticky já empurra o conteúdo */
 }
 
 @media (max-width: 600px) {
   .sidenav-content {
-    margin-top: 3.2rem;
-    padding-top: 1.5rem;
+    padding-top: 0.5rem;
   }
 }
 
@@ -217,38 +220,24 @@
   transform: scale(1.06);
 }
 
-/* ── Floating Menu Toggle ───────────────────────────────── */
+/* ── Hambúrguer dentro da toolbar do header ──────────────── */
+.nav-hamburger-btn {
+  color: rgba(255, 255, 255, 0.90) !important;
+  margin-right: 0.35rem;
+  border-radius: 0.6rem !important;
+  transition: background 0.18s, color 0.18s, transform 0.2s;
+  flex-shrink: 0;
+}
 
-.floating-menu-toggle {
-  position: fixed;
-  top: 6.5rem;
-  left: 1.5rem;
-  z-index: 5000;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
+.nav-hamburger-btn:hover {
   color: #fff !important;
-  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
-  border-radius: 0.75rem !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: left 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s, transform 0.18s;
-  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.14) !important;
 }
 
-.floating-menu-toggle.menu-open {
-  left: 16rem; /* largura do menu + espaçamento */
+.nav-hamburger-btn mat-icon {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 600px) {
-  .floating-menu-toggle {
-    top: 0.7rem;
-    left: 0.7rem;
-    width: 40px;
-    height: 40px;
-  }
-  .floating-menu-toggle.menu-open {
-    left: 13.5rem; /* largura do menu em telas pequenas */
-  }
+.nav-hamburger-btn.menu-open mat-icon {
+  transform: rotate(90deg);
 }

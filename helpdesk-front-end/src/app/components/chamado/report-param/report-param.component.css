@@ -216,6 +216,40 @@ mat-icon {
   opacity: 0.85 !important;
 }
 
+/* ===== Carregando perfil do usuário ===== */
+.loading-user {
+  display:         flex;
+  align-items:     center;
+  gap:             0.65rem;
+  padding:         1.5rem 0;
+  justify-content: center;
+  color:           #607d8b;
+  font-size:       0.85rem;
+}
+
+/* ===== Aviso: Técnico puro ===== */
+.tecnico-notice {
+  display:     flex;
+  align-items: center;
+  gap:         0.45rem;
+  padding:     0.55rem 0.85rem;
+  border-radius: 0.5rem;
+  background:  #e8f5e9;
+  border:      1px solid #a5d6a7;
+  color:       #2e7d32;
+  font-size:   0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.notice-icon {
+  font-size:  1rem !important;
+  width:      1rem !important;
+  height:     1rem !important;
+  color:      #2e7d32 !important;
+  opacity:    1 !important;
+  flex-shrink: 0;
+}
+
 /* ===== Responsividade ===== */
 @media (max-width: 480px) {
   .dialog-wrapper {

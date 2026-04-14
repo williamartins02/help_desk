@@ -18,6 +18,7 @@ import { Telefone } from '../../models/telefone';
 import { MatDialog } from '@angular/material/dialog';
 import { GenericDialogComponent } from '../molecules/generic-dialog/generic-dialog.component';
 import { CriticalAlertDialogComponent } from '../molecules/critical-alert-dialog/critical-alert-dialog.component';
+import { RankingDialogComponent } from '../molecules/ranking-dialog/ranking-dialog.component';
 
 interface Atividade {
   icon: string;
@@ -121,6 +122,19 @@ export class HomeComponent implements OnInit, OnDestroy {
     // ── Polling em tempo real ──────────────────────────────────
     this.reloadInterval = setInterval(() => this.loadDados(false), 30000);
     this.timerInterval  = setInterval(() => this.atualizarTempos(), 60000);
+  }
+
+  openRanking(): void {
+    this.dialog.open(RankingDialogComponent, {
+      width: '780px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      data: {
+        chamados: this.chamados,
+        tecnicos: this.tecnicos
+      },
+      panelClass: 'ranking-dialog-panel'
+    });
   }
 
   ngOnDestroy(): void {

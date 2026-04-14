@@ -77,7 +77,8 @@
           <mat-error *ngIf="classificacao.invalid">Selecione uma classificação</mat-error>
         </mat-form-field>
 
-        <mat-form-field class="field" appearance="outline">
+        <!-- Técnico responsável — Admin: select livre | Técnico: bloqueado no próprio nome -->
+        <mat-form-field class="field" appearance="outline" *ngIf="isAdmin">
           <mat-label>Técnico responsável</mat-label>
           <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
           <mat-select [(ngModel)]="chamado.tecnico" name="tecnico" [formControl]="tecnico" required>
@@ -85,6 +86,14 @@
             <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
           </mat-select>
           <mat-error *ngIf="tecnico.invalid">Selecione um técnico</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="field" appearance="outline" *ngIf="!isAdmin">
+          <mat-label>Técnico responsável</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
+          <input matInput [value]="tecnicoLogadoNome" disabled />
+          <mat-icon matSuffix class="field-locked-icon">lock</mat-icon>
+          <mat-hint>Atribuído automaticamente ao técnico logado</mat-hint>
         </mat-form-field>
 
         <!-- Cliente (largura total) -->

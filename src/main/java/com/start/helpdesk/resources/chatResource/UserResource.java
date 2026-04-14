@@ -1,5 +1,6 @@
 package com.start.helpdesk.resources.chatResource;
 
+import com.start.helpdesk.domain.Pessoa;
 import com.start.helpdesk.domain.dtos.PessoaDTO;
 import com.start.helpdesk.repositories.PessoaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,7 +29,7 @@ public class UserResource {
     private PessoaRepository pessoaRepository;
 
     /**
-     * Retorna as authorities (permissões) do usuário pelo e-mail.
+     * Retorna as authorities (permissões), id e tipo do usuário pelo e-mail.
      * Chamado pelo frontend após login para carregar as permissões no localStorage.
      */
     @GetMapping("/{email}")
@@ -37,7 +40,18 @@ public class UserResource {
                 .map(authority -> Map.of("authority", authority.getAuthority()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(Map.of("authorities", authorities));
+        Map<String, Object> response = new HashMap<>();
+        response.put("authorities", authorities);
+
+        Optional<Pessoa> pessoaOpt = pessoaRepository.findByEmail(email);
+        pessoaOpt.ifPresent(pessoa -> {
+            PessoaDTO dto = new PessoaDTO(pessoa);
+            response.put("id",   dto.getId());
+            response.put("tipo", dto.getTipo());
+            response.put("nome", dto.getNome());
+        });
+
+        return ResponseEntity.ok(response);
     }
 
     /**

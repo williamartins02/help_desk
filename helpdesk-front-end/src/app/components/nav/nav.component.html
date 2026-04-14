@@ -1,9 +1,4 @@
 <mat-drawer-container class="container" autosize>
-  <!-- Botão hambúrguer sempre visível, flutuante, alinhado ao topo do menu lateral -->
-  <button class="floating-menu-toggle" mat-icon-button (click)="drawer.toggle()" aria-label="Alternar menu"
-        [class.menu-open]="isMenuOpen">
-    <mat-icon>menu</mat-icon>
-  </button>
 
   <mat-drawer #drawer class="sidenav" mode="side">
     <!-- ── Seção de identidade ── -->
@@ -27,11 +22,13 @@
         <mat-icon class="nav-icon">home</mat-icon>
         <span class="nav-label">Home</span>
       </a>
-      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="link-tecnicos">
+      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="link-tecnicos"
+         *appShowForRoles="['ROLE_ADMIN']">
         <mat-icon class="nav-icon">engineering</mat-icon>
         <span class="nav-label">Equipe Técnica</span>
       </a>
-      <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="link-clientes">
+      <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="link-clientes"
+         *appShowForRoles="['ROLE_ADMIN']">
         <mat-icon class="nav-icon">group</mat-icon>
         <span class="nav-label">Base de Clientes</span>
       </a>
@@ -66,15 +63,23 @@
     </div>
   </mat-drawer>
 
-  <!-- HEADER SEMPRE NO TOPO -->
+  <!-- HEADER SEMPRE NO TOPO — hambúrguer projetado dentro da toolbar via ng-content -->
   <div class="header-wrapper">
-    <app-header></app-header>
+    <app-header>
+      <button class="nav-hamburger-btn" mat-icon-button
+              (click)="drawer.toggle()"
+              [class.menu-open]="isMenuOpen"
+              aria-label="Alternar menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </app-header>
   </div>
 
   <!-- MAIN CONTENT BELOW HEADER -->
   <div class="sidenav-content">
     <router-outlet></router-outlet>
   </div>
+
 </mat-drawer-container>
 
 <!-- Widget flutuante de chat (visível em todas as páginas) -->

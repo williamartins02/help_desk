@@ -13,6 +13,7 @@ import { Tecnico } from "./../../../models/tecnico";
 import { Cliente } from "./../../../models/cliente";
 import { Component, OnInit } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
+import { JwtHelperService } from "@auth0/angular-jwt";
 
 @Component({
   selector: "app-chamado-create",
@@ -22,7 +23,11 @@ import { FormControl, Validators } from "@angular/forms";
 export class ChamadoCreateComponent implements OnInit {
   private genericDialog: GenericDialog;
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
- 
+  private jwtHelper = new JwtHelperService();
+
+  isAdmin = false;
+  tecnicoLogadoNome = '';
+
   chamado: Chamado = {
     prioridade:  '',
     status:      '',
@@ -60,8 +65,31 @@ export class ChamadoCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.detectarPerfil();
     this.findaAllClientes();
     this.findAllTecnico();
+  }
+
+  private detectarPerfil(): void {
+    const permissions: string[] = JSON.parse(localStorage.getItem('permissions') || '[]');
+    this.isAdmin = permissions.includes('ROLE_ADMIN');
+  }
+
+  private preencherTecnicoLogado(): void {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const decoded = this.jwtHelper.decodeToken(token);
+      const email: string = decoded?.sub || decoded?.email || '';
+      if (!email) return;
+      const match = this.tecnicos.find(t => t.email?.toLowerCase() === email.toLowerCase());
+      if (match) {
+        this.chamado.tecnico  = match.id;
+        this.tecnicoLogadoNome = match.nome;
+        this.tecnico.setValue(match.id);
+        this.tecnico.disable();
+      }
+    } catch { /* token inválido — deixa campo em branco */ }
   }
 
   create(): void{
@@ -98,6 +126,9 @@ export class ChamadoCreateComponent implements OnInit {
     this.tecnicoService.findAll().subscribe(
       (resposta) => {
         this.tecnicos = resposta;
+        if (!this.isAdmin) {
+          this.preencherTecnicoLogado();
+        }
       },(error) => {
         this.toast.error("Ao carregar a lista técnico", "ERROR");
         return throwError(error.error.error);
@@ -106,13 +137,18 @@ export class ChamadoCreateComponent implements OnInit {
   }
 
   validaCampos(): boolean {
+    // Quando ROLE_TECNICO o FormControl fica disabled (válido automaticamente)
+    // e chamado.tecnico já foi preenchido; para ROLE_ADMIN verificamos o valor manualmente.
+    const tecnicoOk = !this.isAdmin
+      ? !!this.chamado.tecnico
+      : !!this.tecnico.value;
     return (
       this.prioridade.valid &&
       this.classificacao.valid &&
       this.status.valid &&
       this.titulo.valid &&
       this.observacoes.valid &&
-      this.tecnico &&
+      tecnicoOk &&
       this.cliente.valid
     );
   }

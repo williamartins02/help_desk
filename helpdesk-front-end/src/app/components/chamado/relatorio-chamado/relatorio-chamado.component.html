@@ -43,6 +43,30 @@
 
       <div class="meta-divider"></div>
 
+      <!-- Técnico filtrado (somente quando há filtro por técnico) -->
+      <ng-container *ngIf="data.tecnicoNome">
+        <div class="meta-item">
+          <span class="meta-label">
+            <mat-icon class="meta-icon">engineering</mat-icon>
+            Técnico
+          </span>
+          <span class="meta-value">{{ data.tecnicoNome }}</span>
+        </div>
+        <div class="meta-divider"></div>
+      </ng-container>
+
+      <!-- Todos os técnicos -->
+      <ng-container *ngIf="!data.tecnicoNome">
+        <div class="meta-item">
+          <span class="meta-label">
+            <mat-icon class="meta-icon">groups</mat-icon>
+            Técnico
+          </span>
+          <span class="meta-value meta-value-muted">Todos</span>
+        </div>
+        <div class="meta-divider"></div>
+      </ng-container>
+
       <div class="meta-item">
         <span class="meta-label">
           <mat-icon class="meta-icon">schedule</mat-icon>

@@ -22,6 +22,7 @@
   display: flex;
   align-items: center;
   gap: 0;
+  width: 100%;
 }
 
 .welcome-icon-wrap {
@@ -81,6 +82,50 @@
   color: #90a4ae;
   line-height: 1.3;
 }
+
+/* ── Ranking button ──────────────────────────────────────── */
+.ranking-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.65rem;
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #546e7a;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ranking-btn mat-icon {
+  font-size: 1.1rem !important;
+  width:  1.1rem !important;
+  height: 1.1rem !important;
+  line-height: 1.1rem !important;
+  transition: transform 0.2s;
+}
+
+.ranking-btn:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25,118,210,0.12);
+}
+
+.ranking-btn:hover mat-icon { transform: scale(1.1); }
+
+.ranking-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ranking-btn-label { line-height: 1; }
 
 /* ── KPI row — fixed height, no compression ──────────────── */
 .kpi-row {

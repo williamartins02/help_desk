@@ -8,6 +8,14 @@
   overflow: hidden;
 }
 
+/* Ícone de cadeado no campo de técnico bloqueado */
+.field-locked-icon {
+  font-size: 1rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  color: #b0bec5;
+}
+
 /* ===== Cabeçalho gradiente ===== */
 .dialog-header {
   background: linear-gradient(135deg, #1565c0 0%, #0288d1 60%, #00bcd4 100%);

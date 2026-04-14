@@ -53,6 +53,11 @@ public class RelatorioResource {
 		params.put("DATA_INICIO_FORMATADA", userReport.getDataInicio());
 		params.put("DATA_FIM_FORMATADA", userReport.getDataFim());
 
+		// Filtra por técnico quando informado (null = todos)
+		if (userReport.getTecnicoId() != null) {
+			params.put("TECNICO_ID", userReport.getTecnicoId());
+		}
+
 	  	byte[] pdf = relatoriosService.gerarRelatorio("relatorio-chamado", params, request.getServletContext());
 	  	  
 	  	String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);

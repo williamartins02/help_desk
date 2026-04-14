@@ -13,6 +13,17 @@
         </h2>
         <p class="welcome-sub">Aqui está um resumo das últimas atualizações.</p>
       </div>
+
+      <!-- Botão Ranking — visível apenas para ROLE_ADMIN -->
+      <button class="ranking-btn"
+              *appShowForRoles="['ROLE_ADMIN']"
+              (click)="openRanking()"
+              matTooltip="Ver ranking de desempenho"
+              matTooltipPosition="below"
+              [disabled]="isLoading">
+        <mat-icon>leaderboard</mat-icon>
+        <span class="ranking-btn-label">Ranking</span>
+      </button>
     </div>
     <div class="welcome-divider"></div>
   </div>

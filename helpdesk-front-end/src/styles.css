@@ -157,6 +157,18 @@ table {
   box-shadow: 0 11px 40px rgba(0, 0, 0, 0.22) !important;
 }
 
+/* Ranking dialog panel */
+.ranking-dialog-panel .mat-dialog-container,
+.ranking-dialog-panel .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 1.25rem !important;
+  background: #fff !important;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.20) !important;
+  display: flex;
+  flex-direction: column;
+}
+
 @keyframes fadeInZoom {
   from {
     opacity: 0;
