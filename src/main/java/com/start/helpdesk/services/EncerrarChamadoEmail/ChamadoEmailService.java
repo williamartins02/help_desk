@@ -10,16 +10,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.util.HtmlUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ChamadoEmailService {
@@ -53,37 +51,40 @@ public class ChamadoEmailService {
 
     private String buildHtml(Chamado chamado) {
         String template = loadEmailTemplate();
-        String dataAbertura = chamado.getDataAbertura() != null ? String.valueOf(chamado.getDataAbertura()) : "";
-        String dataEncerramento = chamado.getDataFechamento() != null ? String.valueOf(chamado.getDataFechamento()) : "";
-        String tempoResolucao = "";
-        if (chamado.getDataAbertura() != null && chamado.getDataFechamento() != null) {
-            try {
-                LocalDateTime abertura = null;
-                LocalDateTime fechamento = null;
-                Object aberturaObj = chamado.getDataAbertura();
-                Object fechamentoObj = chamado.getDataFechamento();
-                if (aberturaObj instanceof LocalDateTime) {
-                    abertura = (LocalDateTime) aberturaObj;
-                } else if (aberturaObj instanceof LocalDate) {
-                    abertura = ((LocalDate) aberturaObj).atStartOfDay();
-                } else if (aberturaObj instanceof Timestamp) {
-                    abertura = ((Timestamp) aberturaObj).toLocalDateTime();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+
+        String dataAbertura    = chamado.getDataAbertura()   != null ? chamado.getDataAbertura().format(fmt)  : "";
+        String dataEncerramento = "";
+        String tempoResolucao   = "";
+
+        if (chamado.getDataFechamento() != null) {
+            LocalDateTime fechamento = chamado.getDataFechamento();
+            dataEncerramento = fechamento.format(fmt);
+
+            if (chamado.getDataAbertura() != null) {
+                try {
+                    Duration duration = Duration.between(chamado.getDataAbertura(), fechamento);
+                    long totalMinutos = duration.toMinutes();
+                    if (totalMinutos == 1) {
+                        tempoResolucao = "1 minuto";
+                    } else if (totalMinutos < 60) {
+                        tempoResolucao = totalMinutos + " minutos";
+                    } else if (totalMinutos < 120) {
+                        tempoResolucao = "1 hora";
+                    } else if (totalMinutos < 1440) {
+                        tempoResolucao = (totalMinutos / 60) + " horas";
+                    } else if (totalMinutos < 2880) {
+                        tempoResolucao = "1 dia";
+                    } else if (totalMinutos < 43200) {
+                        tempoResolucao = (totalMinutos / 1440) + " dias";
+                    } else if (totalMinutos < 86400) {
+                        tempoResolucao = "1 mes";
+                    } else {
+                        tempoResolucao = (totalMinutos / 43200) + " meses";
+                    }
+                } catch (Exception e) {
+                    tempoResolucao = "";
                 }
-                if (fechamentoObj instanceof LocalDateTime) {
-                    fechamento = (LocalDateTime) fechamentoObj;
-                } else if (fechamentoObj instanceof LocalDate) {
-                    fechamento = ((LocalDate) fechamentoObj).atStartOfDay();
-                } else if (fechamentoObj instanceof Timestamp) {
-                    fechamento = ((Timestamp) fechamentoObj).toLocalDateTime();
-                }
-                if (abertura != null && fechamento != null) {
-                    Duration duration = Duration.between(abertura, fechamento);
-                    long hours = duration.toHours();
-                    long minutes = duration.toMinutes() % 60;
-                    tempoResolucao = hours + "h " + minutes + "min";
-                }
-            } catch (Exception e) {
-                tempoResolucao = "";
             }
         }
         String tecnico = chamado.getTecnico() != null ? chamado.getTecnico().getNome() : "";

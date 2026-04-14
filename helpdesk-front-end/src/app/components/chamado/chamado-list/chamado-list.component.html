@@ -254,7 +254,10 @@
                         <ng-container matColumnDef="titulo">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Titulo </th>
                             <td mat-cell *matCellDef="let chamado">
-                                <span class="titulo-text">{{ chamado.titulo }}</span>
+                                <span class="titulo-text"
+                                      [class.titulo-active]="hoveredChamado?.id === chamado.id"
+                                      (click)="toggleChamadoTooltip($event, chamado)"
+                                      title="Clique para ver detalhes">{{ chamado.titulo }}</span>
                                 <app-new-badge [show]="isHighlightedNew(chamado.id)" marginLeft="0.5em"></app-new-badge>
                             </td>
                         </ng-container>
@@ -353,7 +356,9 @@
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row class="mat-row" *matRowDef="let row; columns: displayedColumns;" [attr.data-row-id]="row.id"></tr>
+                        <tr mat-row class="mat-row"
+                            *matRowDef="let row; columns: displayedColumns;"
+                            [attr.data-row-id]="row.id"></tr>
                     </table>
                 </cdk-virtual-scroll-viewport>
 
@@ -373,4 +378,73 @@
             </div>
         </div>
     </section>
+
+    <!-- ── Chamado Hover Tooltip Card ─────────────────────────────────── -->
+    <div class="ctc-card"
+         *ngIf="hoveredChamado"
+         [style.left.px]="tooltipX"
+         [style.top.px]="tooltipY"
+         role="tooltip"
+         aria-live="polite">
+
+        <!-- Header: barra colorida pelo status + título + id -->
+        <div class="ctc-header" [style.borderLeftColor]="getColor(hoveredChamado.status)">
+            <div class="ctc-header-top">
+                <span class="ctc-id">#{{ hoveredChamado.id }}</span>
+                <span class="ctc-status-badge" [style.background]="getColor(hoveredChamado.status)">
+                    {{ returnStatus(hoveredChamado.status) }}
+                </span>
+            </div>
+            <strong class="ctc-titulo">{{ hoveredChamado.titulo }}</strong>
+        </div>
+
+        <!-- Body -->
+        <div class="ctc-body">
+
+            <div class="ctc-row">
+                <mat-icon class="ctc-icon">flag</mat-icon>
+                <span class="ctc-label">Prioridade</span>
+                <span class="ctc-priority-badge" [style.background]="getColorBackground(hoveredChamado.prioridade)">
+                    {{ returnPrioridade(hoveredChamado.prioridade) }}
+                </span>
+            </div>
+
+            <div class="ctc-row">
+                <mat-icon class="ctc-icon">category</mat-icon>
+                <span class="ctc-label">Tipo</span>
+                <span class="ctc-classif-badge" [style.background]="getClassificacaoColor(hoveredChamado.classificacao)">
+                    {{ returnClassificacao(hoveredChamado.classificacao) }}
+                </span>
+            </div>
+
+            <div class="ctc-divider"></div>
+
+            <div class="ctc-row">
+                <mat-icon class="ctc-icon">engineering</mat-icon>
+                <span class="ctc-label">Técnico</span>
+                <span class="ctc-value">{{ hoveredChamado.nomeTecnico || '—' }}</span>
+            </div>
+
+            <div class="ctc-row">
+                <mat-icon class="ctc-icon">person</mat-icon>
+                <span class="ctc-label">Cliente</span>
+                <span class="ctc-value">{{ hoveredChamado.nomeCliente || '—' }}</span>
+            </div>
+
+            <div class="ctc-divider"></div>
+
+            <div class="ctc-row">
+                <mat-icon class="ctc-icon">calendar_today</mat-icon>
+                <span class="ctc-label">Abertura</span>
+                <span class="ctc-date">{{ hoveredChamado.dataAbertura || '—' }}</span>
+            </div>
+
+            <div class="ctc-row" *ngIf="hoveredChamado.status == '2' && hoveredChamado.dataFechamento">
+                <mat-icon class="ctc-icon" style="color:#388e3c">event_available</mat-icon>
+                <span class="ctc-label">Encerrado</span>
+                <span class="ctc-date" style="color:#388e3c">{{ hoveredChamado.dataFechamento }}</span>
+            </div>
+        </div>
+    </div>
+
 </div>

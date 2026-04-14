@@ -23,9 +23,10 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isLoading = false;
   searchTerm = '';
+  roleFilter: number[] = [];
 
   TECNICO_DATA: Tecnico[] = [];
-  displayedColumns: string[] = ['foto', 'id', 'nome', 'cpf', 'email', 'acoes'];
+  displayedColumns: string[] = ['foto', 'id', 'nome', 'cpf', 'email', 'perfis', 'acoes'];
   dataSource = new MatTableDataSource<Tecnico>(this.TECNICO_DATA);
   /*Paninação da tabela tecnico*/
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -36,6 +37,11 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   highlightId: string | null = null;
   isNew: boolean = false;
   hideNewBadge = false;
+
+  /* ── Avatar tooltip ──────────────────────────── */
+  hoveredTecnico: Tecnico | null = null;
+  tooltipX = 0;
+  tooltipY = 0;
 
   constructor(
       private service:  TecnicoService,
@@ -74,17 +80,41 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.TECNICO_DATA.length;
   }
 
+  get hasRoleFilter(): boolean {
+    return this.roleFilter.length > 0;
+  }
+
   get hasActiveFilter(): boolean {
-    return this.searchTerm.length > 0;
+    return this.searchTerm.length > 0 || this.hasRoleFilter;
   }
 
   get filteredCount(): number {
-    return this.hasActiveFilter ? this.dataSource.filteredData.length : this.totalTecnicos;
+    return this.dataSource.filteredData.length;
   }
 
   get hasNoResults(): boolean {
     return !this.isLoading && this.filteredCount === 0;
   }
+
+  /* ── Distribuição de perfis ──────────────────────────────── */
+  get countAdmin(): number {
+    return this.TECNICO_DATA.filter(t => t.perfis.includes(0)).length;
+  }
+
+  get countTecnico(): number {
+    return this.TECNICO_DATA.filter(t => t.perfis.includes(2)).length;
+  }
+
+  get adminBarPercent(): number {
+    const max = Math.max(this.countAdmin, this.countTecnico, 1);
+    return Math.round((this.countAdmin / max) * 100);
+  }
+
+  get tecnicoBarPercent(): number {
+    const max = Math.max(this.countAdmin, this.countTecnico, 1);
+    return Math.round((this.countTecnico / max) * 100);
+  }
+
 
   /*Dando refresh na LIST ao ADICIONAR/EDITAR um usúario, passando um LOADING */
   refresh(): void {
@@ -101,7 +131,14 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private configureDataSource(data: Tecnico[]): void {
-    this.dataSource = new MatTableDataSource<Tecnico>(data);
+    this.TECNICO_DATA = data;
+
+    // Apply role filter if active
+    const effectiveData = this.roleFilter.length === 0
+      ? data
+      : data.filter(t => this.roleFilter.some(r => t.perfis.includes(r)));
+
+    this.dataSource = new MatTableDataSource<Tecnico>(effectiveData);
     this.dataSource.filterPredicate = (tecnico: Tecnico, filter: string) => {
       const normalizedFilter = filter.trim().toLowerCase();
       return [tecnico.id, tecnico.nome, tecnico.cpf, tecnico.email]
@@ -171,8 +208,60 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   clearFilter(input: HTMLInputElement): void {
     input.value = '';
     this.searchTerm = '';
+    this.roleFilter = [];
+    this.dataSource.data = this.TECNICO_DATA;
     this.dataSource.filter = '';
     this.dataSource.paginator?.firstPage();
+  }
+
+  /* ── Role filter ─────────────────────────────── */
+  toggleRoleFilter(role: number): void {
+    const idx = this.roleFilter.indexOf(role);
+    if (idx > -1) {
+      this.roleFilter.splice(idx, 1);
+    } else {
+      this.roleFilter.push(role);
+    }
+    this.applyAllFilters();
+  }
+
+  isRoleFilterActive(role: number): boolean {
+    return this.roleFilter.includes(role);
+  }
+
+  private applyAllFilters(): void {
+    const byRole = this.roleFilter.length === 0
+      ? this.TECNICO_DATA
+      : this.TECNICO_DATA.filter(t => this.roleFilter.some(r => t.perfis.includes(r)));
+    this.dataSource.data = byRole;
+    // text filter is auto re-applied by MatTableDataSource when .data changes
+    this.dataSource.paginator?.firstPage();
+  }
+
+  /* ── Perfil helpers ──────────────────────────── */
+  getPerfilLabel(perfil: number): string {
+    const map: Record<number, string> = { 0: 'Admin', 1: 'Cliente', 2: 'Técnico' };
+    return map[perfil] ?? '?';
+  }
+
+  getPerfilIcon(perfil: number): string {
+    const map: Record<number, string> = { 0: 'admin_panel_settings', 1: 'person', 2: 'build' };
+    return map[perfil] ?? 'help';
+  }
+
+  formatRegistrationDate(tecnico: Tecnico): string {
+    const dateStr = (tecnico as any).dataHoraCriacao || tecnico.dataCriacao;
+    if (!dateStr) return 'Técnico cadastrado';
+    try {
+      // Backend serializa como "dd/MM/yyyy - HH:mm" ou "dd/MM/yyyy"
+      // O construtor Date() do JS não parseia esse formato — fazemos o parse manual
+      const datePart = String(dateStr).split(' ')[0]; // extrai "dd/MM/yyyy"
+      const [day, month, year] = datePart.split('/').map(Number);
+      if (!day || !month || !year) return 'Técnico cadastrado';
+      const d = new Date(year, month - 1, day);
+      if (isNaN(d.getTime())) return 'Técnico cadastrado';
+      return 'Desde ' + d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch { return 'Técnico cadastrado'; }
   }
 
   /*MODAL para EDIATR/CRIAR/DELETAR do tecnico-update/tecnico-create/tecnico-delete */
@@ -187,5 +276,49 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
       width: '600px',
       data: { id }//Pegando ID tecnico para editar..
     });
+  }
+
+  /* ── Atalhos do guia rápido ──────────────────────────────── */
+  focusSearch(): void {
+    const el = document.querySelector<HTMLInputElement>('.search-field input');
+    if (el) {
+      el.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  scrollToFilter(): void {
+    const el = document.querySelector<HTMLElement>('.role-filter-bar');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      el.classList.add('filter-pulse');
+      setTimeout(() => el.classList.remove('filter-pulse'), 1400);
+    }
+  }
+
+  scrollToTable(): void {
+    const el = document.querySelector<HTMLElement>('.table-wrapper');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  /* ── Avatar tooltip ──────────────────────────── */
+  showAvatarTooltip(event: MouseEvent, tecnico: Tecnico): void {
+    this.hoveredTecnico = tecnico;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const cardWidth = 240;
+    const offsetX = 12;
+    // Try to the right; fall back to the left if it would overflow
+    const rightX = rect.right + offsetX;
+    this.tooltipX = rightX + cardWidth > window.innerWidth
+      ? rect.left - cardWidth - offsetX
+      : rightX;
+    // Vertically align with the cell, clamped to viewport
+    this.tooltipY = Math.max(8, Math.min(rect.top - 8, window.innerHeight - 160));
+  }
+
+  hideAvatarTooltip(): void {
+    this.hoveredTecnico = null;
   }
 }

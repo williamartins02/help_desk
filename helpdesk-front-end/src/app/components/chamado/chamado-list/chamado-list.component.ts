@@ -13,7 +13,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { Chamado } from "./../../../models/chamado";
-import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild } from "@angular/core";
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, HostListener } from "@angular/core";
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { ActivatedRoute } from "@angular/router";
 import { ChamadoService } from "src/app/services/chamado.service";
@@ -92,6 +92,11 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   highlightId: string | null = null;
   isNew: boolean = false;
   hideNewBadge = false;
+
+  /* ── Chamado row tooltip ──────────────────────────────── */
+  hoveredChamado: Chamado | null = null;
+  tooltipX = 0;
+  tooltipY = 0;
 
   constructor(
       public dialog: MatDialog,
@@ -418,5 +423,36 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isHighlightedNew(id: any): boolean {
     return String(id) === String(this.highlightId) && this.isNew && !this.hideNewBadge;
+  }
+
+  /* ── Chamado tooltip (click no título) ───────────────────── */
+
+  /** Fecha ao clicar em qualquer lugar fora do título */
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.hoveredChamado = null;
+  }
+
+  /** Toggle ao clicar no título: abre se fechado, fecha se já aberto */
+  toggleChamadoTooltip(event: MouseEvent, chamado: Chamado): void {
+    event.stopPropagation(); // impede que o document:click feche imediatamente
+
+    if (this.hoveredChamado?.id === chamado.id) {
+      this.hoveredChamado = null;
+      return;
+    }
+
+    this.hoveredChamado = chamado;
+    const cardWidth  = 280;
+    const cardHeight = 270;
+    const offsetY    = 10;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    // Posiciona abaixo do título; se não couber, coloca acima
+    const belowY = rect.bottom + offsetY;
+    this.tooltipY = belowY + cardHeight > window.innerHeight
+      ? Math.max(8, rect.top - cardHeight - offsetY)
+      : belowY;
+    // Alinha à esquerda; corrige se ultrapassar borda direita
+    this.tooltipX = Math.min(rect.left, window.innerWidth - cardWidth - 8);
   }
 }

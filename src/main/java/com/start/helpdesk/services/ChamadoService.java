@@ -1,6 +1,6 @@
 package com.start.helpdesk.services;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,7 +81,7 @@ public class ChamadoService {
 		}
 		/* Se o chamado for "ENCERRADO(2)" retorna dia do fechamento */
 		if (object.getStatus().equals(2)) {
-			chamado.setDataFechamento(LocalDate.now());
+			chamado.setDataFechamento(LocalDateTime.now());
 		}
         /*Campos ser ATUALIZADO se caso existir o ID do CHAMADO*/
 		chamado.setTecnico(tecnico);

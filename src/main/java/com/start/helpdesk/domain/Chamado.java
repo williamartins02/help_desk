@@ -1,7 +1,6 @@
 package com.start.helpdesk.domain;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
@@ -35,8 +34,8 @@ public class Chamado implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
 	private LocalDateTime dataAbertura = LocalDateTime.now();
 
-	@JsonFormat(pattern = "dd/MM/yyy")
-	private LocalDate dataFechamento;
+	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+	private LocalDateTime dataFechamento;
 
 	private Prioridade prioridade;
 	private Status status;

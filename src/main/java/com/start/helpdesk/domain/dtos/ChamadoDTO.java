@@ -1,7 +1,7 @@
 package com.start.helpdesk.domain.dtos;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
@@ -23,9 +23,9 @@ public class ChamadoDTO implements Serializable {
 	private Integer id;
 	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
 	private LocalDateTime dataAbertura = LocalDateTime.now();
-	@JsonFormat(pattern = "dd/MM/yyy")
-	private LocalDate dataFechamento;
-	
+	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+	private LocalDateTime dataFechamento;
+
 	@NotNull(message = "Campo PRIORIDADE obrigatório")
 	private Integer prioridade;
 	
