@@ -24,6 +24,57 @@
   <div class="dialog-body">
     <form class="main-form">
 
+      <!-- Seção: Foto de perfil -->
+      <div class="section-header">
+        <mat-icon class="section-icon">photo_camera</mat-icon>
+        <span>Foto de perfil <span class="optional-label">(opcional)</span></span>
+      </div>
+
+      <div class="avatar-upload-section">
+
+        <!-- Preview circular -->
+        <div class="avatar-preview">
+          <img *ngIf="previewUrl" [src]="previewUrl" class="avatar-img" alt="Foto de perfil">
+          <div *ngIf="!previewUrl" class="avatar-placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="avatar-actions">
+          <div class="avatar-btn-row">
+            <!-- Alterar / Enviar foto -->
+            <button type="button" mat-stroked-button color="primary"
+                    (click)="fileInput.click()" class="btn-upload">
+              <mat-icon>upload</mat-icon>
+              {{ previewUrl ? 'Alterar foto' : 'Enviar foto' }}
+            </button>
+
+            <!-- Cancelar troca — volta para a foto que estava antes -->
+            <button type="button" mat-stroked-button color="warn" class="btn-cancel-foto"
+                    *ngIf="fotoAlterada"
+                    (click)="cancelarAlteracaoFoto()"
+                    matTooltip="Descartar alteração e manter a foto anterior">
+              <mat-icon>undo</mat-icon>
+              Desfazer
+            </button>
+          </div>
+
+          <input #fileInput type="file" accept="image/png,image/jpeg,image/jpg,image/webp"
+                 (change)="onFileSelected($event)" style="display:none">
+
+          <p class="avatar-hint">
+            <mat-icon class="hint-icon">info</mat-icon>
+            <span *ngIf="!fotoAlterada">
+              {{ previewUrl ? 'Foto atual do técnico. Clique em "Alterar foto" para substituir.' : 'Nenhuma foto cadastrada.' }}
+            </span>
+            <span *ngIf="fotoAlterada" class="hint-changed">
+              Nova foto selecionada. Clique em "Desfazer" para voltar à foto anterior.
+            </span>
+          </p>
+        </div>
+      </div>
+
       <!-- Seção: Perfis -->
       <div class="section-header">
         <mat-icon class="section-icon">manage_accounts</mat-icon>

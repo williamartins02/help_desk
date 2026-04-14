@@ -47,11 +47,12 @@ public class Tecnico extends Pessoa {
 	
 	public Tecnico(TecnicoDTO object) {
 		super();
-		this.id =     object.getId();
-		this.nome =   object.getNome();
-		this.cpf =    object .getCpf();
-		this.email =  object.getEmail();
-		this.senha =  object.getSenha();
+		this.id =         object.getId();
+		this.nome =       object.getNome();
+		this.cpf =        object.getCpf();
+		this.email =      object.getEmail();
+		this.senha =      object.getSenha();
+		this.fotoPerfil = object.getFotoPerfil();
 		this.perfis = object.getPerfisMapped().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
 		// dataCriacao e dataHoraCriacao são gerenciados pelo servidor via @CreationTimestamp
 	}

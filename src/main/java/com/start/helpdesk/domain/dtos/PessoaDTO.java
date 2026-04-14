@@ -29,6 +29,9 @@ public class PessoaDTO implements Serializable {
     /** "TECNICO" ou "CLIENTE" — derivado do tipo da entidade */
     private String tipo;
 
+    /** Foto de perfil armazenada como Base64 (somente técnicos possuem) */
+    private String fotoPerfil;
+
     public PessoaDTO(Pessoa pessoa) {
         this.id          = pessoa.getId();
         this.nome        = pessoa.getNome();
@@ -39,6 +42,7 @@ public class PessoaDTO implements Serializable {
                                   .collect(Collectors.toSet());
         this.dataCriacao = pessoa.getDataCriacao();
         this.tipo        = (pessoa instanceof Cliente) ? "CLIENTE" : "TECNICO";
+        this.fotoPerfil  = pessoa.getFotoPerfil();
     }
 
     public Integer       getId()          { return id; }
@@ -48,5 +52,6 @@ public class PessoaDTO implements Serializable {
     public Set<String>   getPerfis()      { return perfis; }
     public LocalDate     getDataCriacao() { return dataCriacao; }
     public String        getTipo()        { return tipo; }
+    public String        getFotoPerfil()  { return fotoPerfil; }
 }
 

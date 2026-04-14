@@ -241,6 +241,103 @@ mat-icon {
   opacity: 0.85 !important;
 }
 
+/* ===== Avatar Upload ===== */
+.avatar-upload-section {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #e3ecff;
+  flex-shrink: 0;
+  background: #f1f5ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.12);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #90a4ae;
+}
+
+.avatar-placeholder mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0.55 !important;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.avatar-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-upload {
+  border-radius: 0.65rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+}
+
+.btn-cancel-foto {
+  border-radius: 0.65rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+}
+
+.hint-changed {
+  color: #0288d1;
+  font-weight: 500;
+}
+
+.avatar-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  color: #90a4ae;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.hint-icon {
+  font-size: 0.85rem !important;
+  width: 0.85rem !important;
+  height: 0.85rem !important;
+  opacity: 0.6 !important;
+  color: #1565c0;
+  flex-shrink: 0;
+}
+
+.optional-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #90a4ae;
+  margin-left: 0.3rem;
+}
+
 /* ===== Responsividade ===== */
 @media (max-width: 560px) {
   .dialog-wrapper {

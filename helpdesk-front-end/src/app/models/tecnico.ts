@@ -7,6 +7,7 @@ export interface Tecnico {
     perfis: number[];
     dataCriacao: any;
     dataHoraCriacao?: string;
+    fotoPerfil?: string;
 }
 
 export interface IPessoa {

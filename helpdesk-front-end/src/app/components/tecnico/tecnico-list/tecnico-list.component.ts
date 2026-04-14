@@ -25,7 +25,7 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   searchTerm = '';
 
   TECNICO_DATA: Tecnico[] = [];
-  displayedColumns: string[] = ['id', 'nome', 'cpf', 'email', 'acoes'];
+  displayedColumns: string[] = ['foto', 'id', 'nome', 'cpf', 'email', 'acoes'];
   dataSource = new MatTableDataSource<Tecnico>(this.TECNICO_DATA);
   /*Paninação da tabela tecnico*/
   @ViewChild(MatPaginator) paginator!: MatPaginator;

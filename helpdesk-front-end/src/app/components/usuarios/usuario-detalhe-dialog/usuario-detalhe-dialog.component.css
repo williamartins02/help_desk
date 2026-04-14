@@ -48,6 +48,12 @@
   letter-spacing: 0.05em;
 }
 
+/* Foto real — sobrepõe o display:flex do círculo sem quebrar o layout */
+.header-avatar-img {
+  object-fit: cover;
+  display: block;
+}
+
 .header-user-info { display: flex; flex-direction: column; gap: 0.35rem; }
 
 .header-nome {

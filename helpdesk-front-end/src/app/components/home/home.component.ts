@@ -18,7 +18,7 @@ import { Telefone } from '../../models/telefone';
 import { MatDialog } from '@angular/material/dialog';
 import { GenericDialogComponent } from '../molecules/generic-dialog/generic-dialog.component';
 import { CriticalAlertDialogComponent } from '../molecules/critical-alert-dialog/critical-alert-dialog.component';
-import { RankingDialogComponent } from '../molecules/ranking-dialog/ranking-dialog.component';
+import { RankingDialogComponent } from './ranking-dialog/ranking-dialog.component';
 
 interface Atividade {
   icon: string;

@@ -35,6 +35,8 @@ public class TecnicoService {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired
 	private ChamadoRepository chamadoRepository;
+	@Autowired
+	private AvatarGeneratorService avatarGeneratorService;
 
 	/*METODO -> Buscando ID do tecnico no banco*/
 	public Tecnico findById(Integer id) {
@@ -52,6 +54,10 @@ public class TecnicoService {
 	public Tecnico create(TecnicoDTO objectDTO) {
 		objectDTO.setId(null);/*Assegurando que o ID vai vir nulo,*/
 		objectDTO.setSenha(bCryptPasswordEncoder.encode(objectDTO.getSenha()));/*setando senha com criptografica*/
+		/* Gera avatar automático caso nenhuma foto seja enviada */
+		if (objectDTO.getFotoPerfil() == null || objectDTO.getFotoPerfil().isBlank()) {
+			objectDTO.setFotoPerfil(avatarGeneratorService.generateAvatarBase64(objectDTO.getNome()));
+		}
 		validationCpfEmail(objectDTO);
 	    Tecnico newObject = new Tecnico(objectDTO);
 		return tecnicoRepository.save(newObject);
@@ -64,7 +70,15 @@ public class TecnicoService {
 		   /*Verificando se usuario editou uma nova  senha ou não.*/
 		   if(!objectDTO.getSenha().equals(existingObject.getSenha())) {//se senha for diferente da senha salva, criar uma criptografia nova.
 			   objectDTO.setSenha(bCryptPasswordEncoder.encode(objectDTO.getSenha()));
-		   }  
+		   }
+		/*
+		 * Regras de foto no UPDATE:
+		 *  - null ou vazio → não foi alterada → preserva a foto existente
+		 *  - "data:..."    → nova foto enviada → usa diretamente
+		 */
+		if (objectDTO.getFotoPerfil() == null || objectDTO.getFotoPerfil().isBlank()) {
+			objectDTO.setFotoPerfil(existingObject.getFotoPerfil());
+		}
 		validationCpfEmail(objectDTO);
 		Tecnico updatedObject = new Tecnico(objectDTO);
 		// Preserva a data de criação original — não deve ser alterada em atualizações

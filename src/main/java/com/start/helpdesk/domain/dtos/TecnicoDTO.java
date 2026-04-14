@@ -39,7 +39,10 @@ public class TecnicoDTO implements Serializable {
 		protected String email;
 		@NotNull(message = "O campo SENHA é requerido")
 		protected String senha;
-		
+
+		/** Foto de perfil em Base64 (opcional — gerada automaticamente se não informada). */
+		protected String fotoPerfil;
+
 		protected Set<Integer> perfis = new HashSet<>();
 		
 		
@@ -61,6 +64,7 @@ public class TecnicoDTO implements Serializable {
 			this.cpf =   object.getCpf();
 			this.email = object.getEmail();
 			this.senha = object.getSenha();
+			this.fotoPerfil =      object.getFotoPerfil();
 			this.perfis =        object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
 			this.dataCriacao =     object.getDataCriacao();
 			this.dataHoraCriacao = object.getDataHoraCriacao();

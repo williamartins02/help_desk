@@ -24,6 +24,37 @@
   <div class="dialog-body">
     <form class="main-form">
 
+        <!-- Seção: Foto de perfil -->
+      <div class="section-header">
+        <mat-icon class="section-icon">photo_camera</mat-icon>
+        <span>Foto de perfil <span class="optional-label">(opcional)</span></span>
+      </div>
+
+      <div class="avatar-upload-section">
+        <div class="avatar-preview">
+          <img *ngIf="previewUrl" [src]="previewUrl" class="avatar-img" alt="Prévia da foto">
+          <div *ngIf="!previewUrl" class="avatar-placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+        </div>
+        <div class="avatar-actions">
+          <div class="avatar-btn-row">
+            <button type="button" mat-stroked-button color="primary" (click)="fileInput.click()" class="btn-upload">
+              <mat-icon>upload</mat-icon>
+              {{ previewUrl ? 'Alterar foto' : 'Enviar foto' }}
+            </button>
+            <button type="button" mat-icon-button color="warn" *ngIf="previewUrl" (click)="removePhoto()" matTooltip="Remover foto">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <input #fileInput type="file" accept="image/png,image/jpeg,image/jpg,image/webp" (change)="onFileSelected($event)" style="display:none">
+          <p class="avatar-hint">
+            <mat-icon class="hint-icon">auto_awesome</mat-icon>
+            Se não enviar uma foto, um avatar será gerado automaticamente.
+          </p>
+        </div>
+      </div>
+
       <!-- Seção: Perfis -->
       <div class="section-header">
         <mat-icon class="section-icon">manage_accounts</mat-icon>

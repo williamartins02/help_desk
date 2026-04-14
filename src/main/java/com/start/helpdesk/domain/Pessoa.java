@@ -52,7 +52,11 @@ public abstract class Pessoa implements Serializable {
 	protected String email;
 	
 	protected String senha;
-	
+
+	/** Foto de perfil armazenada como string Base64 (data URL) ou SVG gerado automaticamente. */
+	@Column(name = "foto_perfil", columnDefinition = "LONGTEXT")
+	protected String fotoPerfil;
+
 	@ElementCollection(fetch = FetchType.EAGER)//informando q é uma coleção, element tipo Integer, q a lista tem que vir junto com usuario assim que for informado
 	@CollectionTable(name = "PERFIS")//UMA TABELA NO BANCO COM APENAS OS PERFIS
 	

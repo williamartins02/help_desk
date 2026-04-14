@@ -8,7 +8,15 @@
     </button>
 
     <div class="header-avatar-row">
-      <div class="header-avatar" [style.background]="getAvatarGradient(usuario)">
+      <!-- Foto de perfil real quando disponível -->
+      <img *ngIf="usuario.fotoPerfil"
+           [src]="usuario.fotoPerfil"
+           [alt]="usuario.nome"
+           class="header-avatar header-avatar-img">
+      <!-- Fallback: círculo com iniciais -->
+      <div *ngIf="!usuario.fotoPerfil"
+           class="header-avatar"
+           [style.background]="getAvatarGradient(usuario)">
         {{ getInitials(usuario.nome) }}
       </div>
       <div class="header-user-info">

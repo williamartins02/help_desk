@@ -126,7 +126,17 @@
         <ng-container matColumnDef="avatar">
           <mat-header-cell *matHeaderCellDef class="col-avatar"></mat-header-cell>
           <mat-cell *matCellDef="let u" class="col-avatar">
-            <div class="user-avatar" [style.background]="getAvatarColor(u)">
+            <!-- Foto de perfil real (técnicos que têm foto cadastrada) -->
+            <img *ngIf="u.fotoPerfil"
+                 [src]="u.fotoPerfil"
+                 [alt]="u.nome"
+                 class="user-avatar-img"
+                 [matTooltip]="u.nome">
+            <!-- Fallback: círculo colorido com iniciais -->
+            <div *ngIf="!u.fotoPerfil"
+                 class="user-avatar"
+                 [style.background]="getAvatarColor(u)"
+                 [matTooltip]="u.nome">
               {{ getInitials(u.nome) }}
             </div>
           </mat-cell>

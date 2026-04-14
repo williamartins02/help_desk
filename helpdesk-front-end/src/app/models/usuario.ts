@@ -6,5 +6,6 @@ export interface IUsuario {
   perfis:       string[];   // ex: ['ROLE_ADMIN', 'ROLE_TECNICO']
   dataCriacao:  string;
   tipo:         'TECNICO' | 'CLIENTE';
+  fotoPerfil?:  string;     // Base64 data URL — somente técnicos
 }
 

@@ -1,0 +1,406 @@
+<div class="rk-wrapper">
+
+  <!-- ── Header ────────────────────────────────────────────── -->
+  <div class="rk-header">
+    <div class="rk-header-brand">
+      <div class="rk-header-icon-badge">
+        <mat-icon class="rk-header-icon">leaderboard</mat-icon>
+      </div>
+      <div class="rk-header-text">
+        <h3 class="rk-title">Ranking de Desempenho</h3>
+        <p class="rk-subtitle">
+          Chamados atendidos por técnico
+          <span class="rk-subtitle-badge" *ngIf="ranking.length > 0">
+            {{ ranking.length }} técnico{{ ranking.length !== 1 ? 's' : '' }}
+          </span>
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button class="rk-close-btn" (click)="onClose()" aria-label="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ── Body ──────────────────────────────────────────────── -->
+  <div class="rk-body">
+
+    <mat-tab-group [(selectedIndex)]="tabIndex" animationDuration="200ms" class="rk-tabs">
+
+      <!-- ════ TAB 1: Ranking ════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">emoji_events</mat-icon>
+          <span>Ranking</span>
+          <!-- Indicador "Ao vivo" na aba -->
+          <span class="rk-tab-live-dot"
+                [class.rk-tab-live-updating]="isUpdating"
+                matTooltip="{{ isUpdating ? 'Atualizando…' : 'Ranking ao vivo' }}"
+                matTooltipPosition="above">
+          </span>
+        </ng-template>
+
+        <div class="tab-content">
+
+          <!-- Estado vazio -->
+          <div *ngIf="ranking.length === 0" class="rk-empty">
+            <mat-icon>inbox</mat-icon>
+            <span>Nenhum chamado registrado ainda.</span>
+          </div>
+
+          <ng-container *ngIf="ranking.length > 0">
+
+            <!-- ── Barra "Ao vivo" ── -->
+            <div class="rk-live-bar">
+              <span class="rk-live-dot" [class.rk-live-updating]="isUpdating"></span>
+              <span class="rk-live-text" *ngIf="!isUpdating && ultimaAtualizacao">
+                Ao vivo &bull; Atualizado às {{ ultimaAtualizacao | date:'HH:mm:ss' }}
+              </span>
+              <span class="rk-live-text rk-live-syncing" *ngIf="isUpdating">
+                <mat-icon class="rk-spin-icon">sync</mat-icon> Atualizando ranking…
+              </span>
+            </div>
+
+            <!-- ── Banner de mudança de liderança ── -->
+            <div class="rk-leader-banner" *ngIf="showLeaderChange && novoLider">
+              <mat-icon>emoji_events</mat-icon>
+              <span>Mudança na liderança!&nbsp;<strong>{{ novoLider }}</strong>&nbsp;assumiu o 1º lugar 🏆</span>
+              <button class="rk-banner-close" (click)="showLeaderChange = false">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <!-- ── KPI Summary ── -->
+            <div class="rk-summary-row">
+              <div class="rk-sum-card">
+                <div class="rk-sum-icon rk-sum-blue"><mat-icon>group</mat-icon></div>
+                <div class="rk-sum-text">
+                  <span class="rk-sum-num">{{ ranking.length }}</span>
+                  <span class="rk-sum-lbl">Técnicos</span>
+                </div>
+              </div>
+              <div class="rk-sum-card">
+                <div class="rk-sum-icon rk-sum-purple"><mat-icon>assignment</mat-icon></div>
+                <div class="rk-sum-text">
+                  <span class="rk-sum-num">{{ totalChamadosGeral }}</span>
+                  <span class="rk-sum-lbl">Total Chamados</span>
+                </div>
+              </div>
+              <div class="rk-sum-card">
+                <div class="rk-sum-icon rk-sum-green"><mat-icon>check_circle</mat-icon></div>
+                <div class="rk-sum-text">
+                  <span class="rk-sum-num">{{ taxaGeralResolucao }}%</span>
+                  <span class="rk-sum-lbl">Taxa Geral</span>
+                </div>
+              </div>
+              <div class="rk-sum-card">
+                <div class="rk-sum-icon rk-sum-amber"><mat-icon>emoji_events</mat-icon></div>
+                <div class="rk-sum-text">
+                  <span class="rk-sum-num">{{ melhorTaxa }}%</span>
+                  <span class="rk-sum-lbl">Melhor Taxa</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Search ── -->
+            <div class="rk-search-row">
+              <mat-icon class="rk-search-icon">search</mat-icon>
+              <input class="rk-search-input"
+                     type="text"
+                     [(ngModel)]="searchTerm"
+                     placeholder="Buscar técnico…" />
+              <button class="rk-search-clear" *ngIf="searchTerm"
+                      (click)="searchTerm = ''"
+                      matTooltip="Limpar filtro">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <!-- Nenhum resultado para a busca -->
+            <div *ngIf="filteredRanking.length === 0 && searchTerm" class="rk-empty">
+              <mat-icon>search_off</mat-icon>
+              <span>Nenhum técnico encontrado para "<strong>{{ searchTerm }}</strong>".</span>
+            </div>
+
+            <!-- ── Ranking list ── -->
+            <div class="ranking-list" *ngIf="filteredRanking.length > 0">
+              <div
+                class="ranking-item"
+                [class.podium]="getOriginalIndex(item) < 3"
+                [class.rank-first]="getOriginalIndex(item) === 0"
+                [class.rank-second]="getOriginalIndex(item) === 1"
+                [class.rank-third]="getOriginalIndex(item) === 2"
+                [class.rank-flash-up]="item.posicaoChange !== undefined && item.posicaoChange !== null && item.posicaoChange > 0"
+                [class.rank-flash-down]="item.posicaoChange !== undefined && item.posicaoChange !== null && item.posicaoChange < 0"
+                *ngFor="let item of filteredRanking"
+                (click)="selecionarTecnico(item, 1)"
+                matTooltip="Ver histórico de {{ item.nome }}"
+                matTooltipPosition="above">
+
+                <!-- Posição -->
+                <div class="rank-pos" [class]="getMedalClass(getOriginalIndex(item))">
+                  <span *ngIf="getOriginalIndex(item) < 3" class="medal-emoji">{{ getMedalIcon(getOriginalIndex(item)) }}</span>
+                  <span *ngIf="getOriginalIndex(item) >= 3" class="rank-number">{{ getOriginalIndex(item) + 1 }}</span>
+                </div>
+
+                <!-- Avatar inicial -->
+                <div class="rank-avatar" [class]="getMedalClass(getOriginalIndex(item))">
+                  {{ item.nome.charAt(0).toUpperCase() }}
+                </div>
+
+                <!-- Info -->
+                <div class="rank-info">
+                  <div class="rank-nome-row">
+                    <span class="rank-nome">{{ item.nome }}</span>
+                    <span class="rank-total-chip">{{ item.chamados.length }} total</span>
+                    <span class="rank-enc-chip">{{ item.totalAtendidos }} enc.</span>
+                  </div>
+                  <div class="rank-bar-wrap">
+                    <div class="rank-bar">
+                      <!-- Preenchimento dinâmico: largura relativa ao líder, cor pela taxa de resolução -->
+                      <div class="rank-bar-fill"
+                           [style.width.%]="getBarPercent(item)"
+                           [style.background]="getBarGradient(item.taxaResolucao)">
+                        <!-- Porcentagem dentro da barra (quando o preenchimento tem espaço) -->
+                        <span class="rank-bar-inner-pct" *ngIf="getBarPercent(item) >= 22">
+                          {{ item.taxaResolucao }}%
+                        </span>
+                      </div>
+                    </div>
+                    <!-- Porcentagem fora da barra quando ela é muito estreita -->
+                    <span class="rank-bar-pct-out"
+                          *ngIf="getBarPercent(item) < 22"
+                          [style.color]="getBarSolidColor(item.taxaResolucao)">
+                      {{ item.taxaResolucao }}%
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="rank-stats">
+                  <span class="stat-chip stat-green" matTooltip="Encerrados">
+                    <mat-icon>check_circle_outline</mat-icon>
+                    <span class="stat-val">{{ item.totalAtendidos }}</span>
+                    <span class="stat-txt">enc.</span>
+                  </span>
+                  <span class="stat-chip stat-blue" matTooltip="Abertos">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <span class="stat-val">{{ item.totalAbertos }}</span>
+                    <span class="stat-txt">ab.</span>
+                  </span>
+                  <span class="stat-chip stat-orange" matTooltip="Em andamento">
+                    <mat-icon>autorenew</mat-icon>
+                    <span class="stat-val">{{ item.totalEmAndamento }}</span>
+                    <span class="stat-txt">and.</span>
+                  </span>
+                </div>
+
+                <!-- Delta de posição (visível apenas após o 1º poll) -->
+                <div class="rank-delta" *ngIf="item.posicaoChange !== undefined">
+                  <!-- Novo técnico -->
+                  <span class="delta-badge delta-new"
+                        *ngIf="item.posicaoChange === null"
+                        matTooltip="Novo no ranking">
+                    NOVO
+                  </span>
+                  <!-- Subiu de posição -->
+                  <span class="delta-badge delta-up"
+                        *ngIf="item.posicaoChange !== null && item.posicaoChange > 0"
+                        matTooltip="Subiu {{ getDeltaAbs(item.posicaoChange) }} posição(ões)">
+                    <mat-icon>arrow_upward</mat-icon>{{ getDeltaAbs(item.posicaoChange) }}
+                  </span>
+                  <!-- Caiu de posição -->
+                  <span class="delta-badge delta-down"
+                        *ngIf="item.posicaoChange !== null && item.posicaoChange < 0"
+                        matTooltip="Caiu {{ getDeltaAbs(item.posicaoChange) }} posição(ões)">
+                    <mat-icon>arrow_downward</mat-icon>{{ getDeltaAbs(item.posicaoChange) }}
+                  </span>
+                  <!-- Mesma posição -->
+                  <span class="delta-badge delta-same"
+                        *ngIf="item.posicaoChange === 0"
+                        matTooltip="Sem mudança de posição">
+                    <mat-icon>remove</mat-icon>
+                  </span>
+                </div>
+
+                <!-- Taxa resolução -->
+                <div class="rank-taxa">
+                  <span class="taxa-badge" [class]="'perf-' + getPerformanceLevel(item.taxaResolucao)">
+                    {{ item.taxaResolucao }}%
+                  </span>
+                  <span class="taxa-lbl">resolução</span>
+                </div>
+
+                <!-- Seta -->
+                <mat-icon class="rank-arrow">chevron_right</mat-icon>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+      </mat-tab>
+
+      <!-- ════ TAB 2: Histórico ════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">history</mat-icon>
+          <span>Histórico</span>
+        </ng-template>
+
+        <div class="tab-content">
+
+          <!-- Sem técnico selecionado -->
+          <div *ngIf="!tecnicoSelecionado" class="rk-empty">
+            <mat-icon>person_search</mat-icon>
+            <span>Selecione um técnico no <strong>Ranking</strong> para ver o histórico.</span>
+          </div>
+
+          <!-- Com técnico selecionado -->
+          <ng-container *ngIf="tecnicoSelecionado">
+            <div class="hist-header">
+              <div class="hist-avatar">{{ tecnicoSelecionado.nome.charAt(0).toUpperCase() }}</div>
+              <div class="hist-info">
+                <span class="hist-nome">{{ tecnicoSelecionado.nome }}</span>
+                <span class="hist-sub">{{ tecnicoSelecionado.chamados.length }} chamado(s)</span>
+              </div>
+              <button mat-icon-button (click)="tecnicoSelecionado = null" matTooltip="Limpar seleção">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <!-- KPI strip do técnico selecionado -->
+            <div class="hist-kpi-row">
+              <span class="hist-kpi-chip hist-kpi-green">
+                <mat-icon>check_circle_outline</mat-icon>
+                {{ tecnicoSelecionado.totalAtendidos }} encerrados
+              </span>
+              <span class="hist-kpi-chip hist-kpi-blue">
+                <mat-icon>add_circle_outline</mat-icon>
+                {{ tecnicoSelecionado.totalAbertos }} abertos
+              </span>
+              <span class="hist-kpi-chip hist-kpi-orange">
+                <mat-icon>autorenew</mat-icon>
+                {{ tecnicoSelecionado.totalEmAndamento }} em andamento
+              </span>
+              <span class="hist-kpi-chip"
+                    [class]="'hist-kpi-perf-' + getPerformanceLevel(tecnicoSelecionado.taxaResolucao)">
+                <mat-icon>trending_up</mat-icon>
+                {{ tecnicoSelecionado.taxaResolucao }}% resolução
+              </span>
+            </div>
+
+            <div *ngIf="tecnicoSelecionado.chamados.length === 0" class="rk-empty">
+              <mat-icon>inbox</mat-icon>
+              <span>Nenhum chamado registrado para este técnico.</span>
+            </div>
+
+            <div class="hist-list" *ngIf="tecnicoSelecionado.chamados.length > 0">
+              <div
+                class="hist-item"
+                *ngFor="let c of tecnicoSelecionado.chamados"
+                (click)="selecionarChamado(c)"
+                matTooltip="Ver timeline deste chamado"
+                matTooltipPosition="above">
+
+                <div class="hist-status-icon"
+                     [style.background]="getStatusColor(c.status) + '18'"
+                     [style.color]="getStatusColor(c.status)">
+                  <mat-icon>{{ getStatusIcon(c.status) }}</mat-icon>
+                </div>
+
+                <div class="hist-body">
+                  <span class="hist-titulo">{{ c.titulo }}</span>
+                  <span class="hist-detalhe">
+                    <mat-icon class="hist-mini-icon">person</mat-icon> {{ c.nomeCliente }}
+                    &bull;
+                    <mat-icon class="hist-mini-icon">event</mat-icon> {{ c.dataAbertura }}
+                  </span>
+                </div>
+
+                <div class="hist-badges">
+                  <span class="badge-status"
+                        [style.background]="getStatusColor(c.status) + '18'"
+                        [style.color]="getStatusColor(c.status)">
+                    {{ statusLabels[c.status] }}
+                  </span>
+                  <span class="badge-prio"
+                        [style.background]="getPrioridadeColor(c.prioridade) + '22'"
+                        [style.color]="getPrioridadeColor(c.prioridade)">
+                    {{ prioridadeLabels[c.prioridade] }}
+                  </span>
+                </div>
+
+                <mat-icon class="hist-arrow">chevron_right</mat-icon>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </mat-tab>
+
+      <!-- ════ TAB 3: Timeline ════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">timeline</mat-icon>
+          <span>Timeline</span>
+        </ng-template>
+
+        <div class="tab-content">
+
+          <!-- Sem chamado selecionado -->
+          <div *ngIf="!chamadoSelecionado" class="rk-empty">
+            <mat-icon>touch_app</mat-icon>
+            <span>Selecione um chamado no <strong>Histórico</strong> para ver a timeline.</span>
+          </div>
+
+          <!-- Com chamado selecionado -->
+          <ng-container *ngIf="chamadoSelecionado">
+
+            <div class="tl-chamado-card">
+              <div class="tl-chamado-top">
+                <mat-icon [style.color]="getStatusColor(chamadoSelecionado.status)">
+                  {{ getStatusIcon(chamadoSelecionado.status) }}
+                </mat-icon>
+                <span class="tl-chamado-titulo">{{ chamadoSelecionado.titulo }}</span>
+              </div>
+              <div class="tl-chamado-meta">
+                <span><strong>Cliente:</strong> {{ chamadoSelecionado.nomeCliente }}</span>
+                <span><strong>Técnico:</strong> {{ chamadoSelecionado.nomeTecnico }}</span>
+                <span><strong>Classificação:</strong> {{ classificacaoLabels[chamadoSelecionado.classificacao] }}</span>
+              </div>
+              <div class="tl-chamado-obs" *ngIf="chamadoSelecionado.observacoes">
+                <mat-icon class="tl-obs-icon">notes</mat-icon>
+                <span>{{ chamadoSelecionado.observacoes }}</span>
+              </div>
+              <button mat-icon-button class="tl-back-btn"
+                      (click)="chamadoSelecionado = null; tabIndex = 1"
+                      matTooltip="Voltar ao histórico">
+                <mat-icon>arrow_back</mat-icon>
+              </button>
+            </div>
+
+            <!-- Timeline events -->
+            <div class="tl-list">
+              <div class="tl-item" *ngFor="let ev of timelineEventos; let last = last">
+                <div class="tl-left">
+                  <div class="tl-dot" [style.background]="ev.cor" [style.border-color]="ev.cor + '55'">
+                    <mat-icon class="tl-dot-icon">{{ ev.icone }}</mat-icon>
+                  </div>
+                  <div class="tl-line" *ngIf="!last"></div>
+                </div>
+                <div class="tl-content">
+                  <span class="tl-ev-titulo">{{ ev.titulo }}</span>
+                  <span class="tl-ev-desc">{{ ev.descricao }}</span>
+                  <span class="tl-ev-data" *ngIf="ev.data">
+                    <mat-icon class="tl-clock-icon">schedule</mat-icon> {{ ev.data }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+</div>
+

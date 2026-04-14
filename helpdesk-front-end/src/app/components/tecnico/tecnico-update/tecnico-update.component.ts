@@ -25,7 +25,20 @@ export class TecnicoUpdateComponent implements OnInit {
     senha: '',
     perfis: [],
     dataCriacao: '',
+    fotoPerfil: undefined,
   }
+
+  /** Preview da imagem (data URL): mostra a foto atual ou a recém-selecionada */
+  previewUrl: string | null = null;
+
+  /** Foto original carregada do servidor — usada para desfazer alterações locais */
+  private originalFoto: string | null = null;
+
+  /** Indica se o usuário trocou a foto nesta sessão (vs a foto original do servidor) */
+  fotoAlterada = false;
+
+  /** Máximo de 3 MB para upload de foto */
+  private readonly MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
 
   /*Validação usando o FormControl*/
   nome:  FormControl = new FormControl(null, Validators.minLength(3));
@@ -37,12 +50,12 @@ export class TecnicoUpdateComponent implements OnInit {
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {id: Number},//pegando o id do tecnico para dentro do modal.
-    public  dialogRef: MatDialogRef<TecnicoUpdateComponent>,//dando referencia do componente que eu quero abrir o modal
+    @Inject(MAT_DIALOG_DATA) public data: {id: Number},
+    public  dialogRef: MatDialogRef<TecnicoUpdateComponent>,
     private service:   TecnicoService,
     private toast:     ToastrService,
     private router:    Router,
-    private route:     ActivatedRoute, //permite de um GET em parametros pela url para pegar paramentros 
+    private route:     ActivatedRoute,
     public  dialog:    MatDialog
   ) { 
     this.genericDialog = new GenericDialog(dialog);
@@ -55,14 +68,47 @@ export class TecnicoUpdateComponent implements OnInit {
   findById(): void {
     this.service.findById(this.data.id).subscribe((resposta) => {
       this.tecnico = resposta;
-      // Sincronizar FormControls com os dados carregados
       this.nome.setValue(resposta.nome);
       this.cpf.setValue(resposta.cpf);
       this.email.setValue(resposta.email);
       this.senha.setValue(resposta.senha);
+      // Guarda a foto original para permitir desfazer
+      this.originalFoto  = resposta.fotoPerfil || null;
+      this.previewUrl    = this.originalFoto;
+      this.fotoAlterada  = false;
     })
   }
-  
+
+  /** Lida com a seleção de arquivo de imagem e converte para Base64 */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    if (file.size > this.MAX_FILE_SIZE_BYTES) {
+      this.toast.warning('A imagem deve ter no máximo 3 MB.', 'Arquivo muito grande');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      this.previewUrl   = result;
+      this.tecnico.fotoPerfil = result;
+      this.fotoAlterada = true;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /** Cancela a troca de foto e volta para a foto original do servidor */
+  cancelarAlteracaoFoto(): void {
+    this.previewUrl = this.originalFoto;
+    this.tecnico.fotoPerfil = this.originalFoto ?? undefined;
+    this.fotoAlterada = false;
+  }
+
   update(): void {
     this.onNoClick();
     const matDialogRef = this.genericDialog.loadingMessage("Atualizando técnico...");

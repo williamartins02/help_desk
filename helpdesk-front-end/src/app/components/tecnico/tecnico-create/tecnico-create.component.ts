@@ -26,7 +26,14 @@ export class TecnicoCreateComponent implements OnInit {
     senha: "",
     perfis: [2],  // Técnico pré-selecionado por padrão
     dataCriacao: "",
+    fotoPerfil: undefined,
   };
+
+  /** Preview da imagem selecionada pelo usuário (data URL) */
+  previewUrl: string | null = null;
+
+  /** Máximo de 3 MB para upload de foto */
+  private readonly MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
 
   /*Validação usando o FormControl*/
   nome:   FormControl = new FormControl(null, Validators.minLength(3));
@@ -48,6 +55,34 @@ export class TecnicoCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {}
+
+  /** Lida com a seleção de arquivo de imagem e converte para Base64 */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    if (file.size > this.MAX_FILE_SIZE_BYTES) {
+      this.toast.warning('A imagem deve ter no máximo 3 MB.', 'Arquivo muito grande');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      this.previewUrl = result;
+      this.tecnico.fotoPerfil = result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /** Remove a foto selecionada (o backend gerará o avatar automático) */
+  removePhoto(): void {
+    this.previewUrl = null;
+    this.tecnico.fotoPerfil = undefined;
+  }
 
   /*Metodo para criar um Tecnico*/
   public create(): void{
