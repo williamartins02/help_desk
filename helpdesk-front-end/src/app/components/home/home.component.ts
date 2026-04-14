@@ -14,7 +14,6 @@ import { Chamado } from '../../models/chamado';
 import { Cliente } from '../../models/cliente';
 import { Tecnico } from '../../models/tecnico';
 import { Telefone } from '../../models/telefone';
-import { TecnicoRankingDTO } from '../../models/tecnico-ranking.dto';
 
 import { MatDialog } from '@angular/material/dialog';
 import { GenericDialogComponent } from '../molecules/generic-dialog/generic-dialog.component';
@@ -99,11 +98,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private refreshSub: Subscription;
   private alertDialogRef: any;
 
-  // Ranking
-  rankingTecnicos: TecnicoRankingDTO[] = [];
-  showRankingModal = false;
-  isRankingLoading = false;
-  rankingError: string | null = null;
 
   constructor(
     private chamadoService:  ChamadoService,
@@ -569,26 +563,5 @@ export class HomeComponent implements OnInit, OnDestroy {
     const mo = Math.floor(d / 30);
     if (mo === 1) return 'há 1 mês';
     return `há ${mo} meses`;
-  }
-
-  // ── Ranking ──────────────────────────────────────────────
-  openRankingModal(): void {
-    this.isRankingLoading = true;
-    this.rankingError = null;
-    this.tecnicoService.getRanking().subscribe({
-      next: (data) => {
-        this.rankingTecnicos = data;
-        this.showRankingModal = true;
-        this.isRankingLoading = false;
-      },
-      error: (err) => {
-        this.rankingError = 'Erro ao carregar ranking dos técnicos.';
-        this.isRankingLoading = false;
-      }
-    });
-  }
-
-  closeRankingModal(): void {
-    this.showRankingModal = false;
   }
 }

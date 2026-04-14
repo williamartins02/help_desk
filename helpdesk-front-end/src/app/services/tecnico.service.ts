@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Tecnico } from './../models/tecnico';
 import { Observable, Subject, tap } from 'rxjs';
-import { TecnicoRankingDTO } from '../models/tecnico-ranking.dto';
 
 import { HttpClient } from '@angular/common/http';
 import { API_CONFIG } from '../config/api.config';
@@ -57,12 +56,5 @@ export class TecnicoService {
         this._refresh$.next();
       })
     )
-  }
-
-  /**
-   * Busca o ranking dos técnicos do mês atual.
-   */
-  getRanking(): Observable<TecnicoRankingDTO[]> {
-    return this.http.get<TecnicoRankingDTO[]>(`${API_CONFIG.baseUrl}/tecnicos/ranking`);
   }
 }

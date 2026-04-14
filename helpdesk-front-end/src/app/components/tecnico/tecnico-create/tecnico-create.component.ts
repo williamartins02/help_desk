@@ -73,12 +73,15 @@ export class TecnicoCreateComponent implements OnInit {
       })
   }
 
-  /*Adicionando um perfil com CheckBox/ verificando se ja existe na lista ao clicar/desclicar*/
-  addPerfil(perfil: any): void {
-    if (this.tecnico.perfis.includes(perfil)) {
-      this.tecnico.perfis.splice(this.tecnico.perfis.indexOf(perfil), 1);
-    } else {
+  /*Adicionando um perfil com CheckBox — usa o estado checked do evento para evitar duplo disparo */
+  addPerfil(perfil: number, checked: boolean): void {
+    if (checked && !this.tecnico.perfis.includes(perfil)) {
       this.tecnico.perfis.push(perfil);
+    } else if (!checked) {
+      const idx = this.tecnico.perfis.indexOf(perfil);
+      if (idx > -1) {
+        this.tecnico.perfis.splice(idx, 1);
+      }
     }
   }
 

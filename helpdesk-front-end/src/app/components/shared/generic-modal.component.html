@@ -1,0 +1,17 @@
+<div class="ranking-modal-backdrop" *ngIf="show">
+  <div class="ranking-modal ranking-modal--custom">
+    <div class="ranking-header ranking-header--custom">
+      <span class="ranking-title-main ranking-title-main--custom">{{ title }}</span>
+      <button class="close-btn close-btn--custom" (click)="close()" aria-label="Fechar">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ranking-section ranking-section--custom">
+      <ng-content></ng-content>
+    </div>
+    <div class="ranking-footer ranking-footer--custom">
+      <button class="ranking-btn ranking-btn--custom" (click)="close()">Fechar</button>
+    </div>
+  </div>
+</div>
+

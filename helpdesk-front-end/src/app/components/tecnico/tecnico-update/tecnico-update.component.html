@@ -32,21 +32,21 @@
 
       <div class="perfis-section">
         <div class="perfil-chip" [class.active]="tecnico.perfis.includes(0)">
-          <mat-checkbox (click)="checkPerfil(0)" [checked]="tecnico.perfis.includes(0)" color="primary">
+          <mat-checkbox (change)="checkPerfil(0, $event.checked)" [checked]="tecnico.perfis.includes(0)" color="primary">
             <span class="chip-content">
               <mat-icon>admin_panel_settings</mat-icon>Admin
             </span>
           </mat-checkbox>
         </div>
         <div class="perfil-chip" [class.active]="tecnico.perfis.includes(1)">
-          <mat-checkbox (click)="checkPerfil(1)" [checked]="tecnico.perfis.includes(1)" color="primary">
+          <mat-checkbox (change)="checkPerfil(1, $event.checked)" [checked]="tecnico.perfis.includes(1)" color="primary">
             <span class="chip-content">
               <mat-icon>person</mat-icon>Cliente
             </span>
           </mat-checkbox>
         </div>
         <div class="perfil-chip" [class.active]="tecnico.perfis.includes(2)">
-          <mat-checkbox (click)="checkPerfil(2)" [checked]="tecnico.perfis.includes(2)" color="primary">
+          <mat-checkbox (change)="checkPerfil(2, $event.checked)" [checked]="tecnico.perfis.includes(2)" color="primary">
             <span class="chip-content">
               <mat-icon>build</mat-icon>Técnico
             </span>

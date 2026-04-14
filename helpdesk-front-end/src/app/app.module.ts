@@ -13,7 +13,7 @@ import { ChamadoCreateComponent } from './components/chamado/chamado-create/cham
 
 import { TecnicoListComponent }   from './components/tecnico/tecnico-list/tecnico-list.component';
 import { TecnicoCreateComponent } from './components/tecnico/tecnico-create/tecnico-create.component';
-import { TecnicoRankingModalComponent } from './components/tecnico/tecnico-ranking-modal.component';
+
 
 import { AuthInterceptorProvider } from './interceptors/auth.interceptor';
 import { NgModule } from '@angular/core';
@@ -100,8 +100,6 @@ import { MatDialogRef } from '@angular/material/dialog';
     TecnicoCreateComponent,
     TecnicoUpdateComponent,
     TecnicoListComponent,
-    TecnicoRankingModalComponent,
-
     ClienteCreateComponent,
     ClienteListComponent,
     ClienteUpdateComponent,
@@ -141,6 +139,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     NewBadgeComponent,
+
 
   ],
   imports: [

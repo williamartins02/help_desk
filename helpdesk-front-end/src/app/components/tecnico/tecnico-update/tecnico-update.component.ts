@@ -86,11 +86,14 @@ export class TecnicoUpdateComponent implements OnInit {
     })
   }
 
-  checkPerfil(perfil: any): void {
-    if (this.tecnico.perfis.includes(perfil)) {
-      this.tecnico.perfis.splice(this.tecnico.perfis.indexOf(perfil), 1);
-    } else {
+  checkPerfil(perfil: number, checked: boolean): void {
+    if (checked && !this.tecnico.perfis.includes(perfil)) {
       this.tecnico.perfis.push(perfil);
+    } else if (!checked) {
+      const idx = this.tecnico.perfis.indexOf(perfil);
+      if (idx > -1) {
+        this.tecnico.perfis.splice(idx, 1);
+      }
     }
   }
 
