@@ -10,5 +10,6 @@ export interface IConversa {
   fixada:         boolean;
   silenciada:     boolean;
   lastSeen?:      string;   // ISO timestamp: último horário online
+  fotoPerfil?:    string;   // Base64 data URL da foto de perfil
 }
 

@@ -11,6 +11,7 @@ export interface RankingDialogData {
 
 export interface TecnicoRanking {
   nome: string;
+  fotoPerfil?: string;
   totalAtendidos: number;
   totalAbertos: number;
   totalEmAndamento: number;
@@ -29,7 +30,19 @@ export interface TimelineEvento {
 }
 
 /** Intervalo de polling em milissegundos */
-const POLL_MS = 15_000;
+const POLL_MS = 10_000;
+
+/**
+ * Baseline PERMANENTE — salvo uma única vez (na 1ª abertura do sistema).
+ * NUNCA é sobrescrito automaticamente. As setas são sempre calculadas em relação a ele.
+ */
+const BASELINE_KEY = 'helpdesk_ranking_baseline';
+
+/**
+ * Snapshot das posições mais recentes — atualizado a cada poll.
+ * Usado apenas para detecção de mudança de liderança consecutiva.
+ */
+const CURRENT_KEY = 'helpdesk_ranking_current';
 
 @Component({
   selector: 'app-ranking-dialog',
@@ -49,7 +62,17 @@ export class RankingDialogComponent implements OnInit, OnDestroy {
   /** Cópia local dos chamados — atualizada a cada poll */
   private chamadosAtuais: Chamado[] = [];
 
-  /** Mapa nome → posição anterior no ranking */
+  /**
+   * Baseline FIXO por sessão — carregado do localStorage ao abrir o dialog.
+   * Todos os deltas são calculados sempre em relação a este snapshot.
+   * Nunca é atualizado durante a sessão; só muda na próxima abertura.
+   */
+  private posicaoInicial = new Map<string, number>();
+
+  /**
+   * Snapshot do último poll — atualizado a cada ciclo.
+   * Usado exclusivamente para detectar mudança de liderança entre dois polls consecutivos.
+   */
   private posicaoAnterior = new Map<string, number>();
 
   /** Data/hora da última atualização bem-sucedida */
@@ -92,10 +115,32 @@ export class RankingDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.chamadosAtuais = [...this.data.chamados];
     this.buildRanking();
-    this.savePositions();
-    this.ultimaAtualizacao = new Date();
 
-    // Inicia polling em tempo real
+    // Remove key legado de versões anteriores (evita conflito)
+    try { localStorage.removeItem('helpdesk_ranking_positions'); } catch {}
+
+    // Carrega o baseline permanente (nunca é sobrescrito)
+    const baseline = this.lerStorage(BASELINE_KEY);
+
+    if (baseline.size > 0) {
+      // Baseline existente → compara posições atuais com ele → setas aparecem imediatamente
+      this.posicaoInicial = baseline;
+      this.calcularDeltas();
+    } else {
+      // PRIMEIRA VEZ no sistema → salva o baseline permanente e exibe "estável" para todos
+      this.ranking.forEach((r, i) => this.posicaoInicial.set(r.nome, i));
+      this.salvarStorage(BASELINE_KEY, this.posicaoInicial); // ← salvo UMA VEZ, nunca mais
+      this.ranking.forEach(r => r.posicaoChange = 0);
+    }
+
+    // Inicializa snapshot "anterior" para detecção de mudança de liderança
+    this.posicaoAnterior.clear();
+    this.ranking.forEach((r, i) => this.posicaoAnterior.set(r.nome, i));
+
+    // Persiste posições ATUAIS separadamente (não toca no baseline)
+    this.salvarStorage(CURRENT_KEY, this.posicaoAnterior);
+
+    this.ultimaAtualizacao = new Date();
     this.pollInterval = setInterval(() => this.refreshRanking(), POLL_MS);
   }
 
@@ -108,24 +153,21 @@ export class RankingDialogComponent implements OnInit, OnDestroy {
   private refreshRanking(): void {
     this.isUpdating = true;
     const oldLeader = this.ranking.length > 0 ? this.ranking[0].nome : null;
-    const oldPositions = new Map(this.posicaoAnterior);
 
     this.chamadoService.findAll().subscribe({
       next: (chamados) => {
         this.chamadosAtuais = chamados;
         this.buildRanking();
 
-        // Calcula deltas de posição
-        this.ranking.forEach((r, newIdx) => {
-          const oldIdx = oldPositions.get(r.nome);
-          if (oldIdx === undefined) {
-            r.posicaoChange = null;           // técnico novo
-          } else {
-            r.posicaoChange = oldIdx - newIdx; // positivo = subiu, negativo = desceu
-          }
-        });
+        // Calcula deltas SEMPRE contra o baseline permanente (acumula, nunca reseta)
+        this.calcularDeltas();
 
-        this.savePositions();
+        // Atualiza snapshot anterior (para detecção de liderança)
+        this.posicaoAnterior.clear();
+        this.ranking.forEach((r, i) => this.posicaoAnterior.set(r.nome, i));
+
+        // Persiste posições atuais separadamente — baseline NUNCA é tocado
+        this.salvarStorage(CURRENT_KEY, this.posicaoAnterior);
 
         // Detecta mudança de liderança
         const newLeader = this.ranking.length > 0 ? this.ranking[0].nome : null;
@@ -142,9 +184,41 @@ export class RankingDialogComponent implements OnInit, OnDestroy {
     });
   }
 
-  private savePositions(): void {
-    this.posicaoAnterior.clear();
-    this.ranking.forEach((r, i) => this.posicaoAnterior.set(r.nome, i));
+  /**
+   * Calcula posicaoChange comparando posição ATUAL de cada técnico
+   * com o BASELINE PERMANENTE (posicaoInicial).
+   * Os deltas acumulam ao longo do tempo e nunca são resetados.
+   */
+  private calcularDeltas(): void {
+    this.ranking.forEach((r, newIdx) => {
+      const oldIdx = this.posicaoInicial.get(r.nome);
+      if (oldIdx === undefined) {
+        r.posicaoChange = null;             // Técnico novo (não existia no baseline)
+      } else {
+        r.posicaoChange = oldIdx - newIdx;  // +N = subiu, -N = caiu, 0 = estável
+      }
+    });
+  }
+
+  /** Salva um Map<nome, posição> no localStorage com a chave informada. */
+  private salvarStorage(key: string, mapa: Map<string, number>): void {
+    try {
+      const obj: Record<string, number> = {};
+      mapa.forEach((v, k) => { obj[k] = v; });
+      localStorage.setItem(key, JSON.stringify(obj));
+    } catch { /* ignora erros de quota/privado */ }
+  }
+
+  /** Lê um Map<nome, posição> do localStorage. Retorna Map vazio se não houver dados. */
+  private lerStorage(key: string): Map<string, number> {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return new Map();
+      const obj = JSON.parse(raw) as Record<string, number>;
+      return new Map(Object.entries(obj).map(([k, v]) => [k, Number(v)]));
+    } catch {
+      return new Map();
+    }
   }
 
   // ── Computed KPIs ─────────────────────────────────────────
@@ -187,11 +261,21 @@ export class RankingDialogComponent implements OnInit, OnDestroy {
   private buildRanking(): void {
     const map = new Map<string, TecnicoRanking>();
 
+    // Mapa nome normalizado → fotoPerfil para lookup eficiente
+    const fotoMap = new Map<string, string>();
+    for (const t of (this.data.tecnicos || [])) {
+      if (t.nome && t.fotoPerfil) {
+        fotoMap.set(t.nome.trim().toLowerCase(), t.fotoPerfil);
+      }
+    }
+
     for (const c of this.chamadosAtuais) {
       const nome = (c.nomeTecnico || 'Sem técnico').trim();
       if (!map.has(nome)) {
+        const fotoPerfil = fotoMap.get(nome.toLowerCase());
         map.set(nome, {
           nome,
+          fotoPerfil,
           totalAtendidos:   0,
           totalAbertos:     0,
           totalEmAndamento: 0,

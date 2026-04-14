@@ -251,6 +251,16 @@ export class FloatingChatComponent implements OnInit, OnDestroy, AfterViewChecke
 
   isMeu(msg: IMensagem): boolean { return msg.username === this.myEmail; }
 
+  /** Foto de perfil do contato pela janela */
+  getFotoDoContato(win: IChatWindow): string | undefined {
+    return win.fotoPerfil;
+  }
+
+  /** Foto do próprio usuário logado */
+  get minhaFoto(): string | undefined {
+    return this.usuarios.find(u => u.email === this.myEmail)?.fotoPerfil;
+  }
+
   getInitials(nome: string): string {
     if (!nome) return '?';
     const p = nome.trim().split(' ');

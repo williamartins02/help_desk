@@ -7,8 +7,9 @@
 
     <!-- ── Cabeçalho ──────────────────────────────────────────────────── -->
     <div class="fw-header" (click)="toggle(win)">
-      <div class="fw-avatar" [style.background]="win.cor">
-        {{ getInitials(win.nome) }}
+      <div class="fw-avatar" [style.background]="win.fotoPerfil ? 'transparent' : win.cor">
+        <img *ngIf="win.fotoPerfil" [src]="win.fotoPerfil" class="fw-avatar-img" [alt]="win.nome">
+        <ng-container *ngIf="!win.fotoPerfil">{{ getInitials(win.nome) }}</ng-container>
       </div>
 
       <div class="fw-info">
@@ -75,9 +76,10 @@
           <!-- Avatar do contato -->
           <div *ngIf="!isMeu(msg)"
                class="fw-avatar-xs"
-               [style.background]="win.cor"
+               [style.background]="win.fotoPerfil ? 'transparent' : win.cor"
                [matTooltip]="win.nome">
-            {{ getInitials(win.nome) }}
+            <img *ngIf="win.fotoPerfil" [src]="win.fotoPerfil" class="fw-avatar-img" [alt]="win.nome">
+            <ng-container *ngIf="!win.fotoPerfil">{{ getInitials(win.nome) }}</ng-container>
           </div>
 
           <!-- Balão -->

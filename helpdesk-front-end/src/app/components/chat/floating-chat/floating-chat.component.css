@@ -40,6 +40,16 @@
   color:           #fff;
   flex-shrink:     0;
   border:          2px solid rgba(255,255,255,0.45);
+  overflow:        hidden;
+}
+
+/* Foto de perfil nos avatares */
+.fw-avatar-img {
+  width:         100%;
+  height:        100%;
+  border-radius: 50%;
+  object-fit:    cover;
+  display:       block;
 }
 
 /* Info (nome + status) */
@@ -171,6 +181,7 @@
   font-weight:     700;
   color:           #fff;
   flex-shrink:     0;
+  overflow:        hidden;
 }
 
 /* Coluna do balão */

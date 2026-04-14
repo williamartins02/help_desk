@@ -58,8 +58,9 @@
              matTooltip="Iniciar conversa">
           <!-- Avatar com ponto de presença -->
           <div class="fp-u-avatar-wrap">
-            <div class="fp-u-avatar" [style.background]="getAvatarCor(user.nome)">
-              {{ getInitials(user.nome) }}
+            <div class="fp-u-avatar" [style.background]="user.fotoPerfil ? 'transparent' : getAvatarCor(user.nome)">
+              <img *ngIf="user.fotoPerfil" [src]="user.fotoPerfil" class="fp-u-avatar-img" [alt]="user.nome">
+              <ng-container *ngIf="!user.fotoPerfil">{{ getInitials(user.nome) }}</ng-container>
             </div>
             <span class="fp-u-presence-dot" [class.online]="isOnline(user)"></span>
           </div>
@@ -96,8 +97,9 @@
              (click)="abrirConversa(user)"
              matTooltip="Iniciar conversa">
           <div class="fp-u-avatar-wrap">
-            <div class="fp-u-avatar" [style.background]="getAvatarCor(user.nome)">
-              {{ getInitials(user.nome) }}
+            <div class="fp-u-avatar" [style.background]="user.fotoPerfil ? 'transparent' : getAvatarCor(user.nome)">
+              <img *ngIf="user.fotoPerfil" [src]="user.fotoPerfil" class="fp-u-avatar-img" [alt]="user.nome">
+              <ng-container *ngIf="!user.fotoPerfil">{{ getInitials(user.nome) }}</ng-container>
             </div>
             <span class="fp-u-presence-dot" [class.online]="isOnline(user)"></span>
           </div>

@@ -321,7 +321,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       naoLidas:       this.naoLidasMap.get(convId) ?? 0,
       fixada:         this.fixadaMap.get(convId) ?? false,
       silenciada:     this.silenciadaMap.get(convId) ?? false,
-      lastSeen:       this.chatService.getLastSeen(u.email) || undefined
+      lastSeen:       this.chatService.getLastSeen(u.email) || undefined,
+      fotoPerfil:     u.fotoPerfil
     };
   }
 
@@ -389,6 +390,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   /** Nome exibido do usuário logado */
   get meuNome(): string { return this.getNomeByEmail(this.mensagem.username); }
+
+  /** Foto de perfil do usuário logado */
+  get minhaFoto(): string | undefined {
+    return this.usuarios.find(u => u.email === this.mensagem.username)?.fotoPerfil;
+  }
+
+  /** Foto de perfil de qualquer usuário pelo e-mail */
+  getFotoByEmail(email: string): string | undefined {
+    return this.usuarios.find(u => u.email === email)?.fotoPerfil;
+  }
 
   getInitials(nome: string): string {
     if (!nome) return '?';

@@ -142,15 +142,40 @@
                   <span *ngIf="getOriginalIndex(item) >= 3" class="rank-number">{{ getOriginalIndex(item) + 1 }}</span>
                 </div>
 
-                <!-- Avatar inicial -->
+                <!-- Avatar / Foto de perfil -->
                 <div class="rank-avatar" [class]="getMedalClass(getOriginalIndex(item))">
-                  {{ item.nome.charAt(0).toUpperCase() }}
+                  <img *ngIf="item.fotoPerfil"
+                       [src]="item.fotoPerfil"
+                       alt="Foto de {{ item.nome }}"
+                       class="rank-avatar-img" />
+                  <span *ngIf="!item.fotoPerfil">{{ item.nome.charAt(0).toUpperCase() }}</span>
                 </div>
 
                 <!-- Info -->
                 <div class="rank-info">
                   <div class="rank-nome-row">
                     <span class="rank-nome">{{ item.nome }}</span>
+                    <!-- ── Indicador de variação de posição — ao lado do nome ── -->
+                    <span class="delta-badge delta-up"
+                          *ngIf="item.posicaoChange !== null && item.posicaoChange !== undefined && item.posicaoChange > 0"
+                          [matTooltip]="'Subiu ' + getDeltaAbs(item.posicaoChange) + ' posição(ões) desde a última abertura'">
+                      <mat-icon>arrow_upward</mat-icon>+{{ getDeltaAbs(item.posicaoChange) }}
+                    </span>
+                    <span class="delta-badge delta-down"
+                          *ngIf="item.posicaoChange !== null && item.posicaoChange !== undefined && item.posicaoChange < 0"
+                          [matTooltip]="'Caiu ' + getDeltaAbs(item.posicaoChange) + ' posição(ões) desde a última abertura'">
+                      <mat-icon>arrow_downward</mat-icon>-{{ getDeltaAbs(item.posicaoChange) }}
+                    </span>
+                    <span class="delta-badge delta-same"
+                          *ngIf="item.posicaoChange !== null && item.posicaoChange !== undefined && item.posicaoChange === 0"
+                          matTooltip="Posição estável desde a última abertura">
+                      = estável
+                    </span>
+                    <span class="delta-badge delta-new"
+                          *ngIf="item.posicaoChange === null"
+                          matTooltip="Novo técnico no ranking">
+                      NOVO
+                    </span>
                     <span class="rank-total-chip">{{ item.chamados.length }} total</span>
                     <span class="rank-enc-chip">{{ item.totalAtendidos }} enc.</span>
                   </div>
@@ -194,34 +219,6 @@
                   </span>
                 </div>
 
-                <!-- Delta de posição (visível apenas após o 1º poll) -->
-                <div class="rank-delta" *ngIf="item.posicaoChange !== undefined">
-                  <!-- Novo técnico -->
-                  <span class="delta-badge delta-new"
-                        *ngIf="item.posicaoChange === null"
-                        matTooltip="Novo no ranking">
-                    NOVO
-                  </span>
-                  <!-- Subiu de posição -->
-                  <span class="delta-badge delta-up"
-                        *ngIf="item.posicaoChange !== null && item.posicaoChange > 0"
-                        matTooltip="Subiu {{ getDeltaAbs(item.posicaoChange) }} posição(ões)">
-                    <mat-icon>arrow_upward</mat-icon>{{ getDeltaAbs(item.posicaoChange) }}
-                  </span>
-                  <!-- Caiu de posição -->
-                  <span class="delta-badge delta-down"
-                        *ngIf="item.posicaoChange !== null && item.posicaoChange < 0"
-                        matTooltip="Caiu {{ getDeltaAbs(item.posicaoChange) }} posição(ões)">
-                    <mat-icon>arrow_downward</mat-icon>{{ getDeltaAbs(item.posicaoChange) }}
-                  </span>
-                  <!-- Mesma posição -->
-                  <span class="delta-badge delta-same"
-                        *ngIf="item.posicaoChange === 0"
-                        matTooltip="Sem mudança de posição">
-                    <mat-icon>remove</mat-icon>
-                  </span>
-                </div>
-
                 <!-- Taxa resolução -->
                 <div class="rank-taxa">
                   <span class="taxa-badge" [class]="'perf-' + getPerformanceLevel(item.taxaResolucao)">
@@ -233,6 +230,24 @@
                 <!-- Seta -->
                 <mat-icon class="rank-arrow">chevron_right</mat-icon>
               </div>
+            </div>
+
+            <!-- ── Legenda dos indicadores de posição ── -->
+            <div class="rk-legenda">
+              <span class="rk-legenda-item">
+                <span class="delta-badge delta-up" style="pointer-events:none"><mat-icon>arrow_upward</mat-icon>+N</span>
+                Subiu posições
+              </span>
+              <span class="rk-legenda-sep">·</span>
+              <span class="rk-legenda-item">
+                <span class="delta-badge delta-down" style="pointer-events:none"><mat-icon>arrow_downward</mat-icon>-N</span>
+                Caiu posições
+              </span>
+              <span class="rk-legenda-sep">·</span>
+              <span class="rk-legenda-item">
+                <span class="delta-badge delta-same" style="pointer-events:none">= estável</span>
+                Sem mudança
+              </span>
             </div>
 
           </ng-container>
@@ -257,7 +272,13 @@
           <!-- Com técnico selecionado -->
           <ng-container *ngIf="tecnicoSelecionado">
             <div class="hist-header">
-              <div class="hist-avatar">{{ tecnicoSelecionado.nome.charAt(0).toUpperCase() }}</div>
+              <div class="hist-avatar">
+                <img *ngIf="tecnicoSelecionado.fotoPerfil"
+                     [src]="tecnicoSelecionado.fotoPerfil"
+                     alt="Foto de {{ tecnicoSelecionado.nome }}"
+                     class="rank-avatar-img" />
+                <span *ngIf="!tecnicoSelecionado.fotoPerfil">{{ tecnicoSelecionado.nome.charAt(0).toUpperCase() }}</span>
+              </div>
               <div class="hist-info">
                 <span class="hist-nome">{{ tecnicoSelecionado.nome }}</span>
                 <span class="hist-sub">{{ tecnicoSelecionado.chamados.length }} chamado(s)</span>

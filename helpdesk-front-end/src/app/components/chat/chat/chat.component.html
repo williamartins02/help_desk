@@ -23,8 +23,9 @@
     <!-- Header do painel -->
     <div class="left-header">
       <div class="me-badge">
-        <div class="avatar sm" [style.background]="getAvatarCor(meuNome)">
-          {{ getInitials(meuNome) }}
+        <div class="avatar sm" [style.background]="minhaFoto ? 'transparent' : getAvatarCor(meuNome)">
+          <img *ngIf="minhaFoto" [src]="minhaFoto" class="avatar-img" [alt]="meuNome">
+          <ng-container *ngIf="!minhaFoto">{{ getInitials(meuNome) }}</ng-container>
         </div>
         <div class="me-info">
           <span class="me-name">{{ meuNome }}</span>
@@ -62,7 +63,10 @@
              (click)="selecionarConversa(conv)">
 
           <div class="avatar-wrap">
-            <div class="avatar" [style.background]="conv.cor">{{ getInitials(conv.nome) }}</div>
+            <div class="avatar" [style.background]="conv.fotoPerfil ? 'transparent' : conv.cor">
+              <img *ngIf="conv.fotoPerfil" [src]="conv.fotoPerfil" class="avatar-img" [alt]="conv.nome">
+              <ng-container *ngIf="!conv.fotoPerfil">{{ getInitials(conv.nome) }}</ng-container>
+            </div>
             <span class="dot-status" [class.online]="conv.online"></span>
           </div>
 
@@ -120,7 +124,10 @@
              (click)="selecionarConversa(conv)">
 
           <div class="avatar-wrap">
-            <div class="avatar" [style.background]="conv.cor">{{ getInitials(conv.nome) }}</div>
+            <div class="avatar" [style.background]="conv.fotoPerfil ? 'transparent' : conv.cor">
+              <img *ngIf="conv.fotoPerfil" [src]="conv.fotoPerfil" class="avatar-img" [alt]="conv.nome">
+              <ng-container *ngIf="!conv.fotoPerfil">{{ getInitials(conv.nome) }}</ng-container>
+            </div>
             <span class="dot-status" [class.online]="conv.online"></span>
           </div>
 
@@ -187,8 +194,9 @@
 
     <!-- Header da conversa ativa -->
     <div class="conv-header">
-      <div class="avatar lg" [style.background]="conversaAtiva.cor">
-        {{ getInitials(conversaAtiva.nome) }}
+      <div class="avatar lg" [style.background]="conversaAtiva.fotoPerfil ? 'transparent' : conversaAtiva.cor">
+        <img *ngIf="conversaAtiva.fotoPerfil" [src]="conversaAtiva.fotoPerfil" class="avatar-img" [alt]="conversaAtiva.nome">
+        <ng-container *ngIf="!conversaAtiva.fotoPerfil">{{ getInitials(conversaAtiva.nome) }}</ng-container>
       </div>
       <div class="conv-header-info">
         <span class="conv-header-nome">{{ conversaAtiva.nome }}</span>
@@ -244,9 +252,10 @@
             <!-- Avatar esquerda (outro usuário) -->
             <div *ngIf="!isMeu(msg)"
                  class="avatar xs"
-                 [style.background]="getAvatarCor(msg.username)"
+                 [style.background]="getFotoByEmail(msg.username) ? 'transparent' : getAvatarCor(msg.username)"
                  [matTooltip]="msg.username">
-              {{ getInitials(msg.username) }}
+              <img *ngIf="getFotoByEmail(msg.username)" [src]="getFotoByEmail(msg.username)" class="avatar-img" [alt]="msg.username">
+              <ng-container *ngIf="!getFotoByEmail(msg.username)">{{ getInitials(msg.username) }}</ng-container>
             </div>
 
             <!-- Coluna do balão -->
@@ -266,8 +275,9 @@
             <!-- Avatar direita (minha mensagem) -->
             <div *ngIf="isMeu(msg)"
                  class="avatar xs"
-                 [style.background]="getAvatarCor(msg.username)">
-              {{ getInitials(msg.username) }}
+                 [style.background]="minhaFoto ? 'transparent' : getAvatarCor(msg.username)">
+              <img *ngIf="minhaFoto" [src]="minhaFoto" class="avatar-img" [alt]="meuNome">
+              <ng-container *ngIf="!minhaFoto">{{ getInitials(msg.username) }}</ng-container>
             </div>
 
           </div>
@@ -287,8 +297,9 @@
 
     <!-- ── Indicador de digitação ── -->
     <div *ngIf="escrevendo" class="typing-row" @typingEnter>
-      <div class="avatar xs" [style.background]="conversaAtiva.cor">
-        {{ getInitials(conversaAtiva.nome) }}
+      <div class="avatar xs" [style.background]="conversaAtiva.fotoPerfil ? 'transparent' : conversaAtiva.cor">
+        <img *ngIf="conversaAtiva.fotoPerfil" [src]="conversaAtiva.fotoPerfil" class="avatar-img" [alt]="conversaAtiva.nome">
+        <ng-container *ngIf="!conversaAtiva.fotoPerfil">{{ getInitials(conversaAtiva.nome) }}</ng-container>
       </div>
       <div class="typing-bubble">
         <i class="td"></i><i class="td"></i><i class="td"></i>

@@ -3,12 +3,13 @@ import { BehaviorSubject } from 'rxjs';
 import { IUsuario } from '../models/usuario';
 
 export interface IChatWindow {
-  userId:    string;
-  email:     string;
-  nome:      string;
-  cor:       string;
-  minimized: boolean;
-  naoLidas:  number;
+  userId:     string;
+  email:      string;
+  nome:       string;
+  cor:        string;
+  minimized:  boolean;
+  naoLidas:   number;
+  fotoPerfil?: string;  // Base64 data URL
 }
 
 @Injectable({ providedIn: 'root' })
@@ -40,12 +41,13 @@ export class ChatWindowService {
       // Se minimized=true e janela já existe, não altera — addUnread cuidará do badge
     } else {
       this.windowsSubject.next([...windows, {
-        userId:    user.id.toString(),
-        email:     user.email,
-        nome:      user.nome,
-        cor:       this._avatarCor(user.nome),
+        userId:     user.id.toString(),
+        email:      user.email,
+        nome:       user.nome,
+        cor:        this._avatarCor(user.nome),
         minimized,
-        naoLidas:  0
+        naoLidas:   0,
+        fotoPerfil: user.fotoPerfil
       }]);
     }
   }
