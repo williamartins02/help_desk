@@ -77,6 +77,11 @@ export class ChatService {
               this.usuariosOnlineSubject.next(online);
               this.lastSeenMap.set(msg.username, new Date().toISOString());
             } else if (msg.type === 'MENSAGEM') {
+              // ── Filtra mensagens que não pertencem a esta conversa ────────────
+              // Mensagens DM (com destinatário) só são processadas pelo remetente
+              // e pelo destinatário real. Demais usuários descartam silenciosamente.
+              if (!this._isForMe(msg)) return;
+
               const sala = msg.sala || 'geral';
               if (!this.msgStoreMap.has(sala)) this.msgStoreMap.set(sala, []);
               const storedMsgs = this.msgStoreMap.get(sala)!;
@@ -88,6 +93,34 @@ export class ChatService {
               if (msg.username !== this.username) {
                 this.notificacaoSubject.next({ remetente: msg.username, texto: msg.texto });
               }
+
+            // ── Reação em mensagem ─────────────────────────────────────────────
+            } else if (msg.type === 'REACTION' && msg.msgId) {
+              if (!this._isForMe(msg)) return;
+              this._applyToMsg(msg.msgId, target => {
+                if (!target.reactions) target.reactions = [];
+                // Uma reação por usuário por mensagem — remove a anterior
+                target.reactions = target.reactions.filter(r => r.username !== msg.username);
+                if (msg.emoji) {
+                  target.reactions.push({ emoji: msg.emoji, username: msg.username });
+                }
+              });
+              this.mensagemSubject.next(msg);
+
+            // ── Apagar mensagem ────────────────────────────────────────────────
+            } else if (msg.type === 'DELETE_MSG' && msg.msgId) {
+              if (!this._isForMe(msg)) return;
+              this._applyToMsg(msg.msgId, target => { target.apagada = true; });
+              this.mensagemSubject.next(msg);
+
+            // ── Editar mensagem ────────────────────────────────────────────────
+            } else if (msg.type === 'EDIT_MSG' && msg.msgId && msg.novoTexto) {
+              if (!this._isForMe(msg)) return;
+              this._applyToMsg(msg.msgId, target => {
+                target.texto   = msg.novoTexto!;
+                target.editada = true;
+              });
+              this.mensagemSubject.next(msg);
             }
           });
         });
@@ -237,6 +270,33 @@ export class ChatService {
   /** Retorna o histórico de mensagens de uma sala (cópia) */
   getMessageHistory(sala: string): IMensagem[] {
     return [...(this.msgStoreMap.get(sala) || [])];
+  }
+
+  // ── Helpers internos ──────────────────────────────────────────────────────
+
+  /**
+   * Retorna true se a mensagem pertence a uma conversa do usuário atual:
+   *  – sem destinatário (mensagem de canal/grupo): todos recebem
+   *  – com destinatário: apenas o remetente e o destinatário processam
+   */
+  private _isForMe(msg: IMensagem): boolean {
+    if (!msg.destinatario) return true; // canal/grupo — sem filtro
+    return msg.destinatario === this.username || msg.username === this.username;
+  }
+
+  /** Gera chave estável para identificar uma mensagem — NÃO inclui texto
+   *  para que edições (EDIT_MSG) continuem encontrando a mensagem após
+   *  a mutação optimista no remetente. */
+  private _msgKey(msg: IMensagem): string {
+    return msg.id || ((msg.timestamp ?? '') + msg.username);
+  }
+
+  /** Encontra a mensagem pelo ID/chave e aplica um updater (mutation in-place) */
+  private _applyToMsg(msgId: string, fn: (msg: IMensagem) => void): void {
+    this.msgStoreMap.forEach(msgs => {
+      const target = msgs.find(m => m.id === msgId || this._msgKey(m) === msgId);
+      if (target) fn(target);
+    });
   }
 
   /** Busca mensagens enviadas ao usuário enquanto estava offline e as injeta no histórico. */

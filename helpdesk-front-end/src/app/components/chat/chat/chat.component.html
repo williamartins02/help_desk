@@ -5,9 +5,10 @@
 </div>
 
 <!-- ══ LAYOUT PRINCIPAL ═══════════════════════════════════════════════════ -->
-<div *ngIf="hasEverConnected" class="chat-outer" [@chatEnter]>
+<div *ngIf="hasEverConnected" class="chat-outer" [@chatEnter]
+     (click)="fecharCtxMenu()">
 
-  <!-- Banner de reconexão / offline (aparece quando a conexão é perdida) -->
+  <!-- Banner de reconexão / offline -->
   <div *ngIf="conexaoStatus !== 'conectado'" class="reconn-banner"
        [class.is-offline]="conexaoStatus === 'offline'">
     <mat-spinner *ngIf="conexaoStatus === 'reconectando'" diameter="14"></mat-spinner>
@@ -16,6 +17,59 @@
   </div>
 
   <div class="chat-wrapper">
+
+  <!-- ══ Template reutilizável: item de conversa ════════════════════════════ -->
+  <ng-template #convItem let-conv>
+    <div class="conv-item"
+         [class.active]="conversaAtiva?.id === conv.id"
+         (click)="selecionarConversa(conv)">
+
+      <div class="avatar-wrap">
+        <div class="avatar" [style.background]="conv.fotoPerfil ? 'transparent' : conv.cor">
+          <img *ngIf="conv.fotoPerfil" [src]="conv.fotoPerfil" class="avatar-img" [alt]="conv.nome">
+          <ng-container *ngIf="!conv.fotoPerfil">{{ getInitials(conv.nome) }}</ng-container>
+        </div>
+        <span class="dot-status" [class.online]="conv.online"></span>
+      </div>
+
+      <div class="conv-text">
+        <div class="conv-row1">
+          <span class="conv-nome">
+            <mat-icon *ngIf="conv.fixada" class="icon-xs">push_pin</mat-icon>
+            {{ conv.nome }}
+          </span>
+          <span class="conv-time">{{ formatTime(conv.timestamp) }}</span>
+        </div>
+        <div class="conv-row2">
+          <span class="conv-preview" [class.muted]="conv.silenciada">
+            <mat-icon *ngIf="conv.silenciada" class="icon-xs">notifications_off</mat-icon>
+            <span *ngIf="conv.ultimaMensagem">{{ conv.ultimaMensagem }}</span>
+            <span *ngIf="!conv.ultimaMensagem && !conv.online && conv.lastSeen" class="conv-last-seen">
+              <mat-icon class="icon-xs">schedule</mat-icon>
+              Visto {{ formatLastSeen(conv.lastSeen) }}
+            </span>
+          </span>
+          <span *ngIf="conv.naoLidas > 0 && !conv.silenciada" class="badge-count">
+            {{ conv.naoLidas > 99 ? '99+' : conv.naoLidas }}
+          </span>
+        </div>
+      </div>
+
+      <div class="conv-hover-actions">
+        <button mat-icon-button class="btn-xs-action"
+                (click)="fixarConversa(conv, $event)"
+                [matTooltip]="conv.fixada ? 'Desafixar' : 'Fixar'">
+          <mat-icon>push_pin</mat-icon>
+        </button>
+        <button mat-icon-button class="btn-xs-action"
+                (click)="silenciarConversa(conv, $event)"
+                [matTooltip]="conv.silenciada ? 'Ativar notificações' : 'Silenciar'">
+          <mat-icon>{{ conv.silenciada ? 'notifications' : 'notifications_off' }}</mat-icon>
+        </button>
+      </div>
+
+    </div>
+  </ng-template>
 
   <!-- ── Painel Esquerdo: Lista de Conversas ────────────────────────────── -->
   <aside class="left-panel">
@@ -57,59 +111,9 @@
           <mat-icon class="conv-group-icon">engineering</mat-icon>
           Técnicos
         </div>
-        <div *ngFor="let conv of tecnicosFiltrados"
-             class="conv-item"
-             [class.active]="conversaAtiva?.id === conv.id"
-             (click)="selecionarConversa(conv)">
-
-          <div class="avatar-wrap">
-            <div class="avatar" [style.background]="conv.fotoPerfil ? 'transparent' : conv.cor">
-              <img *ngIf="conv.fotoPerfil" [src]="conv.fotoPerfil" class="avatar-img" [alt]="conv.nome">
-              <ng-container *ngIf="!conv.fotoPerfil">{{ getInitials(conv.nome) }}</ng-container>
-            </div>
-            <span class="dot-status" [class.online]="conv.online"></span>
-          </div>
-
-          <div class="conv-text">
-            <div class="conv-row1">
-              <span class="conv-nome">
-                <mat-icon *ngIf="conv.fixada" class="icon-xs">push_pin</mat-icon>
-                {{ conv.nome }}
-              </span>
-              <span class="conv-time">{{ formatTime(conv.timestamp) }}</span>
-            </div>
-            <div class="conv-row2">
-              <span class="conv-preview" [class.muted]="conv.silenciada">
-                <mat-icon *ngIf="conv.silenciada" class="icon-xs">notifications_off</mat-icon>
-                <ng-container *ngIf="conv.ultimaMensagem; else tsLastSeen">
-                  {{ conv.ultimaMensagem }}
-                </ng-container>
-                <ng-template #tsLastSeen>
-                  <span *ngIf="!conv.online && conv.lastSeen" class="conv-last-seen">
-                    <mat-icon class="icon-xs">schedule</mat-icon>
-                    Visto {{ formatLastSeen(conv.lastSeen) }}
-                  </span>
-                </ng-template>
-              </span>
-              <span *ngIf="conv.naoLidas > 0 && !conv.silenciada" class="badge-count">
-                {{ conv.naoLidas > 99 ? '99+' : conv.naoLidas }}
-              </span>
-            </div>
-          </div>
-
-          <div class="conv-hover-actions">
-            <button mat-icon-button class="btn-xs-action"
-                    (click)="fixarConversa(conv, $event)"
-                    [matTooltip]="conv.fixada ? 'Desafixar' : 'Fixar'">
-              <mat-icon>push_pin</mat-icon>
-            </button>
-            <button mat-icon-button class="btn-xs-action"
-                    (click)="silenciarConversa(conv, $event)"
-                    [matTooltip]="conv.silenciada ? 'Ativar notificações' : 'Silenciar'">
-              <mat-icon>{{ conv.silenciada ? 'notifications' : 'notifications_off' }}</mat-icon>
-            </button>
-          </div>
-        </div>
+        <ng-container *ngFor="let conv of tecnicosFiltrados; trackBy: trackByConv">
+          <ng-container *ngTemplateOutlet="convItem; context: { $implicit: conv }"></ng-container>
+        </ng-container>
       </ng-container>
 
       <!-- ── Clientes ── -->
@@ -118,59 +122,9 @@
           <mat-icon class="conv-group-icon">person</mat-icon>
           Clientes
         </div>
-        <div *ngFor="let conv of clientesFiltrados"
-             class="conv-item"
-             [class.active]="conversaAtiva?.id === conv.id"
-             (click)="selecionarConversa(conv)">
-
-          <div class="avatar-wrap">
-            <div class="avatar" [style.background]="conv.fotoPerfil ? 'transparent' : conv.cor">
-              <img *ngIf="conv.fotoPerfil" [src]="conv.fotoPerfil" class="avatar-img" [alt]="conv.nome">
-              <ng-container *ngIf="!conv.fotoPerfil">{{ getInitials(conv.nome) }}</ng-container>
-            </div>
-            <span class="dot-status" [class.online]="conv.online"></span>
-          </div>
-
-          <div class="conv-text">
-            <div class="conv-row1">
-              <span class="conv-nome">
-                <mat-icon *ngIf="conv.fixada" class="icon-xs">push_pin</mat-icon>
-                {{ conv.nome }}
-              </span>
-              <span class="conv-time">{{ formatTime(conv.timestamp) }}</span>
-            </div>
-            <div class="conv-row2">
-              <span class="conv-preview" [class.muted]="conv.silenciada">
-                <mat-icon *ngIf="conv.silenciada" class="icon-xs">notifications_off</mat-icon>
-                <ng-container *ngIf="conv.ultimaMensagem; else clLastSeen">
-                  {{ conv.ultimaMensagem }}
-                </ng-container>
-                <ng-template #clLastSeen>
-                  <span *ngIf="!conv.online && conv.lastSeen" class="conv-last-seen">
-                    <mat-icon class="icon-xs">schedule</mat-icon>
-                    Visto {{ formatLastSeen(conv.lastSeen) }}
-                  </span>
-                </ng-template>
-              </span>
-              <span *ngIf="conv.naoLidas > 0 && !conv.silenciada" class="badge-count">
-                {{ conv.naoLidas > 99 ? '99+' : conv.naoLidas }}
-              </span>
-            </div>
-          </div>
-
-          <div class="conv-hover-actions">
-            <button mat-icon-button class="btn-xs-action"
-                    (click)="fixarConversa(conv, $event)"
-                    [matTooltip]="conv.fixada ? 'Desafixar' : 'Fixar'">
-              <mat-icon>push_pin</mat-icon>
-            </button>
-            <button mat-icon-button class="btn-xs-action"
-                    (click)="silenciarConversa(conv, $event)"
-                    [matTooltip]="conv.silenciada ? 'Ativar notificações' : 'Silenciar'">
-              <mat-icon>{{ conv.silenciada ? 'notifications' : 'notifications_off' }}</mat-icon>
-            </button>
-          </div>
-        </div>
+        <ng-container *ngFor="let conv of clientesFiltrados; trackBy: trackByConv">
+          <ng-container *ngTemplateOutlet="convItem; context: { $implicit: conv }"></ng-container>
+        </ng-container>
       </ng-container>
 
       <!-- Estado vazio -->
@@ -202,12 +156,16 @@
         <span class="conv-header-nome">{{ conversaAtiva.nome }}</span>
         <span class="conv-header-status">
           <span class="dot" [class.online]="conversaAtiva.online"></span>
-          {{ conversaAtiva.online ? 'Online' : 'Offline' }}
-          <!-- Last seen quando offline -->
+          <span [class.online-txt]="conversaAtiva.online">
+            {{ conversaAtiva.online ? 'Online' : 'Offline' }}
+          </span>
           <ng-container *ngIf="!conversaAtiva.online && conversaAtiva.lastSeen">
             &nbsp;·&nbsp;
             <span class="last-seen-txt">Visto {{ formatLastSeen(conversaAtiva.lastSeen) }}</span>
           </ng-container>
+          <span *ngIf="escrevendo" class="typing-inline">
+            &nbsp;·&nbsp;<i>digitando...</i>
+          </span>
         </span>
       </div>
       <div class="conv-header-badges">
@@ -220,17 +178,19 @@
     <div class="messages-wrapper">
 
       <div class="messages-scroll" #messagesArea
-           (click)="fecharEmoji()"
+           (click)="fecharEmoji(); fecharCtxMenu(); closeReactionPicker()"
            (scroll)="onMessagesScroll()">
 
         <!-- Estado vazio -->
         <div *ngIf="mensagensAtivas.length === 0" class="empty-state">
-          <mat-icon>chat_bubble_outline</mat-icon>
+          <div class="empty-icon-wrap">
+            <mat-icon>chat_bubble_outline</mat-icon>
+          </div>
           <p>Nenhuma mensagem ainda</p>
-          <span>Comece a conversa! 👋</span>
+          <span>Comece a conversa com <strong>{{ conversaAtiva.nome }}</strong> 👋</span>
         </div>
 
-        <ng-container *ngFor="let msg of mensagensAtivas; let i = index">
+        <ng-container *ngFor="let msg of mensagensAtivas; let i = index; trackBy: trackByMsg">
 
           <!-- Separador de data -->
           <div *ngIf="showDateSep(mensagensAtivas, i)" class="date-sep">
@@ -253,21 +213,81 @@
             <div *ngIf="!isMeu(msg)"
                  class="avatar xs"
                  [style.background]="getFotoByEmail(msg.username) ? 'transparent' : getAvatarCor(msg.username)"
-                 [matTooltip]="msg.username">
+                 [matTooltip]="getNomeByEmail(msg.username)">
               <img *ngIf="getFotoByEmail(msg.username)" [src]="getFotoByEmail(msg.username)" class="avatar-img" [alt]="msg.username">
-              <ng-container *ngIf="!getFotoByEmail(msg.username)">{{ getInitials(msg.username) }}</ng-container>
+              <ng-container *ngIf="!getFotoByEmail(msg.username)">{{ getInitials(getNomeByEmail(msg.username)) }}</ng-container>
             </div>
 
             <!-- Coluna do balão -->
             <div class="bubble-col" [class.mine]="isMeu(msg)">
               <span *ngIf="!isMeu(msg)" class="sender-name">{{ getNomeByEmail(msg.username) }}</span>
-              <div class="bubble" [class.mine]="isMeu(msg)">{{ msg.texto }}</div>
+
+              <!-- Wrapper com botão de reação + balão + picker -->
+              <div class="bubble-wrap" [class.mine]="isMeu(msg)">
+
+                <!-- Botão de reação (aparece no hover da msg-row, ao lado do balão) -->
+                <button *ngIf="!isApagada(msg)" class="bbl-react-trigger" [class.mine]="isMeu(msg)"
+                        [class.picker-open]="isReactionPickerOpen(msg)"
+                        (click)="toggleReactionPicker($event, msg)"
+                        title="Reagir">
+                  <mat-icon>add_reaction</mat-icon>
+                </button>
+
+                <!-- Balão da mensagem -->
+                <div class="bubble"
+                     [class.mine]="isMeu(msg)"
+                     [class.bbl-pinned]="isFixada(msg)"
+                     (contextmenu)="onMsgContextMenu($event, msg)">
+
+                  <!-- Botão de menu DENTRO do balão (canto superior direito) -->
+                  <button class="bbl-menu-inner" [class.mine]="isMeu(msg)"
+                          (click)="onBubbleMenuClick($event, msg)"
+                          (mousedown)="$event.stopPropagation()">
+                    <mat-icon>expand_more</mat-icon>
+                  </button>
+
+                  <!-- Citação de resposta -->
+                  <div *ngIf="msg.replyTo && !isApagada(msg)" class="msg-quote" [class.mine]="isMeu(msg)">
+                    <span class="msg-quote-author">{{ getNomeByEmail(msg.replyTo.username) }}</span>
+                    <span class="msg-quote-text">{{ msg.replyTo.texto }}</span>
+                  </div>
+
+                  <!-- Texto apagado -->
+                  <span *ngIf="isApagada(msg)" class="msg-apagada-txt">
+                    <mat-icon class="apagada-icon">do_not_disturb_on</mat-icon>
+                    Mensagem apagada
+                  </span>
+
+                  <!-- Texto normal / editado -->
+                  <ng-container *ngIf="!isApagada(msg)">{{ getTexto(msg) }}<span *ngIf="isEditada(msg)" class="msg-editada-label">&nbsp;(editado)</span></ng-container>
+                </div>
+
+                <!-- Picker de reações rápidas (popup acima do balão) -->
+                <div *ngIf="isReactionPickerOpen(msg)" class="reaction-picker" [class.mine]="isMeu(msg)"
+                     (click)="$event.stopPropagation()">
+                  <button *ngFor="let e of QUICK_REACTIONS; trackBy: trackByEmoji"
+                          class="rp-btn" [class.rp-active]="hasMyReaction(msg, e)"
+                          (click)="addReaction(msg, e)">{{ e }}</button>
+                </div>
+
+              </div><!-- /bubble-wrap -->
+
+              <!-- Reações abaixo do balão -->
+              <div *ngIf="hasReactions(msg)" class="msg-reactions" [class.mine]="isMeu(msg)">
+                <span *ngFor="let r of getReactions(msg); trackBy: trackByReaction"
+                      class="reaction-chip" [class.active]="r.mine"
+                      (click)="addReaction(msg, r.emoji)"
+                      [matTooltip]="r.count + (r.count === 1 ? ' reação' : ' reações')">
+                  {{ r.emoji }}<span *ngIf="r.count > 1" class="rc-count">{{ r.count }}</span>
+                </span>
+              </div>
+
               <div class="msg-meta" [class.mine]="isMeu(msg)">
+                <mat-icon *ngIf="isFixada(msg)"   class="marker-icon pin"  matTooltip="Fixada">push_pin</mat-icon>
+                <mat-icon *ngIf="isFavorita(msg)" class="marker-icon star" matTooltip="Favorita">star</mat-icon>
                 <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
                 <span *ngIf="isMeu(msg)" class="msg-tick" [class]="'tick-' + msg.status">
-                  <mat-icon *ngIf="msg.status === 'sent'">done</mat-icon>
-                  <mat-icon *ngIf="msg.status === 'delivered'">done_all</mat-icon>
-                  <mat-icon *ngIf="msg.status === 'read'">done_all</mat-icon>
+                  <mat-icon class="tick-icon">{{ msg.status === 'sent' ? 'done' : 'done_all' }}</mat-icon>
                 </span>
               </div>
             </div>
@@ -275,9 +295,9 @@
             <!-- Avatar direita (minha mensagem) -->
             <div *ngIf="isMeu(msg)"
                  class="avatar xs"
-                 [style.background]="minhaFoto ? 'transparent' : getAvatarCor(msg.username)">
+                 [style.background]="minhaFoto ? 'transparent' : getAvatarCor(meuNome)">
               <img *ngIf="minhaFoto" [src]="minhaFoto" class="avatar-img" [alt]="meuNome">
-              <ng-container *ngIf="!minhaFoto">{{ getInitials(msg.username) }}</ng-container>
+              <ng-container *ngIf="!minhaFoto">{{ getInitials(meuNome) }}</ng-container>
             </div>
 
           </div>
@@ -308,8 +328,31 @@
     </div>
 
     <!-- Emoji picker -->
-    <div *ngIf="showEmojiPicker" class="emoji-panel">
-      <button *ngFor="let e of emojis" class="emoji-btn" (click)="inserirEmoji(e)">{{ e }}</button>
+    <div *ngIf="showEmojiPicker" class="emoji-panel" (click)="$event.stopPropagation()">
+      <button *ngFor="let e of emojis; trackBy: trackByEmoji" class="emoji-btn" (click)="inserirEmoji(e)">{{ e }}</button>
+    </div>
+
+    <!-- ── Barra de resposta ── -->
+    <div *ngIf="msgResposta" class="reply-bar" [@barEnter]>
+      <div class="reply-bar-accent"></div>
+      <mat-icon class="reply-bar-icon">reply</mat-icon>
+      <div class="reply-bar-content">
+        <span class="reply-bar-author">{{ getNomeByEmail(msgResposta.username) }}</span>
+        <span class="reply-bar-text">{{ getTexto(msgResposta) }}</span>
+      </div>
+      <button mat-icon-button class="reply-bar-close" (click)="cancelarResposta()" matTooltip="Cancelar resposta">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- ── Barra de edição ── -->
+    <div *ngIf="msgEditando" class="edit-bar" [@barEnter]>
+      <div class="edit-bar-accent"></div>
+      <mat-icon class="edit-bar-icon">edit</mat-icon>
+      <span class="edit-bar-label">Editando mensagem</span>
+      <button mat-icon-button class="edit-bar-close" (click)="cancelarEdicao()" matTooltip="Cancelar edição (Esc)">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
 
     <!-- Barra de input -->
@@ -319,16 +362,21 @@
       </button>
       <input class="msg-input"
              [(ngModel)]="mensagem.texto"
-             placeholder="Digite uma mensagem..."
+             [placeholder]="msgEditando ? 'Editar mensagem... (Enter para salvar, Esc para cancelar)' : 'Digite uma mensagem... (Enter para enviar)'"
              (keydown)="onKeyDown($event)"
              (input)="escreverEvento()"
              maxlength="500"
              autocomplete="off"/>
+      <span class="char-counter"
+            [class.warning]="(mensagem.texto?.length || 0) > 400"
+            [class.danger]="(mensagem.texto?.length || 0) > 470">
+        {{ mensagem.texto?.length || 0 }}/500
+      </span>
       <button mat-icon-button class="btn-icon-bar send"
-              [disabled]="!mensagem.texto?.trim()"
+              [disabled]="!mensagem.texto?.trim() || !connected"
               (click)="enviarMensagem()"
-              matTooltip="Enviar (Enter)">
-        <mat-icon>send</mat-icon>
+              [matTooltip]="msgEditando ? 'Salvar edição (Enter)' : 'Enviar (Enter)'">
+        <mat-icon>{{ msgEditando ? 'check' : 'send' }}</mat-icon>
       </button>
     </div>
 
@@ -337,12 +385,175 @@
   <!-- Placeholder quando nenhuma conversa está selecionada -->
   <ng-template #semConversa>
     <div class="no-conv">
-      <mat-icon>forum</mat-icon>
-      <h3>Selecione uma conversa</h3>
-      <p>Escolha uma sala à esquerda para começar</p>
+      <div class="no-conv-icon">
+        <mat-icon>forum</mat-icon>
+      </div>
+      <h3>Bem-vindo ao chat</h3>
+      <p>Selecione uma conversa à esquerda para começar</p>
+      <span class="no-conv-hint">{{ usuariosOnline.length }} usuário(s) online agora</span>
     </div>
   </ng-template>
 
   </div><!-- /chat-wrapper -->
+
+  <!-- ── Menu de contexto (clique direito ou botão de ação na mensagem) ──── -->
+  <div *ngIf="ctxMenu" class="ctx-overlay" (click)="fecharCtxMenu()"></div>
+  <div *ngIf="ctxMenu" class="ctx-menu"
+       [style.left.px]="ctxMenu.x"
+       [style.top.px]="ctxMenu.y"
+       (click)="$event.stopPropagation()">
+
+    <!-- Dados da mensagem -->
+    <button class="ctx-item" (click)="mostrarInfoMsg()">
+      <mat-icon>info_outline</mat-icon>
+      Dados da mensagem
+    </button>
+
+    <!-- Responder -->
+    <button class="ctx-item" (click)="responder()">
+      <mat-icon>reply</mat-icon>
+      Responder
+    </button>
+
+    <!-- Copiar (oculto se apagada) -->
+    <button *ngIf="!isApagada(ctxMenu.msg)" class="ctx-item" (click)="copiarMensagem()">
+      <mat-icon>content_copy</mat-icon>
+      Copiar
+    </button>
+
+    <!-- Encaminhar (oculto se apagada) -->
+    <button *ngIf="!isApagada(ctxMenu.msg)" class="ctx-item" (click)="encaminhar()">
+      <mat-icon>forward</mat-icon>
+      Encaminhar
+    </button>
+
+    <div class="ctx-divider"></div>
+
+    <!-- Fixar / Desafixar -->
+    <button class="ctx-item" (click)="toggleFixarMensagem()">
+      <mat-icon>push_pin</mat-icon>
+      {{ isFixada(ctxMenu.msg) ? 'Desafixar' : 'Fixar' }}
+    </button>
+
+    <!-- Favoritar / Desfavoritar -->
+    <button class="ctx-item" (click)="toggleFavoritarMensagem()">
+      <mat-icon>{{ isFavorita(ctxMenu.msg) ? 'star' : 'star_border' }}</mat-icon>
+      {{ isFavorita(ctxMenu.msg) ? 'Desfavoritar' : 'Favoritar' }}
+    </button>
+
+    <!-- Editar (apenas mensagens próprias não apagadas) -->
+    <ng-container *ngIf="isMeu(ctxMenu.msg) && !isApagada(ctxMenu.msg)">
+      <div class="ctx-divider"></div>
+      <button class="ctx-item" (click)="entrarModoEdicao()">
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+    </ng-container>
+
+    <!-- Apagar (apenas mensagens próprias) -->
+    <button *ngIf="isMeu(ctxMenu.msg)" class="ctx-item ctx-item-danger" (click)="apagarMensagem()">
+      <mat-icon>delete_outline</mat-icon>
+      Apagar
+    </button>
+
+  </div>
+
+  <!-- ── Painel de encaminhamento ─────────────────────────────────────────── -->
+  <div *ngIf="showEncaminhar" class="fwd-overlay" (click)="cancelarEncaminhar()"></div>
+  <div *ngIf="showEncaminhar" class="fwd-panel" [@panelEnter] (click)="$event.stopPropagation()">
+    <div class="fwd-header">
+      <mat-icon class="fwd-header-icon">forward</mat-icon>
+      <span>Encaminhar para...</span>
+      <button mat-icon-button class="fwd-close" (click)="cancelarEncaminhar()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="encaminhandoMsg" class="fwd-preview">
+      <mat-icon class="fwd-preview-icon">chat_bubble_outline</mat-icon>
+      <span class="fwd-preview-text">{{ getTexto(encaminhandoMsg) }}</span>
+    </div>
+    <div class="fwd-search">
+      <mat-icon class="fwd-search-icon">search</mat-icon>
+      <input class="fwd-search-input" [(ngModel)]="fwdSearchQuery" placeholder="Buscar usuário..." autocomplete="off"/>
+    </div>
+    <div class="fwd-list">
+      <div *ngFor="let user of usuariosFiltradosFwd; trackBy: trackByUser"
+           class="fwd-user-item"
+           (click)="encaminharPara(user)">
+        <div class="fwd-avatar" [style.background]="user.fotoPerfil ? 'transparent' : getAvatarCor(user.nome)">
+          <img *ngIf="user.fotoPerfil" [src]="user.fotoPerfil" class="fwd-avatar-img" [alt]="user.nome">
+          <ng-container *ngIf="!user.fotoPerfil">{{ getInitials(user.nome) }}</ng-container>
+        </div>
+        <div class="fwd-user-info">
+          <span class="fwd-user-name">{{ user.nome }}</span>
+          <span class="fwd-user-role">{{ user.tipo === 'TECNICO' ? 'Técnico' : 'Cliente' }}</span>
+        </div>
+        <mat-icon class="fwd-send-icon">send</mat-icon>
+      </div>
+      <div *ngIf="usuariosFiltradosFwd.length === 0" class="fwd-empty">
+        <mat-icon>search_off</mat-icon>
+        <span>Nenhum usuário encontrado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Painel de informações da mensagem ────────────────────────────────── -->
+  <div *ngIf="infoMsg" class="info-overlay" (click)="fecharInfo()"></div>
+  <div *ngIf="infoMsg" class="info-panel" [@panelEnter] (click)="$event.stopPropagation()">
+    <div class="info-header">
+      <mat-icon>info_outline</mat-icon>
+      <span>Dados da mensagem</span>
+      <button mat-icon-button class="info-close" (click)="fecharInfo()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="info-body">
+      <!-- Remetente -->
+      <div class="info-row">
+        <mat-icon>person</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Remetente</span>
+          <span class="info-value">{{ getNomeByEmail(infoMsg.username) }}</span>
+        </div>
+      </div>
+      <!-- Data e hora -->
+      <div class="info-row">
+        <mat-icon>schedule</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Enviada em</span>
+          <span class="info-value">{{ formatFullDate(infoMsg.timestamp) }}</span>
+        </div>
+      </div>
+      <!-- Status -->
+      <div class="info-row">
+        <mat-icon [class]="'info-status-' + infoMsg.status">{{ getStatusIcon(infoMsg.status) }}</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Status</span>
+          <span class="info-value" [class]="'info-status-' + infoMsg.status">{{ getStatusLabel(infoMsg.status) }}</span>
+        </div>
+      </div>
+      <!-- Fixada -->
+      <div class="info-row" *ngIf="isFixada(infoMsg)">
+        <mat-icon class="info-pin">push_pin</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Mensagem fixada</span>
+        </div>
+      </div>
+      <!-- Favorita -->
+      <div class="info-row" *ngIf="isFavorita(infoMsg)">
+        <mat-icon class="info-fav">star</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Marcada como favorita</span>
+        </div>
+      </div>
+      <!-- Editada -->
+      <div class="info-row" *ngIf="isEditada(infoMsg)">
+        <mat-icon>edit</mat-icon>
+        <div class="info-row-content">
+          <span class="info-label">Mensagem editada</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /chat-outer -->

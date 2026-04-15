@@ -50,8 +50,8 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
   myEmail  = '';
   private myUserId = '';
 
-  /** Quantidade de não-lidas por e-mail de remetente */
-  naoLidasPorUsuario = new Map<string, number>();
+  /** Mapa email → não-lidas (sincronizado com ChatWindowService) */
+  unreadByEmail: Record<string, number> = {};
 
   /** Notificação in-panel exibida enquanto o painel está aberto */
   notificacaoAtiva: { nome: string; texto: string } | null = null;
@@ -62,6 +62,7 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
   private onlineSub:     Subscription;
   private notifSub:      Subscription;
   private msgSub:        Subscription;
+  private unreadSub:     Subscription;
   private routerSub:     Subscription;
 
   constructor(
@@ -96,15 +97,29 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
       this.usuariosOnline = onlineList;
     });
 
+    // ── Não-lidas centralizadas (fonte única de verdade no ChatWindowService) ──
+    // O badge por remetente E o badge do FAB são derivados deste observable.
+    // Qualquer abertura de janela / seleção de conversa zera o email no serviço
+    // e, em cascata, recalcula o total do FAB automaticamente.
+    this.unreadSub = this.chatWindowService.unreadByEmail$.subscribe(map => {
+      this.unreadByEmail = map;
+      // FAB badge = soma real de todas as não-lidas de todos os remetentes
+      this.naoLidas = Object.values(map).reduce((sum, v) => sum + v, 0);
+    });
+
     // ── Mensagens em tempo-real ───────────────────────────────────────────
-    // Cuida de: badge por usuário, notificação in-panel, badge do FAB, toast
+    // Cuida de: badge do FAB, notificação in-panel e toast.
+    // O badge por remetente é atualizado pelo FloatingChatComponent via addUnread().
     this.msgSub = this.chatService.getMensagem().subscribe(msg => {
       if (msg.type !== 'MENSAGEM') return;
-      if (msg.username === this.myEmail) return;  // ignora próprias mensagens
+      if (msg.username === this.myEmail) return;
 
-      // Badge por remetente
-      const prev = this.naoLidasPorUsuario.get(msg.username) ?? 0;
-      this.naoLidasPorUsuario.set(msg.username, prev + 1);
+      // Descarta mensagens DM que não são para este usuário (guarda dupla)
+      if (msg.destinatario && msg.destinatario !== this.myEmail) return;
+
+      // Suprime a notificação SOMENTE quando o chat principal está com esta conversa ativa.
+      // Janelas flutuantes abertas NÃO suprimem o toast — o usuário pode não estar olhando.
+      if (this.chatWindowService.isMainChatActive(msg.username)) return;
 
       const sender = this.usuarios.find(u => u.email === msg.username);
       const nome   = sender?.nome || msg.username;
@@ -115,9 +130,7 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
         if (this.notifTimer) clearTimeout(this.notifTimer);
         this.notifTimer = setTimeout(() => { this.notificacaoAtiva = null; }, 4000);
       } else {
-        // Painel fechado → incrementa badge do FAB
-        this.naoLidas++;
-        // Toast apenas fora da página de chat completo
+        // Painel fechado → toast (o badge do FAB é atualizado via unreadByEmail$)
         if (!this.isOnChatPage) {
           const corpo = `<b>${nome}</b> enviou uma mensagem.<br><small>Clique para responder</small>`;
           const toastRef = this.toast.info(corpo, '💬 Nova mensagem',
@@ -132,9 +145,9 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
     this.notifSub = this.chatService.getNotificacao().subscribe(notif => {
       if (notif.qtd === undefined) return; // real-time já tratado em msgSub
 
-      const prev = this.naoLidasPorUsuario.get(notif.remetente) ?? 0;
-      this.naoLidasPorUsuario.set(notif.remetente, prev + notif.qtd);
-      if (!this.expanded) this.naoLidas += notif.qtd;
+      // Atualiza contagem por remetente no serviço centralizado
+      // (o badge do FAB é recalculado automaticamente via unreadByEmail$)
+      this.chatWindowService.addBatchUnreadByEmail(notif.remetente, notif.qtd);
 
       if (!this.isOnChatPage) {
         const user = this.usuarios.find(u => u.email === notif.remetente);
@@ -165,6 +178,7 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
     this.onlineSub?.unsubscribe();
     this.notifSub?.unsubscribe();
     this.msgSub?.unsubscribe();
+    this.unreadSub?.unsubscribe();
     this.routerSub?.unsubscribe();
     if (this.notifTimer) clearTimeout(this.notifTimer);
   }
@@ -173,19 +187,17 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
   toggle(): void {
     this.expanded = !this.expanded;
     if (this.expanded) {
-      this.naoLidas = 0;
+      // Não zeramos naoLidas — ele é derivado de unreadByEmail$ e reflete a realidade.
+      // Só some quando as conversas forem realmente abertas/visualizadas.
       this.notificacaoAtiva = null;
     }
   }
 
   // ── Abrir janela flutuante de DM ───────────────────────────────────────
   abrirConversa(user: IUsuario): void {
+    // open(user) sem minimized=true → maximiza e zera naoLidas + email unread
     this.chatWindowService.open(user);
     this.expanded = false;
-    // Zera badge do remetente ao abrir conversa
-    if (this.naoLidasPorUsuario.has(user.email)) {
-      this.naoLidasPorUsuario.delete(user.email);
-    }
   }
 
   // ── Getters de lista (filtrados e ordenados) ────────────────────────────
@@ -195,8 +207,8 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
       const bOn = this.usuariosOnline.includes(b.email);
       if (aOn !== bOn) return aOn ? -1 : 1;
       // Com não-lidas sobem ao topo dentro do grupo online/offline
-      const aUnread = (this.naoLidasPorUsuario.get(a.email) ?? 0) > 0 ? -1 : 0;
-      const bUnread = (this.naoLidasPorUsuario.get(b.email) ?? 0) > 0 ? -1 : 0;
+      const aUnread = (this.unreadByEmail[a.email] ?? 0) > 0 ? -1 : 0;
+      const bUnread = (this.unreadByEmail[b.email] ?? 0) > 0 ? -1 : 0;
       if (aUnread !== bUnread) return aUnread - bUnread;
       return a.nome.localeCompare(b.nome, 'pt-BR');
     });
@@ -222,9 +234,9 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
 
   // ── Helpers de UI ────────────────────────────────────────────────────────
 
-  /** Retorna o número de mensagens não lidas do usuário */
+  /** Retorna o número de mensagens não lidas do usuário (sincronizado com o serviço) */
   getUnread(user: IUsuario): number {
-    return this.naoLidasPorUsuario.get(user.email) ?? 0;
+    return this.unreadByEmail[user.email] ?? 0;
   }
 
   /** Prévia da última mensagem da conversa com o usuário */

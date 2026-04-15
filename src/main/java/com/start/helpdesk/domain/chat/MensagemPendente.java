@@ -39,6 +39,14 @@ public class MensagemPendente implements Serializable {
     @Column(nullable = false)
     private boolean entregue = false;
 
+    // ── Dados da mensagem original (quando esta é uma resposta) ───────────────
+    /** E-mail do autor da mensagem original citada */
+    private String replyToUsername;
+
+    /** Trecho do texto da mensagem original citada */
+    @Column(length = 500)
+    private String replyToTexto;
+
     public MensagemPendente() {}
 
     // ── Getters & Setters ─────────────────────────────────────────────────────
@@ -66,5 +74,11 @@ public class MensagemPendente implements Serializable {
 
     public boolean isEntregue()                  { return entregue; }
     public void    setEntregue(boolean entregue) { this.entregue = entregue; }
+
+    public String getReplyToUsername()                       { return replyToUsername; }
+    public void   setReplyToUsername(String replyToUsername) { this.replyToUsername = replyToUsername; }
+
+    public String getReplyToTexto()                    { return replyToTexto; }
+    public void   setReplyToTexto(String replyToTexto) { this.replyToTexto = replyToTexto; }
 }
 

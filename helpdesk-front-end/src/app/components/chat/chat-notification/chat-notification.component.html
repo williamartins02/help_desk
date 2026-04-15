@@ -1,0 +1,18 @@
+﻿<div class="notif-stack" aria-live="polite">
+  <div *ngFor="let notif of notifications; trackBy: trackById" class="notif-bar" [@slideIn] (click)="abrir(notif)" role="alert">
+    <div class="notif-avatar-wrap">
+      <img *ngIf="notif.avatar" [src]="notif.avatar" class="notif-avatar-img" [alt]="notif.nome" />
+      <div *ngIf="!notif.avatar" class="notif-avatar-initials" [style.background]="getAvatarColor(notif.nome)">{{ getInitials(notif.nome) }}</div>
+      <span class="notif-online-dot" [class.is-online]="notif.online"></span>
+    </div>
+    <div class="notif-info">
+      <span class="notif-nome">{{ truncar(notif.nome, 22) }}</span>
+      <span class="notif-status">{{ notif.online ? "● Online" : "○ Offline" }}</span>
+    </div>
+    <span class="notif-badge" *ngIf="notif.unread > 0">{{ notif.unread }}</span>
+    <div class="notif-actions" (click)="$event.stopPropagation()">
+      <button class="notif-ctrl-btn" (click)="abrir(notif)" title="Abrir conversa"><mat-icon>open_in_new</mat-icon></button>
+      <button class="notif-ctrl-btn" (click)="fechar(notif.id)" title="Fechar"><mat-icon>close</mat-icon></button>
+    </div>
+  </div>
+</div>

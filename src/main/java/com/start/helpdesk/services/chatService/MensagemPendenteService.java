@@ -28,6 +28,13 @@ public class MensagemPendenteService {
         p.setSala(mensagem.getSala());
         p.setTimestamp(mensagem.getTimestamp());
         p.setColor(mensagem.getColor() != null ? mensagem.getColor() : "");
+
+        // Preserva a referência de resposta (reply) quando presente
+        if (mensagem.getReplyTo() != null) {
+            p.setReplyToUsername(mensagem.getReplyTo().getUsername());
+            p.setReplyToTexto(mensagem.getReplyTo().getTexto());
+        }
+
         repository.save(p);
     }
 
@@ -55,6 +62,15 @@ public class MensagemPendenteService {
             m.setColor(p.getColor());
             m.setType("MENSAGEM");
             m.setStatus("delivered");
+
+            // Reconstrói o replyTo se a mensagem era uma resposta
+            if (p.getReplyToUsername() != null) {
+                Mensagem.ReplyTo replyTo = new Mensagem.ReplyTo();
+                replyTo.setUsername(p.getReplyToUsername());
+                replyTo.setTexto(p.getReplyToTexto());
+                m.setReplyTo(replyTo);
+            }
+
             return m;
         }).collect(Collectors.toList());
     }

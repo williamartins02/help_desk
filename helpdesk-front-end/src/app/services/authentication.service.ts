@@ -64,10 +64,12 @@ authenticate(creds: Credenciais){
    return this.http.post(`${API_CONFIG.baseUrl}/auth/reset-password`, { token, newPassword });
  }
 
-  /*Metodo para limpar o (toke) */
+  /*Metodo para limpar o (token) e as flags de sessão */
   logout(){
     localStorage.clear();
+    // Limpa flags de notificação para que reapareçam no próximo login
     sessionStorage.removeItem('alertaChamadosCriticosExibido');
+    sessionStorage.removeItem('hd_chatOnlineNotifMostrado');
   }
 
 }

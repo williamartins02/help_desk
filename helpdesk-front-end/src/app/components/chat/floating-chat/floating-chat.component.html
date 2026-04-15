@@ -3,7 +3,8 @@
   <div class="fw-window mat-elevation-z8"
        [class.minimized]="win.minimized"
        [style.right.px]="windowRight(i)"
-       [@windowEnter]>
+       [@windowEnter]
+       (click)="fecharCtxMenu(); closeFwReactionPicker()">
 
     <!-- ── Cabeçalho ──────────────────────────────────────────────────── -->
     <div class="fw-header" (click)="toggle(win)">
@@ -11,47 +12,29 @@
         <img *ngIf="win.fotoPerfil" [src]="win.fotoPerfil" class="fw-avatar-img" [alt]="win.nome">
         <ng-container *ngIf="!win.fotoPerfil">{{ getInitials(win.nome) }}</ng-container>
       </div>
-
       <div class="fw-info">
         <span class="fw-name">{{ win.nome }}</span>
         <span class="fw-status" [class.online]="isOnline(win.email)">
           <span class="fw-dot"></span>
           <ng-container *ngIf="isOnline(win.email); else fwOffline">Online</ng-container>
           <ng-template #fwOffline>
-            <ng-container *ngIf="getLastSeen(win.email); else justOffline">
-              Visto {{ formatLastSeen(getLastSeen(win.email)) }}
-            </ng-container>
+            <ng-container *ngIf="getLastSeen(win.email); else justOffline">Visto {{ formatLastSeen(getLastSeen(win.email)) }}</ng-container>
             <ng-template #justOffline>Offline</ng-template>
           </ng-template>
         </span>
       </div>
-
-      <!-- Badge de não-lidas (quando minimizado) -->
-      <span *ngIf="win.naoLidas > 0" class="fw-badge">
-        {{ win.naoLidas > 99 ? '99+' : win.naoLidas }}
-      </span>
-
-      <!-- Botão minimizar/expandir -->
-      <button class="fw-btn-icon" mat-icon-button
-              (click)="toggle(win); $event.stopPropagation()"
-              [matTooltip]="win.minimized ? 'Expandir' : 'Minimizar'">
+      <span *ngIf="win.naoLidas > 0" class="fw-badge">{{ win.naoLidas > 99 ? '99+' : win.naoLidas }}</span>
+      <button class="fw-btn-icon" mat-icon-button (click)="toggle(win); $event.stopPropagation()" [matTooltip]="win.minimized ? 'Expandir' : 'Minimizar'">
         <mat-icon>{{ win.minimized ? 'expand_less' : 'remove' }}</mat-icon>
       </button>
-
-      <!-- Botão fechar -->
-      <button class="fw-btn-icon" mat-icon-button
-              (click)="fechar(win, $event)"
-              matTooltip="Fechar">
+      <button class="fw-btn-icon" mat-icon-button (click)="fechar(win, $event)" matTooltip="Fechar">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <!-- ── Corpo (mensagens + input) ──────────────────────────────────── -->
+    <!-- ── Corpo ───────────────────────────────────────────────────────── -->
     <ng-container *ngIf="!win.minimized">
-
-      <!-- Barra de estado de conexão (reconectando / offline) -->
-      <div *ngIf="conexaoStatus !== 'conectado'"
-           class="fw-conn-bar"
+      <div *ngIf="conexaoStatus !== 'conectado'" class="fw-conn-bar"
            [class.fw-conn-reconectando]="conexaoStatus === 'reconectando'"
            [class.fw-conn-offline]="conexaoStatus === 'offline'">
         <mat-spinner *ngIf="conexaoStatus === 'reconectando'" diameter="10"></mat-spinner>
@@ -59,63 +42,178 @@
         <span>{{ conexaoStatus === 'reconectando' ? 'Reconectando...' : 'Offline' }}</span>
       </div>
 
-      <!-- Área de mensagens -->
-      <div class="fw-messages" [id]="'fw-msgs-' + win.userId">
-
-        <!-- Estado vazio -->
+      <!-- Mensagens -->
+      <div class="fw-messages" [id]="'fw-msgs-' + win.userId"
+           (click)="fecharCtxMenu(); closeFwReactionPicker()">
         <div *ngIf="getMensagens(win).length === 0" class="fw-empty">
           <mat-icon>chat_bubble_outline</mat-icon>
           <span>Início da conversa 👋</span>
         </div>
 
-        <!-- Mensagens -->
-        <div *ngFor="let msg of getMensagens(win)"
-             class="fw-msg-row"
-             [class.mine]="isMeu(msg)">
-
-          <!-- Avatar do contato -->
-          <div *ngIf="!isMeu(msg)"
-               class="fw-avatar-xs"
-               [style.background]="win.fotoPerfil ? 'transparent' : win.cor"
-               [matTooltip]="win.nome">
+        <div *ngFor="let msg of getMensagens(win)" class="fw-msg-row" [class.mine]="isMeu(msg)">
+          <div *ngIf="!isMeu(msg)" class="fw-avatar-xs"
+               [style.background]="win.fotoPerfil ? 'transparent' : win.cor" [matTooltip]="win.nome">
             <img *ngIf="win.fotoPerfil" [src]="win.fotoPerfil" class="fw-avatar-img" [alt]="win.nome">
             <ng-container *ngIf="!win.fotoPerfil">{{ getInitials(win.nome) }}</ng-container>
           </div>
 
-          <!-- Balão -->
           <div class="fw-bubble-col" [class.mine]="isMeu(msg)">
-            <div class="fw-bubble" [class.mine]="isMeu(msg)">{{ msg.texto }}</div>
-            <span class="fw-time">{{ formatTime(msg.timestamp) }}</span>
-          </div>
+            <!-- Citação de resposta -->
+            <div *ngIf="msg.replyTo && !isFwApagada(msg)" class="fw-msg-quote" [class.mine]="isMeu(msg)">
+              <span class="fw-quote-author">{{ isMeu(msg) && msg.replyTo.username === myEmailPublic ? 'Você' : win.nome }}</span>
+              <span class="fw-quote-text">{{ msg.replyTo.texto }}</span>
+            </div>
 
+            <!-- Bubble + botão de reação -->
+            <div class="fw-bubble-wrap" [class.mine]="isMeu(msg)">
+
+              <!-- Botão de reação (aparece no hover) -->
+              <button *ngIf="!isFwApagada(msg)" class="fw-react-trigger" [class.mine]="isMeu(msg)"
+                      [class.fw-picker-open]="isFwReactionPickerOpen(msg, win)"
+                      (click)="toggleFwReactionPicker($event, msg, win)"
+                      title="Reagir">
+                <mat-icon>add_reaction</mat-icon>
+              </button>
+
+              <!-- Balão -->
+              <div class="fw-bubble" [class.mine]="isMeu(msg)"
+                   (contextmenu)="onFwContextMenu($event, msg, win)">
+                <!-- Botão de menu dentro do balão -->
+                <button class="fw-bbl-btn" [class.mine]="isMeu(msg)"
+                        (click)="onFwBubbleClick($event, msg, win)" title="Opções">
+                  <mat-icon>expand_more</mat-icon>
+                </button>
+                <span *ngIf="isFwApagada(msg)" class="fw-apagada">
+                  <mat-icon class="fw-apagada-icon">do_not_disturb_on</mat-icon> Mensagem apagada
+                </span>
+                <ng-container *ngIf="!isFwApagada(msg)">{{ getFwTexto(msg) }}<span *ngIf="isFwEditada(msg)" class="fw-editada">&nbsp;(editado)</span></ng-container>
+              </div>
+
+              <!-- Picker de reações rápidas -->
+              <div *ngIf="isFwReactionPickerOpen(msg, win)" class="fw-reaction-picker" [class.mine]="isMeu(msg)"
+                   (click)="$event.stopPropagation()">
+                <button *ngFor="let e of QUICK_REACTIONS" class="fw-rp-btn"
+                        [class.fw-rp-active]="hasMyFwReaction(msg, e)"
+                        (click)="addFwReaction(msg, e, win)">{{ e }}</button>
+              </div>
+
+            </div><!-- /fw-bubble-wrap -->
+
+            <!-- Reações abaixo do balão -->
+            <div *ngIf="hasFwReactions(msg)" class="fw-reactions" [class.mine]="isMeu(msg)">
+              <span *ngFor="let r of getFwReactions(msg)"
+                    class="fw-reaction-chip" [class.active]="r.mine"
+                    (click)="addFwReaction(msg, r.emoji, win)"
+                    [matTooltip]="r.count + (r.count === 1 ? ' reação' : ' reações')">
+                {{ r.emoji }}<span *ngIf="r.count > 1" class="fw-rc-count">{{ r.count }}</span>
+              </span>
+            </div>
+
+            <div class="fw-meta" [class.mine]="isMeu(msg)">
+              <mat-icon *ngIf="isFwFixada(msg)"   class="fw-marker pin"  matTooltip="Fixada">push_pin</mat-icon>
+              <mat-icon *ngIf="isFwFavorita(msg)" class="fw-marker star" matTooltip="Favorita">star</mat-icon>
+              <span class="fw-time">{{ formatTime(msg.timestamp) }}</span>
+              <span *ngIf="isMeu(msg)" class="fw-tick" [class]="'fw-tick-' + msg.status">
+                <mat-icon class="fw-tick-icon">{{ msg.status === 'sent' ? 'done' : 'done_all' }}</mat-icon>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Indicador de digitação -->
+      <!-- Digitando -->
       <div *ngIf="escrevendo[win.userId]" class="fw-typing">
         <i class="td"></i><i class="td"></i><i class="td"></i>
         <span>{{ escrevendo[win.userId] }}</span>
       </div>
 
-      <!-- Barra de input -->
-      <div class="fw-input-row">
-        <input class="fw-input"
-               [(ngModel)]="textos[win.userId]"
-               placeholder="Mensagem..."
-               (keydown)="onKey($event, win)"
-               (input)="escrever(win)"
-               maxlength="256"
-               autocomplete="off"/>
-        <button mat-icon-button class="fw-btn-send"
-                [disabled]="!textos[win.userId]?.trim() || !connected"
-                (click)="enviar(win)"
-                matTooltip="Enviar (Enter)">
-          <mat-icon>send</mat-icon>
+      <!-- Barra de resposta -->
+      <div *ngIf="fwResposta[win.userId]" class="fw-reply-bar">
+        <div class="fw-reply-accent"></div>
+        <mat-icon class="fw-reply-icon">reply</mat-icon>
+        <div class="fw-reply-content">
+          <span class="fw-reply-author">{{ fwResposta[win.userId].username === myEmailPublic ? 'Você' : win.nome }}</span>
+          <span class="fw-reply-text">{{ fwResposta[win.userId].texto }}</span>
+        </div>
+        <button mat-icon-button class="fw-reply-close" (click)="cancelarFwResposta(win)">
+          <mat-icon>close</mat-icon>
         </button>
       </div>
 
-    </ng-container>
+      <!-- Barra de edição -->
+      <div *ngIf="fwEditando[win.userId]" class="fw-edit-bar">
+        <div class="fw-edit-accent"></div>
+        <mat-icon class="fw-edit-icon">edit</mat-icon>
+        <span class="fw-edit-label">Editando mensagem</span>
+        <button mat-icon-button class="fw-edit-close" (click)="cancelarFwEdicao(win)" matTooltip="Cancelar (Esc)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
+      <!-- Input -->
+      <div class="fw-input-row">
+        <input class="fw-input"
+               [(ngModel)]="textos[win.userId]"
+               [placeholder]="fwEditando[win.userId] ? 'Editar... (Enter/Esc)' : 'Mensagem...'"
+               (keydown)="onKey($event, win)"
+               (input)="escrever(win)"
+               maxlength="256" autocomplete="off"/>
+        <button mat-icon-button class="fw-btn-send"
+                [disabled]="!textos[win.userId]?.trim() || !connected"
+                (click)="enviar(win)"
+                [matTooltip]="fwEditando[win.userId] ? 'Salvar (Enter)' : 'Enviar (Enter)'">
+          <mat-icon>{{ fwEditando[win.userId] ? 'check' : 'send' }}</mat-icon>
+        </button>
+      </div>
+    </ng-container>
   </div>
 </ng-container>
 
+<!-- ── Menu de contexto (floating-chat) ──────────────────────────────── -->
+<div *ngIf="fwCtxMenu" class="fw-ctx-overlay" (click)="fecharCtxMenu()"></div>
+<div *ngIf="fwCtxMenu" class="fw-ctx-menu"
+     [style.left.px]="fwCtxMenu.x" [style.top.px]="fwCtxMenu.y"
+     (click)="$event.stopPropagation()">
+  <button class="fw-ctx-item" (click)="fwMostrarInfo()"><mat-icon>info_outline</mat-icon> Dados</button>
+  <button class="fw-ctx-item" (click)="fwResponder()"><mat-icon>reply</mat-icon> Responder</button>
+  <button *ngIf="!isFwApagada(fwCtxMenu.msg)" class="fw-ctx-item"
+          (click)="toggleFwReactionPicker($event, fwCtxMenu.msg, fwCtxMenu.win); fecharCtxMenu()">
+    <mat-icon>add_reaction</mat-icon> Reagir
+  </button>
+  <button *ngIf="!isFwApagada(fwCtxMenu.msg)" class="fw-ctx-item" (click)="fwCopiar()"><mat-icon>content_copy</mat-icon> Copiar</button>
+  <div class="fw-ctx-divider"></div>
+  <button class="fw-ctx-item" (click)="fwToggleFixar()">
+    <mat-icon>push_pin</mat-icon> {{ isFwFixada(fwCtxMenu.msg) ? 'Desafixar' : 'Fixar' }}
+  </button>
+  <button class="fw-ctx-item" (click)="fwToggleFavoritar()">
+    <mat-icon>{{ isFwFavorita(fwCtxMenu.msg) ? 'star' : 'star_border' }}</mat-icon>
+    {{ isFwFavorita(fwCtxMenu.msg) ? 'Desfavoritar' : 'Favoritar' }}
+  </button>
+  <ng-container *ngIf="isMeu(fwCtxMenu.msg) && !isFwApagada(fwCtxMenu.msg)">
+    <div class="fw-ctx-divider"></div>
+    <button class="fw-ctx-item" (click)="fwEditar()"><mat-icon>edit</mat-icon> Editar</button>
+  </ng-container>
+  <button *ngIf="isMeu(fwCtxMenu.msg)" class="fw-ctx-item fw-ctx-danger" (click)="fwApagar()">
+    <mat-icon>delete_outline</mat-icon> Apagar
+  </button>
+</div>
+
+<!-- ── Painel de info ─────────────────────────────────────────────────── -->
+<div *ngIf="fwInfoMsg" class="fw-info-overlay" (click)="fwInfoMsg = null"></div>
+<div *ngIf="fwInfoMsg" class="fw-info-panel" (click)="$event.stopPropagation()">
+  <div class="fw-info-header">
+    <mat-icon>info_outline</mat-icon><span>Dados da mensagem</span>
+    <button mat-icon-button (click)="fwInfoMsg = null"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="fw-info-row">
+    <mat-icon>schedule</mat-icon>
+    <div><span class="fw-info-label">Enviada em</span><span class="fw-info-val">{{ formatFullDate(fwInfoMsg.timestamp) }}</span></div>
+  </div>
+  <div class="fw-info-row">
+    <mat-icon [class]="'fw-st-' + fwInfoMsg.status">{{ fwGetStatusIcon(fwInfoMsg.status) }}</mat-icon>
+    <div>
+      <span class="fw-info-label">Status</span>
+      <span class="fw-info-val" [class]="'fw-st-' + fwInfoMsg.status">{{ fwGetStatusLabel(fwInfoMsg.status) }}</span>
+    </div>
+  </div>
+</div>

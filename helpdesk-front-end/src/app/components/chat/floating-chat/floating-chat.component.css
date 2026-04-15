@@ -4,15 +4,15 @@
   bottom:         0;
   width:          300px;
   background:     #fff;
-  border-radius:  10px 10px 0 0;
+  border-radius:  12px 12px 0 0;
   display:        flex;
   flex-direction: column;
   z-index:        990;
   overflow:       hidden;
-  box-shadow:     0 -2px 24px rgba(15,23,42,0.18);
+  box-shadow:     0 -4px 28px rgba(15,23,42,0.18);
   transition:     box-shadow 0.2s;
 }
-.fw-window:hover { box-shadow: 0 -4px 32px rgba(15,23,42,0.24); }
+.fw-window:hover { box-shadow: 0 -6px 36px rgba(15,23,42,0.24); }
 
 /* ── Cabeçalho ────────────────────────────────────────────────────────────── */
 .fw-header {
@@ -87,27 +87,27 @@
 
 /* Badge não-lidas */
 .fw-badge {
-  background:    #f44336;
-  color:         #fff;
-  font-size:     0.6rem;
-  font-weight:   700;
-  min-width:     17px;
-  height:        17px;
-  border-radius: 9px;
-  display:       flex;
-  align-items:   center;
+  background:      #f44336;
+  color:           #fff;
+  font-size:       0.6rem;
+  font-weight:     700;
+  min-width:       17px;
+  height:          17px;
+  border-radius:   9px;
+  display:         flex;
+  align-items:     center;
   justify-content: center;
-  padding:       0 3px;
-  border:        1.5px solid rgba(255,255,255,0.6);
-  flex-shrink:   0;
+  padding:         0 3px;
+  border:          1.5px solid rgba(255,255,255,0.6);
+  flex-shrink:     0;
 }
 
 /* Botões de ação no header */
 .fw-btn-icon {
-  width:   26px  !important;
-  height:  26px  !important;
+  width:       26px  !important;
+  height:      26px  !important;
   line-height: 26px !important;
-  color:   rgba(255,255,255,0.8) !important;
+  color:       rgba(255,255,255,0.8) !important;
   flex-shrink: 0;
 }
 .fw-btn-icon:hover { color: #fff !important; }
@@ -136,13 +136,15 @@
 
 /* ── Área de mensagens ────────────────────────────────────────────────────── */
 .fw-messages {
-  height:     280px;
-  overflow-y: auto;
-  padding:    0.6rem 0.65rem;
-  display:    flex;
+  height:         280px;
+  overflow-y:     auto;
+  padding:        0.65rem 0.65rem 0.5rem;
+  display:        flex;
   flex-direction: column;
-  gap:        0.35rem;
-  background: #f9fafb;
+  gap:            0.38rem;
+  background-color:  #eef1f7;
+  background-image:  radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:   20px 20px;
 }
 .fw-messages::-webkit-scrollbar { width: 4px; }
 .fw-messages::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 2px; }
@@ -195,25 +197,68 @@
 
 /* Balão */
 .fw-bubble {
-  background:    #eceff1;
+  background:    #fff;
   color:         #263238;
-  border-radius: 12px 12px 12px 3px;
-  padding:       0.38rem 0.6rem;
+  border-radius: 3px 12px 12px 12px;
+  padding:       0.42rem 0.65rem;
   font-size:     0.82rem;
-  line-height:   1.4;
+  line-height:   1.45;
   word-break:    break-word;
+  box-shadow:    0 1px 2px rgba(0,0,0,0.1);
+  position:      relative; /* needed for inner button */
 }
+/* gradient overlay corner */
+.fw-bubble::before {
+  content:        '';
+  position:       absolute;
+  top:            0;
+  right:          0;
+  width:          38px;
+  height:         26px;
+  border-radius:  0 12px 0 0;
+  background:     linear-gradient(225deg, rgba(255,255,255,0.96) 40%, transparent 100%);
+  opacity:        0;
+  transition:     opacity 0.14s;
+  pointer-events: none;
+  z-index:        1;
+}
+.fw-bubble:hover::before { opacity: 1; }
 .fw-bubble.mine {
-  background:    #1565c0;
+  background:    linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
   color:         #fff;
-  border-radius: 12px 12px 3px 12px;
+  border-radius: 12px 3px 12px 12px;
+  box-shadow:    0 1px 2px rgba(21,101,192,0.28);
 }
+.fw-bubble.mine::before {
+  border-radius: 12px 3px 0 0;
+  background:    linear-gradient(225deg, rgba(13,71,161,0.5) 40%, transparent 100%);
+}
+
+/* Metadados da mensagem (hora + tick) */
+.fw-meta {
+  display:     flex;
+  align-items: center;
+  gap:         2px;
+  padding:     0 2px;
+}
+.fw-meta.mine { flex-direction: row-reverse; }
 
 /* Horário */
 .fw-time {
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   color:     #90a4ae;
 }
+
+/* Ticks de status */
+.fw-tick { display: inline-flex; align-items: center; }
+.fw-tick-icon {
+  font-size: 0.78rem !important;
+  width:     0.78rem !important;
+  height:    0.78rem !important;
+  color:     #b0bec5;
+}
+.fw-tick-delivered .fw-tick-icon { color: #78909c; }
+.fw-tick-read      .fw-tick-icon { color: #90caf9; }
 
 /* ── Indicador de digitação ───────────────────────────────────────────────── */
 .fw-typing {
@@ -223,7 +268,7 @@
   padding:     0.3rem 0.75rem;
   font-size:   0.72rem;
   color:       #90a4ae;
-  background:  #f9fafb;
+  background:  #f5f7fb;
   border-top:  1px solid #eceff1;
   flex-shrink: 0;
 }
@@ -244,30 +289,281 @@
 
 /* ── Barra de input ───────────────────────────────────────────────────────── */
 .fw-input-row {
-  display:      flex;
-  align-items:  center;
-  padding:      0.4rem 0.4rem 0.4rem 0.65rem;
-  border-top:   1px solid #eceff1;
-  background:   #fff;
-  gap:          0.25rem;
-  flex-shrink:  0;
+  display:     flex;
+  align-items: center;
+  padding:     0.4rem 0.4rem 0.4rem 0.65rem;
+  border-top:  1px solid #eceff1;
+  background:  #fff;
+  gap:         0.25rem;
+  flex-shrink: 0;
 }
 .fw-input {
-  flex:         1;
-  border:       none;
-  outline:      none;
-  font-size:    0.83rem;
-  color:        #263238;
-  background:   transparent;
-  padding:      0.2rem 0;
+  flex:       1;
+  border:     none;
+  outline:    none;
+  font-size:  0.83rem;
+  color:      #263238;
+  background: transparent;
+  padding:    0.2rem 0;
 }
 .fw-input::placeholder { color: #b0bec5; }
 .fw-btn-send {
-  color:   #1565c0 !important;
-  width:   34px !important;
-  height:  34px !important;
+  color:       #1565c0 !important;
+  width:       34px !important;
+  height:      34px !important;
   line-height: 34px !important;
+  transition:  transform 0.12s;
 }
+.fw-btn-send:not([disabled]):hover { transform: scale(1.1); }
 .fw-btn-send[disabled] { color: #cfd8dc !important; }
 .fw-btn-send mat-icon { font-size: 1.15rem !important; width: 1.15rem !important; height: 1.15rem !important; }
+
+/* ══ Bubble wrap + action button ════════════════════════════════════════ */
+.fw-bubble-wrap {
+  position: relative; display: inline-flex; flex-direction: column; max-width: 100%;
+}
+.fw-bubble-col.mine .fw-bubble-wrap { align-items: flex-end; }
+
+/* Action button inside bubble */
+.fw-bbl-btn {
+  position:       absolute;
+  top:            2px;
+  right:          3px;
+  width:          22px;
+  height:         22px;
+  background:     transparent;
+  border:         none;
+  border-radius:  0 0.5rem 0 0.3rem;
+  cursor:         pointer;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  opacity:        0;
+  pointer-events: none;
+  transition:     opacity 0.14s, background 0.1s;
+  padding:        0;
+  z-index:        2;
+}
+.fw-bbl-btn mat-icon { font-size: 0.8rem !important; width: 0.8rem !important; height: 0.8rem !important; color: #546e7a; position: relative; z-index: 1; }
+.fw-bbl-btn.mine mat-icon { color: rgba(255,255,255,0.9); }
+.fw-bubble:hover .fw-bbl-btn { opacity: 1; pointer-events: all; }
+.fw-bubble:hover .fw-bbl-btn:hover { background: rgba(0,0,0,0.10); }
+.fw-bubble.mine:hover .fw-bbl-btn:hover { background: rgba(0,0,0,0.18); }
+
+/* Quote inside bubble */
+.fw-msg-quote {
+  background: rgba(0,0,0,0.07); border-left: 2.5px solid rgba(0,0,0,0.25);
+  border-radius: 0.15rem; padding: 0.18rem 0.45rem; margin-bottom: 0.3rem;
+}
+.fw-msg-quote.mine { background: rgba(255,255,255,0.15); border-left-color: rgba(255,255,255,0.5); }
+.fw-quote-author { display: block; font-size: 0.63rem; font-weight: 700; color: #1565c0; }
+.fw-msg-quote.mine .fw-quote-author { color: #bbdefb; }
+.fw-quote-text { display: block; font-size: 0.7rem; opacity: 0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
+/* Deleted / edited */
+.fw-apagada { display: inline-flex; align-items: center; gap: 0.22rem; font-style: italic; opacity: 0.6; font-size: 0.8rem; }
+.fw-apagada-icon { font-size: 0.8rem !important; width: 0.8rem !important; height: 0.8rem !important; }
+.fw-editada { font-size: 0.58rem; opacity: 0.6; font-style: italic; }
+
+/* ══ Botão de reação (aparece no hover da msg-row) ═══════════════════ */
+.fw-react-trigger {
+  position:       absolute;
+  bottom:         18px;
+  right:          -32px; /* mensagem recebida: à direita */
+  width:          26px;
+  height:         26px;
+  border-radius:  50%;
+  background:     #fff;
+  border:         1px solid #e0e7ef;
+  cursor:         pointer;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  opacity:        0;
+  pointer-events: none;
+  transition:     opacity 0.18s, box-shadow 0.14s, transform 0.12s;
+  box-shadow:     0 2px 8px rgba(0,0,0,0.12);
+  padding:        0;
+  z-index:        5;
+}
+.fw-react-trigger mat-icon {
+  font-size: 0.85rem !important;
+  width:     0.85rem !important;
+  height:    0.85rem !important;
+  color:     #546e7a;
+}
+/* Mensagem enviada (mine): à esquerda do balão */
+.fw-react-trigger.mine { right: auto; left: -32px; }
+/* Picker aberto → sempre visível */
+.fw-react-trigger.fw-picker-open {
+  opacity: 1 !important; pointer-events: all !important;
+  background: #e3f2fd; border-color: #1565c0;
+}
+.fw-react-trigger.fw-picker-open mat-icon { color: #1565c0; }
+/* Exibir no hover da linha da mensagem */
+.fw-msg-row:hover .fw-react-trigger {
+  opacity: 1;
+  pointer-events: all;
+}
+.fw-react-trigger:hover {
+  transform:  scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+/* ══ Picker de reações rápidas ═══════════════════════════════════════ */
+.fw-reaction-picker {
+  position:      absolute;
+  bottom:        calc(100% + 6px);
+  left:          0;
+  background:    #fff;
+  border-radius: 2rem;
+  box-shadow:    0 6px 24px rgba(15,23,42,0.18), 0 2px 6px rgba(15,23,42,0.08);
+  display:       flex;
+  align-items:   center;
+  gap:           1px;
+  padding:       0.22rem 0.35rem;
+  z-index:       3000;
+  animation:     fwRpFade 0.14s ease-out;
+  border:        1px solid #e8edf2;
+  white-space:   nowrap;
+}
+.fw-reaction-picker.mine { left: auto; right: 0; }
+@keyframes fwRpFade {
+  from { opacity: 0; transform: scale(0.82) translateY(5px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.fw-rp-btn {
+  font-size:     1.25rem;
+  line-height:   1;
+  background:    none;
+  border:        none;
+  cursor:        pointer;
+  border-radius: 50%;
+  width:         34px;
+  height:        34px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    transform 0.12s, background 0.1s;
+  position:      relative;
+}
+.fw-rp-btn:hover              { transform: scale(1.35) translateY(-3px); background: #f0f4ff; }
+.fw-rp-btn.fw-rp-active       { background: #e3f2fd; }
+.fw-rp-btn.fw-rp-active::after {
+  content:       '';
+  position:      absolute;
+  inset:         2px;
+  border-radius: 50%;
+  border:        2px solid #1565c0;
+}
+
+/* ══ Chips de reações abaixo do balão ════════════════════════════════ */
+.fw-reactions {
+  display:    flex;
+  flex-wrap:  wrap;
+  gap:        3px;
+  margin-top: 1px;
+  padding:    0 0.1rem;
+}
+.fw-reactions.mine { justify-content: flex-end; }
+.fw-reaction-chip {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           2px;
+  background:    #fff;
+  border:        1.5px solid #e0e7ef;
+  border-radius: 1rem;
+  padding:       1px 5px;
+  font-size:     0.78rem;
+  cursor:        pointer;
+  transition:    background 0.12s, border-color 0.12s, transform 0.1s;
+  box-shadow:    0 1px 3px rgba(0,0,0,0.07);
+  user-select:   none;
+  line-height:   1.3;
+}
+.fw-reaction-chip:hover  { background: #f0f4ff; border-color: #1565c0; transform: scale(1.06); }
+.fw-reaction-chip.active { background: #e3f2fd; border-color: #1565c0; }
+.fw-rc-count             { font-size: 0.62rem; color: #546e7a; font-weight: 700; }
+
+/* Markers */
+.fw-marker { font-size: 0.65rem !important; width: 0.65rem !important; height: 0.65rem !important; color: #90a4ae; }
+.fw-marker.pin  { color: #78909c; }
+.fw-marker.star { color: #f9a825; }
+
+/* Edited label — "(editado)" exibido inline no balão */
+.fw-editada { font-size: 0.58rem; opacity: 0.62; font-style: italic; }
+
+/* Reply bar */
+.fw-reply-bar {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.65rem 0.35rem 0;
+  background: #e8f5e9; border-top: 1px solid #c8e6c9; flex-shrink: 0;
+}
+.fw-reply-accent { width: 3px; align-self: stretch; background: #2e7d32; flex-shrink: 0; margin-right: 0.1rem; }
+.fw-reply-icon   { font-size: 0.9rem !important; width: 0.9rem !important; height: 0.9rem !important; color: #2e7d32; flex-shrink: 0; }
+.fw-reply-content { flex: 1; min-width: 0; }
+.fw-reply-author  { display: block; font-size: 0.62rem; font-weight: 700; color: #1b5e20; }
+.fw-reply-text    { display: block; font-size: 0.7rem; color: #37474f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fw-reply-close { width: 22px !important; height: 22px !important; }
+.fw-reply-close mat-icon { font-size: 0.85rem !important; color: #78909c; }
+
+/* Edit bar — barra de edição (similar à reply bar, tom amarelo) */
+.fw-edit-bar {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  background: #fff8e1; border-top: 1px solid #ffe082; flex-shrink: 0;
+}
+.fw-edit-accent { width: 3px; align-self: stretch; background: #f9a825; flex-shrink: 0; margin-right: 0.1rem; }
+.fw-edit-icon   { font-size: 0.9rem !important; width: 0.9rem !important; height: 0.9rem !important; color: #f57f17; flex-shrink: 0; }
+.fw-edit-label  { flex: 1; font-size: 0.72rem; font-weight: 700; color: #5d4037; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fw-edit-close  { width: 22px !important; height: 22px !important; }
+.fw-edit-close mat-icon { font-size: 0.85rem !important; color: #78909c; }
+
+/* Context menu */
+.fw-ctx-overlay { position: fixed; inset: 0; z-index: 3990; cursor: default; }
+.fw-ctx-menu {
+  position: fixed; z-index: 4000; background: #fff; border-radius: 0.65rem;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18); padding: 0.2rem 0; min-width: 185px;
+  overflow: hidden; animation: fwCtxIn 0.12s ease-out;
+}
+@keyframes fwCtxIn { from { opacity: 0; transform: scale(0.93) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.fw-ctx-item {
+  display: flex; align-items: center; gap: 0.55rem; width: 100%;
+  padding: 0.55rem 0.9rem; background: none; border: none; cursor: pointer;
+  font-size: 0.8rem; color: #263238; text-align: left; font-family: 'Roboto', sans-serif;
+  transition: background 0.1s, color 0.1s;
+}
+.fw-ctx-item:hover { background: #f0f4ff; color: #1565c0; }
+.fw-ctx-item mat-icon { font-size: 0.9rem !important; width: 0.9rem !important; height: 0.9rem !important; color: #78909c; transition: color 0.1s; flex-shrink: 0; }
+.fw-ctx-item:hover mat-icon { color: #1565c0; }
+.fw-ctx-danger        { color: #c62828 !important; }
+.fw-ctx-danger:hover  { background: #fde8e8 !important; color: #b71c1c !important; }
+.fw-ctx-danger mat-icon,
+.fw-ctx-danger:hover mat-icon { color: #c62828 !important; }
+.fw-ctx-divider { height: 1px; background: #e8edf2; margin: 0.15rem 0; }
+
+/* Info panel */
+.fw-info-overlay { position: fixed; inset: 0; z-index: 3990; background: rgba(0,0,0,0.3); }
+.fw-info-panel {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 4000; background: #fff; border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.22); width: min(300px, 90vw); overflow: hidden;
+}
+.fw-info-header {
+  display: flex; align-items: center; gap: 0.45rem; padding: 0.65rem 0.85rem;
+  background: linear-gradient(135deg, #0d47a1, #0288d1); color: #fff; font-weight: 700; font-size: 0.85rem;
+}
+.fw-info-header mat-icon { font-size: 0.95rem !important; width: 0.95rem !important; height: 0.95rem !important; }
+.fw-info-header span { flex: 1; }
+.fw-info-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.85rem; border-bottom: 1px solid #f0f4f8; }
+.fw-info-row:last-child { border-bottom: none; }
+.fw-info-row > mat-icon { font-size: 0.95rem !important; width: 0.95rem !important; height: 0.95rem !important; color: #90a4ae; flex-shrink: 0; }
+.fw-info-row > div { display: flex; flex-direction: column; gap: 1px; }
+.fw-info-label { font-size: 0.62rem; color: #90a4ae; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.fw-info-val   { font-size: 0.8rem; color: #37474f; font-weight: 500; }
+.fw-st-sent      { color: #78909c !important; }
+.fw-st-delivered { color: #546e7a !important; }
+.fw-st-read      { color: #0288d1 !important; }
 

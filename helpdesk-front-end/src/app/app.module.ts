@@ -75,6 +75,7 @@ import { NgChartsModule }                 from 'ng2-charts';
 import { ChatComponent }                  from './components/chat/chat/chat.component';
 import { ChatBubbleComponent }            from './components/chat/chat-bubble/chat-bubble.component';
 import { FloatingChatComponent }          from './components/chat/floating-chat/floating-chat.component';
+import { ChatNotificationComponent }      from './components/chat/chat-notification/chat-notification.component';
 import { UsuariosListComponent }          from './components/usuarios/usuarios-list/usuarios-list.component';
 
 import { UsuarioDetalheDialogComponent }   from './components/usuarios/usuario-detalhe-dialog/usuario-detalhe-dialog.component';
@@ -129,6 +130,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     ChatComponent,
     ChatBubbleComponent,
     FloatingChatComponent,
+    ChatNotificationComponent,
 
     UsuariosListComponent,
 
