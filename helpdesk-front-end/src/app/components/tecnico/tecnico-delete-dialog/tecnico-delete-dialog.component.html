@@ -1,0 +1,640 @@
+<div class="dialog-container">
+
+  <!-- ══════════ TRANSFER LOADING OVERLAY ══════════ -->
+  <div class="transfer-overlay" *ngIf="isTransferring" [class.overlay-success]="transferSuccess">
+    <div class="overlay-content">
+      <ng-container *ngIf="!transferSuccess">
+        <div class="overlay-spinner-wrap">
+          <svg class="overlay-circle-svg" viewBox="0 0 60 60">
+            <circle class="circle-track" cx="30" cy="30" r="26"/>
+            <circle class="circle-spin"  cx="30" cy="30" r="26"/>
+          </svg>
+          <mat-icon class="overlay-center-icon">swap_horiz</mat-icon>
+        </div>
+        <p class="overlay-title">Transferindo chamados...</p>
+        <p class="overlay-sub">
+          <strong>{{ transferQtd }}</strong> chamado{{ transferQtd > 1 ? 's' : '' }} sendo
+          enviado{{ transferQtd > 1 ? 's' : '' }} para <strong>{{ nomeNovoTecnico }}</strong>
+        </p>
+        <div class="overlay-dots"><span></span><span></span><span></span></div>
+      </ng-container>
+      <ng-container *ngIf="transferSuccess">
+        <div class="overlay-check-wrap">
+          <svg class="check-svg" viewBox="0 0 60 60">
+            <circle class="check-circle" cx="30" cy="30" r="26"/>
+            <polyline class="check-mark" points="18,31 26,39 42,22"/>
+          </svg>
+        </div>
+        <p class="overlay-title success-title">Transferência concluída!</p>
+        <p class="overlay-sub">
+          <strong>{{ transferQtd }}</strong> chamado{{ transferQtd > 1 ? 's' : '' }}
+          transferido{{ transferQtd > 1 ? 's' : '' }} com sucesso
+        </p>
+        <p class="overlay-refresh">Atualizando lista<span class="refresh-dots"><span></span><span></span><span></span></span></p>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <div class="dialog-header">
+    <div class="header-avatar">
+      <img *ngIf="tecnico.fotoPerfil" [src]="tecnico.fotoPerfil" [alt]="tecnico.nome" class="header-avatar-img">
+      <div *ngIf="!tecnico.fotoPerfil" class="header-avatar-fallback">
+        <mat-icon>person</mat-icon>
+      </div>
+    </div>
+    <div class="header-text">
+      <div class="header-label"><mat-icon>person_off</mat-icon> Inativar Técnico</div>
+      <h2>{{ tecnico.nome }}</h2>
+      <span class="header-email">{{ tecnico.email }}</span>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()" matTooltip="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ══════════ LOADING ══════════ -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="32"></mat-spinner>
+    <div class="loading-text">
+      <strong>{{ fase === 'transferencia' && totalInicial > 0 ? 'Atualizando chamados' : 'Verificando chamados' }}</strong>
+      <span>Aguarde...</span>
+    </div>
+  </div>
+
+  <!-- ══════════ FASE: SEM PENDENTES ══════════ -->
+  <div class="dialog-body" *ngIf="!isLoading && fase === 'sem-pendentes'">
+    <div class="status-card status-ok">
+      <div class="status-icon-wrap"><mat-icon>verified</mat-icon></div>
+      <div class="status-info">
+        <strong>Pronto para inativar</strong>
+        <span>Este técnico não possui chamados em aberto ou andamento.</span>
+      </div>
+    </div>
+    <div class="consequence-list">
+      <p class="consequence-title"><mat-icon>info_outline</mat-icon> O que acontece após a inativação:</p>
+      <ul>
+        <li><mat-icon>check_circle</mat-icon> Técnico removido de todas as listas ativas</li>
+        <li><mat-icon>check_circle</mat-icon> Não poderá receber novos chamados</li>
+        <li><mat-icon>check_circle</mat-icon> Acesso ao sistema será bloqueado</li>
+        <li><mat-icon>history</mat-icon> Histórico de chamados encerrados preservado</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════ FASE: CONFIRMAÇÃO DE INATIVAÇÃO ══════════ -->
+  <div class="dialog-body confirmacao-body" *ngIf="!isLoading && fase === 'confirmacao-inativacao'">
+    <div class="confirmacao-card">
+      <div class="confirmacao-icon-wrap"><mat-icon>check_circle</mat-icon></div>
+      <h3>Todos os chamados foram transferidos!</h3>
+      <p>
+        <strong>{{ tecnico.nome }}</strong> não possui mais chamados em aberto.
+        Deseja confirmar a inativação do técnico?
+      </p>
+      <div class="confirmacao-stats">
+        <span class="conf-stat">
+          <mat-icon>swap_horiz</mat-icon>
+          {{ totalInicial }} chamado{{ totalInicial > 1 ? 's' : '' }} transferido{{ totalInicial > 1 ? 's' : '' }}
+        </span>
+        <span class="conf-stat conf-stat-warn">
+          <mat-icon>person_off</mat-icon> Técnico será inativado
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ FASE: TRANSFERÊNCIA ══════════ -->
+  <div class="dialog-body" *ngIf="!isLoading && fase === 'transferencia'">
+
+    <!-- ── Indicador de etapas ── -->
+    <div class="steps-bar">
+      <div class="step step-active">
+        <div class="step-circle"><mat-icon>swap_horiz</mat-icon></div>
+        <div class="step-label">
+          <span class="step-num">Etapa 1</span>
+          <span class="step-name">Transferir chamados</span>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step step-pending">
+        <div class="step-circle"><mat-icon>person_off</mat-icon></div>
+        <div class="step-label">
+          <span class="step-num">Etapa 2</span>
+          <span class="step-name">Inativar técnico</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tabs: Transferência | Histórico | Recebidos ── -->
+    <div class="tabs-bar">
+      <button class="tab-btn" [class.tab-active]="abaAtiva === 'transferencia'"
+              (click)="abaAtiva = 'transferencia'">
+        <mat-icon>swap_horiz</mat-icon>
+        <span>Transferência</span>
+      </button>
+      <button class="tab-btn" [class.tab-active]="abaAtiva === 'historico'"
+              (click)="abaAtiva = 'historico'">
+        <mat-icon>history</mat-icon>
+        <span>Enviados</span>
+        <span class="tab-badge" *ngIf="historico.length > 0">{{ historico.length }}</span>
+      </button>
+      <button class="tab-btn" [class.tab-active]="abaAtiva === 'recebidos'"
+              (click)="abaAtiva = 'recebidos'">
+        <mat-icon>move_to_inbox</mat-icon>
+        <span>Recebidos</span>
+        <span class="tab-badge tab-badge-green" *ngIf="recebidos.length > 0">{{ recebidos.length }}</span>
+      </button>
+    </div>
+
+    <!-- ════════════════ ABA: TRANSFERÊNCIA ════════════════ -->
+    <ng-container *ngIf="abaAtiva === 'transferencia'">
+
+      <!-- ── Progresso geral ── -->
+    <div class="progress-section" [class.is-done]="!hasPendentes">
+      <div class="progress-header">
+        <div class="progress-label">
+          <mat-icon [class.icon-done]="!hasPendentes">
+            {{ !hasPendentes ? 'check_circle' : 'pending' }}
+          </mat-icon>
+          <span *ngIf="hasPendentes">
+            <strong>{{ chamadosTransferidos }}</strong> de <strong>{{ totalInicial }}</strong>
+            transferido{{ chamadosTransferidos > 1 ? 's' : '' }}
+            &nbsp;·&nbsp; Faltam <strong>{{ chamadosPendentes.length }}</strong>
+          </span>
+          <span *ngIf="!hasPendentes">Todos os chamados transferidos!</span>
+        </div>
+        <span class="progress-count" [class.count-done]="!hasPendentes">{{ progressoPct }}%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" [style.width.%]="progressoPct" [class.fill-done]="!hasPendentes"></div>
+      </div>
+    </div>
+
+    <!-- ── Stats / filtros rápidos ── -->
+    <div class="pendentes-summary" *ngIf="hasPendentes">
+      <div class="summary-stat stat-warn" [class.stat-filter-active]="filtroAtivo === 'todos'"
+           (click)="setFiltro('todos')" matTooltip="Mostrar todos">
+        <div class="stat-icon-wrap warn"><mat-icon>assignment_late</mat-icon></div>
+        <div class="stat-body">
+          <strong>{{ chamadosPendentes.length }}</strong>
+          <span>Restante{{ chamadosPendentes.length > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <div class="summary-stat stat-critica" *ngIf="countPorPrioridade('CRITICA') > 0"
+           [class.stat-filter-active]="filtroAtivo === 'CRITICA'"
+           (click)="setFiltro('CRITICA')" matTooltip="Filtrar Críticos">
+        <div class="stat-icon-wrap critica"><mat-icon>warning</mat-icon></div>
+        <div class="stat-body">
+          <strong>{{ countPorPrioridade('CRITICA') }}</strong>
+          <span>Crítico{{ countPorPrioridade('CRITICA') > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <div class="summary-stat stat-alta" *ngIf="countPorPrioridade('ALTA') > 0"
+           [class.stat-filter-active]="filtroAtivo === 'ALTA'"
+           (click)="setFiltro('ALTA')" matTooltip="Filtrar Alta prioridade">
+        <div class="stat-icon-wrap alta"><mat-icon>priority_high</mat-icon></div>
+        <div class="stat-body">
+          <strong>{{ countPorPrioridade('ALTA') }}</strong>
+          <span>Alta{{ countPorPrioridade('ALTA') > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <div class="summary-stat stat-info" [class.stat-filter-active]="filtroAtivo === 'selecionados'"
+           (click)="setFiltro('selecionados')" matTooltip="Filtrar selecionados">
+        <div class="stat-icon-wrap info"><mat-icon>check_box</mat-icon></div>
+        <div class="stat-body">
+          <strong>{{ selectedChamadosIds.size }}</strong>
+          <span>Selecionado{{ selectedChamadosIds.size !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Painel de transferência (selector + lista lado a lado em tela grande, coluna em pequena) ── -->
+    <div class="transfer-panel" *ngIf="hasPendentes">
+
+      <!-- Destino (selector) -->
+      <div class="destination-card">
+        <div class="destination-header">
+          <div class="dest-icon-wrap"><mat-icon>engineering</mat-icon></div>
+          <div>
+            <p class="dest-title">Técnico destino</p>
+            <p class="dest-hint">Escolha quem receberá os chamados selecionados</p>
+          </div>
+        </div>
+        <mat-form-field appearance="outline" class="full-width dest-field">
+          <mat-label>Selecione o técnico</mat-label>
+          <mat-select [(ngModel)]="novoTecnicoId" [required]="true">
+            <mat-select-trigger>
+              <span class="select-trigger-text" *ngIf="novoTecnicoId">{{ nomeNovoTecnico }}</span>
+            </mat-select-trigger>
+            <mat-option *ngFor="let t of tecnicosAtivos" [value]="t.id">{{ t.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- Preview do destino selecionado -->
+        <div class="dest-preview" *ngIf="novoTecnicoId">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            <strong>{{ selectedChamadosIds.size }}</strong>
+            chamado{{ selectedChamadosIds.size !== 1 ? 's' : '' }} →
+            <strong>{{ nomeNovoTecnico }}</strong>
+          </span>
+        </div>
+        <div class="dest-empty" *ngIf="!novoTecnicoId">
+          <mat-icon>info_outline</mat-icon>
+          <span>Selecione um técnico para habilitar a transferência</span>
+        </div>
+      </div>
+
+      <!-- Lista de chamados -->
+      <div class="chamados-section">
+        <div class="chamados-header">
+          <mat-checkbox [checked]="allSelected" [indeterminate]="someSelected"
+                        (change)="toggleAll($event.checked)" color="primary" class="select-all-check">
+            <span class="select-all-label">Selecionar todos</span>
+          </mat-checkbox>
+          <div style="display:flex;align-items:center;gap:0.4rem;">
+            <span class="filter-badge" *ngIf="filtroAtivo !== 'todos'">
+              <mat-icon>filter_list</mat-icon>
+              {{ filtroAtivo === 'selecionados' ? 'Selecionados' : filtroAtivo }}
+              <button class="filter-badge-clear" (click)="setFiltro('todos')" matTooltip="Limpar filtro">
+                <mat-icon>close</mat-icon>
+              </button>
+            </span>
+            <span class="chamados-count-pill">{{ chamadosFiltrados.length }} / {{ chamadosPendentes.length }}</span>
+          </div>
+        </div>
+
+        <div class="chamados-list" #chamadosList>
+          <div *ngFor="let chamado of chamadosPaginados"
+               class="chamado-card"
+               [class.card-selected]="isChamadoSelected(chamado.id)"
+               [class.card-critica]="chamado.prioridade === 'CRITICA'"
+               [class.card-alta]="chamado.prioridade === 'ALTA'"
+               (click)="toggleChamado(chamado.id, !isChamadoSelected(chamado.id))">
+
+            <mat-checkbox [checked]="isChamadoSelected(chamado.id)"
+                          (change)="toggleChamado(chamado.id, $event.checked)"
+                          (click)="$event.stopPropagation()"
+                          color="primary"></mat-checkbox>
+
+            <div class="chamado-body">
+              <div class="chamado-top">
+                <span class="chamado-id">#{{ chamado.id }}</span>
+                <span class="chamado-titulo">{{ chamado.titulo }}</span>
+                <span class="priority-pill {{ getPriorityClass(chamado.prioridade) }}">
+                  <mat-icon>{{ getPriorityIcon(chamado.prioridade) }}</mat-icon>
+                  {{ chamado.prioridade }}
+                </span>
+              </div>
+              <div class="chamado-bottom">
+                <span class="meta-chip"><mat-icon>person_outline</mat-icon>{{ chamado.nomeCliente }}</span>
+                <span class="meta-chip status-chip"><mat-icon>radio_button_checked</mat-icon>{{ chamado.status }}</span>
+                <span class="meta-chip"><mat-icon>schedule</mat-icon>{{ chamado.dataAbertura }}</span>
+              </div>
+            </div>
+
+            <div class="card-check-indicator" [class.visible]="isChamadoSelected(chamado.id)">
+              <mat-icon>check_circle</mat-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paginação -->
+        <div class="chamados-pagination" *ngIf="totalPages > 1">
+          <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 0">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button *ngFor="let p of pageNumbers"
+                  class="page-btn page-number"
+                  [class.active]="p === currentPage"
+                  (click)="goToPage(p)">{{ p + 1 }}</button>
+          <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages - 1">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <span class="page-info">{{ currentPage + 1 }} / {{ totalPages }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso de transferência parcial -->
+    <div class="partial-warning"
+         *ngIf="hasPendentes && selectedChamadosIds.size > 0 && selectedChamadosIds.size < chamadosPendentes.length">
+      <mat-icon>info_outline</mat-icon>
+      <span>Apenas os <strong>{{ selectedChamadosIds.size }}</strong> chamados marcados serão transferidos agora.
+        Os demais permanecerão com o técnico (que continuará ativo).</span>
+    </div>
+
+    </ng-container><!-- fim aba transferência -->
+
+    <!-- ════════════════ ABA: HISTÓRICO / TIMELINE ════════════════ -->
+    <ng-container *ngIf="abaAtiva === 'historico'">
+
+      <!-- Vazio -->
+      <div class="timeline-empty" *ngIf="historico.length === 0">
+        <div class="timeline-empty-icon">
+          <mat-icon>history_toggle_off</mat-icon>
+        </div>
+        <p class="timeline-empty-title">Nenhuma transferência ainda</p>
+        <p class="timeline-empty-sub">As transferências realizadas nesta sessão aparecerão aqui.</p>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline" *ngIf="historico.length > 0">
+
+      <!-- Resumo no topo -->
+      <div class="timeline-summary">
+        <div class="tl-sum-item">
+          <mat-icon>swap_horiz</mat-icon>
+          <span><strong>{{ historico.length }}</strong> lote{{ historico.length > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="tl-sum-sep"></div>
+        <div class="tl-sum-item">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span><strong>{{ chamadosTransferidos }}</strong> chamado{{ chamadosTransferidos > 1 ? 's' : '' }} transferido{{ chamadosTransferidos > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="tl-sum-sep"></div>
+        <div class="tl-sum-item">
+          <mat-icon>trending_down</mat-icon>
+          <span><strong>{{ chamadosPendentes.length }}</strong> pendente{{ chamadosPendentes.length > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="tl-sum-sep"></div>
+        <div class="tl-sum-item tl-sum-persisted">
+          <mat-icon>save</mat-icon>
+          <span>Histórico salvo</span>
+        </div>
+        <button class="tl-clear-btn" (click)="limparHistorico()"
+                matTooltip="Limpar histórico desta sessão">
+          <mat-icon>delete_sweep</mat-icon>
+          Limpar
+        </button>
+      </div>
+
+        <!-- Itens da timeline -->
+        <div class="timeline-list">
+          <div class="tl-item" *ngFor="let h of historico; let i = index; let last = last">
+
+            <!-- Linha vertical + dot -->
+            <div class="tl-track">
+              <div class="tl-dot" [class.tl-dot-first]="i === 0">
+                <mat-icon>{{ i === 0 ? 'check_circle' : 'swap_horiz' }}</mat-icon>
+              </div>
+              <div class="tl-line" *ngIf="!last"></div>
+            </div>
+
+            <!-- Conteúdo -->
+            <div class="tl-content" [class.tl-content-latest]="i === 0">
+              <div class="tl-header">
+                <div class="tl-lote-badge">Lote {{ h.lote }}</div>
+                <span class="tl-time">
+                  <mat-icon>schedule</mat-icon>
+                  {{ h.dataHora | date:'dd/MM/yyyy' }} às {{ h.dataHora | date:'HH:mm:ss' }}
+                </span>
+              </div>
+              <div class="tl-body">
+                <div class="tl-transfer-row">
+                  <!-- De (origem = tecnico sendo inativado) -->
+                  <div class="tl-person tl-from">
+                    <div class="tl-person-avatar from-avatar">
+                      <mat-icon>person</mat-icon>
+                    </div>
+                    <div class="tl-person-info">
+                      <span class="tl-person-role">Origem</span>
+                      <span class="tl-person-name">{{ tecnico.nome }}</span>
+                    </div>
+                  </div>
+                  <!-- Seta -->
+                  <div class="tl-arrow">
+                    <mat-icon>arrow_forward</mat-icon>
+                    <span class="tl-arrow-qtd">{{ h.qtdChamados }} chamado{{ h.qtdChamados > 1 ? 's' : '' }}</span>
+                  </div>
+                  <!-- Para (destino) -->
+                  <div class="tl-person tl-to">
+                    <div class="tl-person-avatar to-avatar">
+                      <mat-icon>engineering</mat-icon>
+                    </div>
+                    <div class="tl-person-info">
+                      <span class="tl-person-role">Destino</span>
+                      <span class="tl-person-name">{{ h.nomeDestino }}</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Chamados com título -->
+                <div class="tl-chamados-list">
+                  <ng-container *ngIf="h.chamados?.length; else semTitulo">
+                    <div class="tl-chamado-item" *ngFor="let c of h.chamados">
+                      <span class="tl-chamado-id">#{{ c.id }}</span>
+                      <span class="tl-chamado-titulo">{{ c.titulo }}</span>
+                    </div>
+                  </ng-container>
+                  <ng-template #semTitulo>
+                    <div class="tl-chamado-item" *ngFor="let id of h.chamadoIds">
+                      <span class="tl-chamado-id">#{{ id }}</span>
+                      <span class="tl-chamado-titulo" style="color:#94a3b8;font-style:italic">Chamado #{{ id }}</span>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </ng-container><!-- fim aba histórico -->
+
+    <!-- ════════════════ ABA: CHAMADOS RECEBIDOS ════════════════ -->
+    <ng-container *ngIf="abaAtiva === 'recebidos'">
+
+      <!-- Vazio -->
+      <div class="timeline-empty" *ngIf="recebidos.length === 0">
+        <div class="timeline-empty-icon recv-empty-icon">
+          <mat-icon>move_to_inbox</mat-icon>
+        </div>
+        <p class="timeline-empty-title">Nenhum chamado recebido</p>
+        <p class="timeline-empty-sub">Chamados transferidos para <strong>{{ tecnico.nome }}</strong> aparecerão aqui.</p>
+      </div>
+
+      <!-- Resumo + timeline de recebidos -->
+      <div *ngIf="recebidos.length > 0" style="display:flex;flex-direction:column;gap:0.75rem;">
+
+        <!-- Card de resumo -->
+        <div class="recv-summary-card">
+          <div class="recv-sum-item">
+            <div class="recv-sum-icon-wrap recv-sum-blue">
+              <mat-icon>inbox</mat-icon>
+            </div>
+            <div class="recv-sum-body">
+              <strong>{{ recebidos.length }}</strong>
+              <span>Lote{{ recebidos.length > 1 ? 's' : '' }} recebido{{ recebidos.length > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+          <div class="recv-sum-divider"></div>
+          <div class="recv-sum-item">
+            <div class="recv-sum-icon-wrap recv-sum-green">
+              <mat-icon>assignment_turned_in</mat-icon>
+            </div>
+            <div class="recv-sum-body">
+              <strong>{{ totalRecebidos }}</strong>
+              <span>Chamado{{ totalRecebidos > 1 ? 's' : '' }} recebido{{ totalRecebidos > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+          <div class="recv-sum-divider"></div>
+          <div class="recv-sum-item">
+            <div class="recv-sum-icon-wrap recv-sum-purple">
+              <mat-icon>people</mat-icon>
+            </div>
+            <div class="recv-sum-body">
+              <strong>{{ origensUnicas.length }}</strong>
+              <span>Técnico{{ origensUnicas.length > 1 ? 's' : '' }} de origem</span>
+            </div>
+          </div>
+          <div class="recv-sum-divider"></div>
+          <div class="recv-sum-item recv-sum-saved">
+            <mat-icon>save</mat-icon>
+            <span>Histórico salvo</span>
+          </div>
+          <button class="tl-clear-btn" (click)="limparRecebidos()" matTooltip="Limpar histórico recebidos">
+            <mat-icon>delete_sweep</mat-icon>
+            Limpar
+          </button>
+        </div>
+
+        <!-- Timeline de recebidos -->
+        <div class="timeline-list">
+          <div class="tl-item" *ngFor="let r of recebidos; let i = index; let last = last">
+
+            <div class="tl-track">
+              <div class="tl-dot recv-dot" [class.recv-dot-first]="i === 0">
+                <mat-icon>{{ i === 0 ? 'inbox' : 'move_to_inbox' }}</mat-icon>
+              </div>
+              <div class="tl-line" *ngIf="!last"></div>
+            </div>
+
+            <div class="tl-content recv-content" [class.recv-content-latest]="i === 0">
+              <div class="tl-header">
+                <div class="recv-lote-badge">Recebimento {{ r.lote }}</div>
+                <span class="tl-time">
+                  <mat-icon>schedule</mat-icon>
+                  {{ r.dataHora | date:'dd/MM/yyyy' }} às {{ r.dataHora | date:'HH:mm:ss' }}
+                </span>
+              </div>
+
+              <div class="tl-transfer-row">
+                <!-- Origem (quem enviou) -->
+                <div class="tl-person tl-from">
+                  <div class="tl-person-avatar from-avatar">
+                    <mat-icon>engineering</mat-icon>
+                  </div>
+                  <div class="tl-person-info">
+                    <span class="tl-person-role">Enviado por</span>
+                    <span class="tl-person-name">{{ r.nomeOrigem }}</span>
+                  </div>
+                </div>
+                <!-- Seta -->
+                <div class="tl-arrow">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span class="tl-arrow-qtd recv-arrow-qtd">{{ r.qtdChamados }} chamado{{ r.qtdChamados > 1 ? 's' : '' }}</span>
+                </div>
+                <!-- Destino (este técnico = receptor) -->
+                <div class="tl-person tl-to">
+                  <div class="tl-person-avatar recv-self-avatar">
+                    <mat-icon>person</mat-icon>
+                  </div>
+                  <div class="tl-person-info">
+                    <span class="tl-person-role">Recebido por</span>
+                    <span class="tl-person-name">{{ tecnico.nome }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chamados com título -->
+              <div class="tl-chamados-list recv-chamados-list">
+                <ng-container *ngIf="r.chamados?.length; else semTituloRecv">
+                  <div class="tl-chamado-item" *ngFor="let c of r.chamados">
+                    <span class="tl-chamado-id recv-chamado-id">#{{ c.id }}</span>
+                    <span class="tl-chamado-titulo">{{ c.titulo }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #semTituloRecv>
+                  <div class="tl-chamado-item" *ngFor="let id of r.chamadoIds">
+                    <span class="tl-chamado-id recv-chamado-id">#{{ id }}</span>
+                    <span class="tl-chamado-titulo" style="color:#94a3b8;font-style:italic">Chamado #{{ id }}</span>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </ng-container><!-- fim aba recebidos -->
+
+  </div>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <div class="dialog-footer" *ngIf="!isLoading">
+
+    <!-- Fase: sem pendentes -->
+    <ng-container *ngIf="fase === 'sem-pendentes'">
+      <button mat-stroked-button class="cancel-btn" (click)="cancel()" [disabled]="isSubmitting">
+        <mat-icon>close</mat-icon> Cancelar
+      </button>
+      <button mat-flat-button color="primary" class="confirm-btn" [disabled]="isSubmitting" (click)="confirmarInativacao()">
+        <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
+        <ng-container *ngIf="!isSubmitting"><mat-icon>person_off</mat-icon> Confirmar Inativação</ng-container>
+        <span *ngIf="isSubmitting">Processando...</span>
+      </button>
+    </ng-container>
+
+    <!-- Fase: confirmação de inativação -->
+    <ng-container *ngIf="fase === 'confirmacao-inativacao'">
+      <button mat-stroked-button class="cancel-btn" (click)="cancel()" [disabled]="isSubmitting">
+        <mat-icon>close</mat-icon> Não agora
+      </button>
+      <button mat-flat-button color="primary" class="confirm-btn confirm-btn-success"
+              [disabled]="isSubmitting" (click)="confirmarInativacao()">
+        <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
+        <ng-container *ngIf="!isSubmitting"><mat-icon>person_off</mat-icon> Sim, Inativar</ng-container>
+        <span *ngIf="isSubmitting">Processando...</span>
+      </button>
+    </ng-container>
+
+    <!-- Fase: transferência -->
+    <ng-container *ngIf="fase === 'transferencia'">
+      <div class="footer-transfer">
+        <div class="footer-hint" *ngIf="hasPendentes">
+          <ng-container *ngIf="!canTransfer && !novoTecnicoId">
+            <mat-icon>touch_app</mat-icon> Selecione um técnico e marque os chamados
+          </ng-container>
+          <ng-container *ngIf="!canTransfer && novoTecnicoId && selectedChamadosIds.size === 0">
+            <mat-icon>check_box_outline_blank</mat-icon> Marque ao menos um chamado
+          </ng-container>
+          <ng-container *ngIf="canTransfer">
+            <mat-icon>swap_horiz</mat-icon>
+            Transferir <strong>{{ selectedChamadosIds.size }}</strong>
+            chamado{{ selectedChamadosIds.size !== 1 ? 's' : '' }} para
+            <strong>{{ nomeNovoTecnico }}</strong>
+          </ng-container>
+        </div>
+        <div class="footer-actions">
+          <button mat-stroked-button class="cancel-btn" (click)="cancel()" [disabled]="isSubmitting">
+            <mat-icon>close</mat-icon> Fechar
+          </button>
+          <button mat-flat-button color="primary" class="confirm-btn"
+                  [disabled]="!canTransfer" (click)="transferir()">
+            <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
+            <ng-container *ngIf="!isSubmitting">
+              <mat-icon>swap_horiz</mat-icon>
+              Transferir {{ selectedChamadosIds.size > 0 ? selectedChamadosIds.size : '' }}
+              Chamado{{ selectedChamadosIds.size !== 1 ? 's' : '' }}
+            </ng-container>
+            <span *ngIf="isSubmitting">Transferindo...</span>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+
+</div>
+

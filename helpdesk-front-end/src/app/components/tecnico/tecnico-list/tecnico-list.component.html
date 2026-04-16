@@ -261,100 +261,136 @@
                             </ng-container>
 
                             <ng-container matColumnDef="id">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID</th>
                                 <td mat-cell *matCellDef="let tecnico">
                                     <span class="id-badge">#{{ tecnico.id }}</span>
                                 </td>
                             </ng-container>
 
                             <ng-container matColumnDef="nome">
-                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome</th>
                                 <td mat-cell *matCellDef="let tecnico">
-                                    <div class="main-cell" style="position:relative;">
-                                        <strong>
-                                            {{ tecnico.nome }}
-                                            <app-new-badge [show]="tecnico.id.toString() == highlightId && isNew && !hideNewBadge" marginLeft="0.5em"></app-new-badge>
-                                        </strong>
-                                        <span>{{ formatRegistrationDate(tecnico) }}</span>
+                                    <div class="main-cell">
+                                        <span class="nome-com-status">
+                                            <!-- Prefix: todas as palavras EXCETO a última (podem quebrar normalmente) -->
+                                            {{ nomePrefix(tecnico.nome) }}<!--
+                                            --><!-- Última palavra + badge: white-space:nowrap — sempre ficam juntos -->
+                                            <span class="nome-last-word-badge">
+                                                {{ nomeLastWord(tecnico.nome) }}<span *ngIf="tecnico.ativo !== false" class="status-badge status-ativo">
+                                                    <mat-icon>check_circle</mat-icon>Ativo
+                                                </span><span *ngIf="tecnico.ativo === false" class="status-badge status-inativo">
+                                                    <mat-icon>person_off</mat-icon>Inativo
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <app-new-badge
+                                                [show]="tecnico.id.toString() == highlightId && isNew && !hideNewBadge"
+                                                marginLeft="0"></app-new-badge>
+                                        <span class="data-criacao">{{ formatRegistrationDate(tecnico) }}</span>
                                     </div>
                                 </td>
                             </ng-container>
 
-                                            <ng-container matColumnDef="cpf">
-                                                <th mat-header-cell *matHeaderCellDef mat-sort-header> CPF </th>
-                                                <td mat-cell *matCellDef="let tecnico">{{ tecnico.cpf }}</td>
-                                            </ng-container>
+                            <ng-container matColumnDef="cpf">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> CPF</th>
+                                <td mat-cell *matCellDef="let tecnico">{{ tecnico.cpf }}</td>
+                            </ng-container>
 
-                                            <ng-container matColumnDef="email">
-                                                <th mat-header-cell *matHeaderCellDef mat-sort-header> E-mail </th>
-                                                <td mat-cell *matCellDef="let tecnico" class="email-cell">{{ tecnico.email }}</td>
-                                            </ng-container>
+                            <ng-container matColumnDef="email">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> E-mail</th>
+                                <td mat-cell *matCellDef="let tecnico" class="email-cell">{{ tecnico.email }}</td>
+                            </ng-container>
 
-                                            <!-- Coluna: Perfis -->
-                                            <ng-container matColumnDef="perfis">
-                                                <th mat-header-cell *matHeaderCellDef> Perfis </th>
-                                                <td mat-cell *matCellDef="let tecnico">
-                                                    <div class="perfis-badges">
+                            <!-- Coluna: Perfis -->
+                            <ng-container matColumnDef="perfis">
+                                <th mat-header-cell *matHeaderCellDef> Perfis</th>
+                                <td mat-cell *matCellDef="let tecnico">
+                                    <div class="perfis-badges">
                                                         <span *ngFor="let p of tecnico.perfis"
                                                               class="perfil-badge perfil-{{p}}"
                                                               [matTooltip]="getPerfilLabel(p)">
                                                             <mat-icon>{{ getPerfilIcon(p) }}</mat-icon>
                                                             {{ getPerfilLabel(p) }}
                                                         </span>
-                                                    </div>
-                                                </td>
-                                            </ng-container>
+                                    </div>
+                                </td>
+                            </ng-container>
 
-                                            <ng-container matColumnDef="acoes">
-                                                <th mat-header-cell *matHeaderCellDef> Ações </th>
-                                                <td mat-cell *matCellDef="let tecnico" class="actions-cell">
-                                                    <div class="actions-group">
-                                                        <button
-                                                                type="button"
-                                                                mat-icon-button
-                                                                class="action-btn edit-action"
-                                                                matTooltip="Editar técnico"
-                                                                matTooltipShowDelay="400"
-                                                                [attr.aria-label]="'Editar técnico ' + tecnico.nome"
-                                                                (click)="openEdit(tecnico.id)"
-                                                        >
-                                                            <mat-icon>edit</mat-icon>
-                                                        </button>
+                            <ng-container matColumnDef="acoes">
+                                <th mat-header-cell *matHeaderCellDef> Ações</th>
+                                <td mat-cell *matCellDef="let tecnico" class="actions-cell">
+                                    <div class="actions-group">
 
-                                                        <button
-                                                                type="button"
-                                                                mat-icon-button
-                                                                class="action-btn delete-action"
-                                                                matTooltip="Excluir técnico"
-                                                                matTooltipShowDelay="400"
-                                                                [attr.aria-label]="'Excluir técnico ' + tecnico.nome"
-                                                                (click)="delete(tecnico.id)"
-                                                        >
-                                                            <mat-icon>delete_forever</mat-icon>
-                                                        </button>
+                                        <!-- Editar: bloqueado para inativos -->
+                                        <button
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn edit-action"
+                                                [matTooltip]="tecnico.ativo === false ? 'Técnico inativo — edição bloqueada' : 'Editar técnico'"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Editar técnico ' + tecnico.nome"
+                                                [disabled]="tecnico.ativo === false"
+                                                (click)="openEdit(tecnico.id)"
+                                        >
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
 
-                                                        <button
-                                                                type="button"
-                                                                mat-icon-button
-                                                                class="action-btn phone-action"
-                                                                matTooltip="Visualizar telefones"
-                                                                matTooltipShowDelay="400"
-                                                                [attr.aria-label]="'Ver telefones de ' + tecnico.nome"
-                                                                [routerLink]="['/tecnicos/telefones', tecnico.id]"
-                                                        >
-                                                            <mat-icon>phone_iphone</mat-icon>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </ng-container>
+                                        <!-- Inativar (apenas para técnicos ativos) -->
+                                        <button
+                                                *ngIf="tecnico.ativo !== false"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn delete-action"
+                                                matTooltip="Inativar técnico"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Inativar técnico ' + tecnico.nome"
+                                                (click)="delete(tecnico.id)"
+                                        >
+                                            <mat-icon>person_off</mat-icon>
+                                        </button>
 
-                                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                                            <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-row-id]="row.id" [class.highlight-row]="row.id == highlightId"></tr>
-                                        </table>
-                                    </cdk-virtual-scroll-viewport>
+                                        <!-- Reativar (apenas para técnicos inativos) -->
+                                        <button
+                                                *ngIf="tecnico.ativo === false"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn reativar-action"
+                                                matTooltip="Reativar técnico"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Reativar técnico ' + tecnico.nome"
+                                                (click)="reativar(tecnico.id)"
+                                        >
+                                            <mat-icon>person_check</mat-icon>
+                                        </button>
+
+                                        <!-- Telefones: bloqueado para inativos -->
+                                        <button
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn phone-action"
+                                                [matTooltip]="tecnico.ativo === false ? 'Técnico inativo — ações bloqueadas' : 'Visualizar telefones'"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Ver telefones de ' + tecnico.nome"
+                                                [disabled]="tecnico.ativo === false"
+                                                [routerLink]="tecnico.ativo !== false ? ['/tecnicos/telefones', tecnico.id] : null"
+                                        >
+                                            <mat-icon>phone_iphone</mat-icon>
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;" [attr.data-row-id]="row.id"
+                                [class.highlight-row]="row.id == highlightId"
+                                [class.inactive-row]="row.ativo === false"></tr>
+                        </table>
+                    </cdk-virtual-scroll-viewport>
 
                     <div class="table-footer">
-                        <mat-paginator class="pagination" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                        <mat-paginator class="pagination" [pageSizeOptions]="[5, 10, 20]"
+                                       showFirstLastButtons></mat-paginator>
                     </div>
                 </ng-container>
 
@@ -366,11 +402,13 @@
 
                         <h3>{{ hasActiveFilter ? 'Nenhum técnico encontrado' : 'Nenhum técnico cadastrado' }}</h3>
                         <p>
-                            {{ hasRoleFilter && !searchTerm
-                            ? 'Nenhum técnico possui o perfil selecionado. Tente outro filtro de perfil ou limpe-o.'
-                            : hasActiveFilter
-                            ? 'Tente buscar por outro nome, CPF, e-mail ou limpe o filtro aplicado.'
-                            : 'Quando houver técnicos cadastrados, eles aparecerão organizados nesta lista.' }}
+                            {{
+                                hasRoleFilter && !searchTerm
+                                    ? 'Nenhum técnico possui o perfil selecionado. Tente outro filtro de perfil ou limpe-o.'
+                                    : hasActiveFilter
+                                        ? 'Tente buscar por outro nome, CPF, e-mail ou limpe o filtro aplicado.'
+                                        : 'Quando houver técnicos cadastrados, eles aparecerão organizados nesta lista.'
+                            }}
                         </p>
 
                         <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(input)">
@@ -403,6 +441,12 @@
             <div class="atc-meta">
                 <strong class="atc-name">{{ hoveredTecnico.nome }}</strong>
                 <span class="atc-id">#{{ hoveredTecnico.id }}</span>
+                <span *ngIf="hoveredTecnico.ativo !== false" class="status-badge status-ativo status-badge-sm">
+                    <mat-icon>check_circle</mat-icon>Ativo
+                </span>
+                <span *ngIf="hoveredTecnico.ativo === false" class="status-badge status-inativo status-badge-sm">
+                    <mat-icon>person_off</mat-icon>Inativo
+                </span>
             </div>
         </div>
 

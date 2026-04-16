@@ -10,6 +10,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { TecnicoCreateComponent } from '../tecnico-create/tecnico-create.component';
 import { TecnicoUpdateComponent } from '../tecnico-update/tecnico-update.component';
+import { TecnicoDeleteDialogComponent } from '../tecnico-delete-dialog/tecnico-delete-dialog.component';
+import { TecnicoReativarDialogComponent } from '../tecnico-reativar-dialog/tecnico-reativar-dialog.component';
 import { MatSort } from '@angular/material/sort';
 
 @Component({
@@ -174,27 +176,53 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   delete(id: number): void {
     const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
-    const deleteDialogRef = this.genericDialog.deleteWarningMessage();
-    deleteDialogRef.afterClosed().subscribe(deleteConfirmation => {
-      if(!deleteConfirmation) {
-        return;
+    if (!tecnicoSelecionado) return;
+
+    const dialogRef = this.dialog.open(TecnicoDeleteDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      disableClose: true,
+      panelClass: 'no-padding-dialog',
+      data: {
+        tecnico: tecnicoSelecionado,
+        todosTecnicos: this.TECNICO_DATA
       }
-      const matDialogRef = this.genericDialog.loadingMessage("Deletando Técnico...");
-      this.service.delete(id).subscribe(() => {
-        setTimeout(() => {
-          matDialogRef.close();
-          this.toast.success('Deletado com sucesso', 'Técnico ' + (tecnicoSelecionado?.nome ?? 'selecionado'));
-          this.router.navigate(['/tecnicos']);
-        },1000)
-      }, (err) => {
-        matDialogRef.close();
-        if (err.error.errors)
-          err.error.errors.forEach((element) => {
-            this.toast.error(element.message);
-          });
-        this.toast.error(err.error.message)
-      })
-    })
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.success) {
+        this.toast.success(
+          'Técnico inativado com sucesso',
+          tecnicoSelecionado.nome ?? 'Técnico'
+        );
+        this.findAll();
+      }
+    });
+  }
+
+  reativar(id: number): void {
+    const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
+    if (!tecnicoSelecionado) return;
+
+    const dialogRef = this.dialog.open(TecnicoReativarDialogComponent, {
+      width: '500px',
+      maxWidth: '96vw',
+      disableClose: true,
+      data: { tecnico: tecnicoSelecionado }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.service.reativarTecnico(tecnicoSelecionado.id).subscribe({
+        next: () => {
+          this.toast.success('Técnico reativado com sucesso', tecnicoSelecionado.nome ?? 'Técnico');
+          this.findAll();
+        },
+        error: (err) => {
+          this.toast.error(err?.error?.message || 'Erro ao reativar técnico', 'Erro');
+        }
+      });
+    });
   }
 
   /*Metodo para filtrar*/
@@ -253,15 +281,29 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     const dateStr = (tecnico as any).dataHoraCriacao || tecnico.dataCriacao;
     if (!dateStr) return 'Técnico cadastrado';
     try {
-      // Backend serializa como "dd/MM/yyyy - HH:mm" ou "dd/MM/yyyy"
-      // O construtor Date() do JS não parseia esse formato — fazemos o parse manual
-      const datePart = String(dateStr).split(' ')[0]; // extrai "dd/MM/yyyy"
+      const datePart = String(dateStr).split(' ')[0];
       const [day, month, year] = datePart.split('/').map(Number);
       if (!day || !month || !year) return 'Técnico cadastrado';
       const d = new Date(year, month - 1, day);
       if (isNaN(d.getTime())) return 'Técnico cadastrado';
       return 'Desde ' + d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
     } catch { return 'Técnico cadastrado'; }
+  }
+
+  /** Retorna o nome sem a última palavra (para quebra de linha) */
+  nomePrefix(nome: string): string {
+    if (!nome) return '';
+    const parts = nome.trim().split(' ');
+    if (parts.length <= 1) return '';
+    parts.pop();
+    return parts.join(' ') + ' ';
+  }
+
+  /** Retorna apenas a última palavra do nome (fica no nowrap junto ao badge) */
+  nomeLastWord(nome: string): string {
+    if (!nome) return nome;
+    const parts = nome.trim().split(' ');
+    return parts[parts.length - 1];
   }
 
   /*MODAL para EDIATR/CRIAR/DELETAR do tecnico-update/tecnico-create/tecnico-delete */

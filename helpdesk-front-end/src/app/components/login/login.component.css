@@ -135,6 +135,52 @@
   gap: 0.5rem;
 }
 
+/* ===== Banner: Usuário Inativo ===== */
+.inativo-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+  border: 1.5px solid #ef9a9a;
+  color: #b71c1c;
+  animation: bannerSlideIn 0.3s ease;
+}
+
+@keyframes bannerSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.inativo-banner mat-icon {
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #c62828;
+}
+
+.inativo-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.inativo-banner-text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #b71c1c;
+}
+
+.inativo-banner-text span {
+  font-size: 0.8rem;
+  color: #c62828;
+  line-height: 1.4;
+}
+
 /* ===== Responsividade ===== */
 @media (max-width: 640px) {
   .login-left {

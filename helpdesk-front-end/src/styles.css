@@ -157,6 +157,19 @@ table {
   box-shadow: 0 11px 40px rgba(0, 0, 0, 0.22) !important;
 }
 
+/* No-padding dialog panel (tecnico-delete, etc.) */
+.no-padding-dialog .mat-dialog-container,
+.no-padding-dialog .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Ranking dialog panel */
 .ranking-dialog-panel .mat-dialog-container,
 .ranking-dialog-panel .mat-mdc-dialog-surface {

@@ -53,6 +53,7 @@ public class Tecnico extends Pessoa {
 		this.email =      object.getEmail();
 		this.senha =      object.getSenha();
 		this.fotoPerfil = object.getFotoPerfil();
+		this.ativo =      object.isAtivo();
 		this.perfis = object.getPerfisMapped().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
 		// dataCriacao e dataHoraCriacao são gerenciados pelo servidor via @CreationTimestamp
 	}

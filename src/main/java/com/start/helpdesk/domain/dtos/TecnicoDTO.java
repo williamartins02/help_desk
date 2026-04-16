@@ -43,6 +43,9 @@ public class TecnicoDTO implements Serializable {
 		/** Foto de perfil em Base64 (opcional — gerada automaticamente se não informada). */
 		protected String fotoPerfil;
 
+		/** Indica se o técnico está ativo no sistema. */
+		protected boolean ativo = true;
+
 		protected Set<Integer> perfis = new HashSet<>();
 		
 		
@@ -65,6 +68,7 @@ public class TecnicoDTO implements Serializable {
 			this.email = object.getEmail();
 			this.senha = object.getSenha();
 			this.fotoPerfil =      object.getFotoPerfil();
+			this.ativo =           object.isAtivo();
 			this.perfis =        object.getPerfis().stream().map(p -> p.getCodigo()).collect(Collectors.toSet());
 			this.dataCriacao =     object.getDataCriacao();
 			this.dataHoraCriacao = object.getDataHoraCriacao();

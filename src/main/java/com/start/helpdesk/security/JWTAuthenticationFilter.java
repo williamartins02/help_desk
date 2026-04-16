@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -60,18 +61,33 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException failed) throws IOException, ServletException {
-		response.setStatus(401);
+		boolean isInativo = failed instanceof DisabledException
+				|| (failed.getCause() != null && failed.getCause() instanceof DisabledException);
+
+		response.setStatus(isInativo ? 423 : 401);
 		response.setContentType("application/json");
-		response.getWriter().append(json());
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().append(isInativo ? jsonInativo() : json());
 	}
+
 	private CharSequence json() {
 		long date = new Date().getTime();
 		return "{"
-				+ "\"timestamp\": " + date + " , "
+				+ "\"timestamp\": " + date + ", "
 				+ "\"status\": 401, "
 				+ "\"error\": \"Não autorizado\", "
 				+ "\"message\": \"Email ou senha inválidos\", "
-				+ "\"path\": \"/login\"} ";
+				+ "\"path\": \"/login\"}";
+	}
+
+	private CharSequence jsonInativo() {
+		long date = new Date().getTime();
+		return "{"
+				+ "\"timestamp\": " + date + ", "
+				+ "\"status\": 423, "
+				+ "\"error\": \"Conta Inativa\", "
+				+ "\"message\": \"Seu usuário está inativo. Entre em contato com o administrador para reativação.\", "
+				+ "\"path\": \"/login\"}";
 	}
 
 }

@@ -62,6 +62,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { ToastrModule }                   from 'ngx-toastr';
 import { NgxMaskModule }                  from 'ngx-mask';
 import {TecnicoUpdateComponent }         from './components/tecnico/tecnico-update/tecnico-update.component';
+import { TecnicoDeleteDialogComponent }  from './components/tecnico/tecnico-delete-dialog/tecnico-delete-dialog.component';
+import { TecnicoReativarDialogComponent } from './components/tecnico/tecnico-reativar-dialog/tecnico-reativar-dialog.component';
 import { TecnicoTelefoneListComponent }   from './components/tecnico/telefone-tecnico/tecnico-telefone-list/tecnico-telefone-list.component';
 import { TecnicoTelefoneUpdateComponent } from './components/tecnico/telefone-tecnico/tecnico-telefone-update/tecnico-telefone-update.component';
 import { TecnicoTelefoneCreateComponent } from './components/tecnico/telefone-tecnico/tecnico-telefone-create/tecnico-telefone-create.component';
@@ -101,6 +103,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 
     TecnicoCreateComponent,
     TecnicoUpdateComponent,
+    TecnicoDeleteDialogComponent,
+    TecnicoReativarDialogComponent,
     TecnicoListComponent,
     ClienteCreateComponent,
     ClienteListComponent,

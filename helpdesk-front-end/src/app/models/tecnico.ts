@@ -8,6 +8,7 @@ export interface Tecnico {
     dataCriacao: any;
     dataHoraCriacao?: string;
     fotoPerfil?: string;
+    ativo?: boolean;
 }
 
 export interface IPessoa {

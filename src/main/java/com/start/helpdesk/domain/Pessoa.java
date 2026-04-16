@@ -57,6 +57,10 @@ public abstract class Pessoa implements Serializable {
 	@Column(name = "foto_perfil", columnDefinition = "LONGTEXT")
 	protected String fotoPerfil;
 
+	/** Indica se o técnico/usuário está ativo no sistema. Exclusão lógica. */
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+	protected boolean ativo = true;
+
 	@ElementCollection(fetch = FetchType.EAGER)//informando q é uma coleção, element tipo Integer, q a lista tem que vir junto com usuario assim que for informado
 	@CollectionTable(name = "PERFIS")//UMA TABELA NO BANCO COM APENAS OS PERFIS
 	

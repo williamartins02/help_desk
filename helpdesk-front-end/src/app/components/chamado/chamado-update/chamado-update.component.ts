@@ -119,7 +119,7 @@ export class ChamadoUpdateComponent implements OnInit {
   }
 
   findAllTecnico(): void {
-    this.tecnicoService.findAll().subscribe(
+    this.tecnicoService.findAllAtivos().subscribe(
       (resposta) => {
         this.tecnicos = resposta;
       },(error) => {

@@ -1,0 +1,41 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-icon-wrap"><mat-icon>person_check</mat-icon></div>
+    <div class="header-text">
+      <h2>Reativar Técnico</h2>
+      <p>{{ tecnico.nome }}</p>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()" matTooltip="Cancelar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    <div class="avatar-wrap" *ngIf="tecnico.fotoPerfil">
+      <img [src]="tecnico.fotoPerfil" [alt]="tecnico.nome" class="avatar-img" />
+    </div>
+    <div class="info-banner info-green">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <strong>Confirmar reativação</strong>
+        <span>
+          O técnico <strong>{{ tecnico.nome }}</strong> será reativado no sistema,
+          voltando a aparecer nas listas ativas e podendo receber novos chamados.
+        </span>
+      </div>
+    </div>
+    <p class="confirm-text">
+      O histórico de chamados encerrados permanece intacto e visível normalmente.
+    </p>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-stroked-button class="cancel-btn" (click)="cancel()">
+      <mat-icon>close</mat-icon> Cancelar
+    </button>
+    <button mat-raised-button class="confirm-btn" (click)="confirm()">
+      <mat-icon>person_check</mat-icon> Confirmar Reativação
+    </button>
+  </div>
+</div>
+

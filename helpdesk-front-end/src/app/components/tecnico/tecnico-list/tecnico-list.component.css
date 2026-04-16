@@ -543,10 +543,7 @@ table {
     font-weight: 700;
 }
 
-.main-cell span {
-    color: #90a4ae;
-    font-size: 0.82rem;
-}
+/* Date line is styled via .data-criacao */
 
 .actions-cell {
     width: 170px;
@@ -605,6 +602,24 @@ table {
     background: rgba(67, 160, 71, 0.22) !important;
     color: #2e7d32 !important;
     border-color: rgba(67, 160, 71, 0.3);
+}
+
+.reativar-action {
+    background: rgba(46, 125, 50, 0.12);
+    color: #2e7d32;
+    border-color: rgba(46, 125, 50, 0.22);
+}
+
+.reativar-action:hover {
+    background: rgba(46, 125, 50, 0.22) !important;
+    color: #1b5e20 !important;
+    border-color: rgba(46, 125, 50, 0.35);
+}
+
+/* Highlight rows for inactive technicians */
+tr.inactive-row td {
+    opacity: 0.72;
+    background: rgba(198, 40, 40, 0.03);
 }
 
 .table-footer {
@@ -1216,4 +1231,114 @@ button:focus-visible {
     line-height: 1.35;
 }
 
+/* ── Inativo badge ─────────────────────────────────── */
+.inativo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    vertical-align: middle;
+    margin-left: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.inativo-badge mat-icon {
+    font-size: 0.85rem !important;
+    width: 0.85rem !important;
+    height: 0.85rem !important;
+}
+
+.inativo-badge-sm {
+    font-size: 0.68rem;
+    padding: 0.05rem 0.4rem;
+}
+
+/* ── Unified status badge (Ativo / Inativo) ───────── */
+
+/*
+ * TÉCNICA "last-word + badge":
+ * .nome-com-status: bloco que permite quebra de linha normalmente.
+ * .nome-last-word-badge: white-space:nowrap → última palavra e badge
+ *   NUNCA se separam — se não couberem na linha, quebram JUNTOS.
+ *
+ * Resultado:
+ *   William Fernandes        → Marquês [● ATIVO]   (badge gruda na última palavra)
+ *   Isabelly Camila da Mata [● ATIVO]               (nome curto: tudo na mesma linha)
+ */
+.nome-com-status {
+    display: block;
+    font-weight: 700;
+    color: #263238;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Última palavra + badge: inseparáveis */
+.nome-last-word-badge {
+    display: inline;
+    white-space: nowrap;
+}
+
+.data-criacao {
+    display: block;
+    color: #90a4ae;
+    font-size: 0.82rem;
+    margin-top: 0.05rem;
+    font-weight: 400;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.18rem;
+    padding: 0.1rem 0.48rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 0.4rem;
+    position: relative;
+    top: -1px;
+}
+
+.status-badge mat-icon {
+    font-size: 0.78rem !important;
+    width: 0.78rem !important;
+    height: 0.78rem !important;
+}
+
+.status-ativo {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.status-inativo {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.status-badge-sm {
+    font-size: 0.62rem;
+    padding: 0.06rem 0.38rem;
+    margin-left: 0.25rem;
+}
+
+/* Disabled action buttons for inactive row */
+.inactive-row .action-btn:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed;
+}
 

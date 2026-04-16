@@ -45,11 +45,22 @@
         </a>
       </div>
 
-      <button (click)="login()" [disabled]="!validaCampos()" class="full-width login-btn"
+      <button (click)="login()" [disabled]="!validaCampos() || isLoading" class="full-width login-btn"
               mat-raised-button color="primary">
-        <mat-icon>login</mat-icon>
-        ENTRAR
+        <mat-spinner *ngIf="isLoading" diameter="18" style="display:inline-flex;margin-right:6px"></mat-spinner>
+        <mat-icon *ngIf="!isLoading">login</mat-icon>
+        {{ isLoading ? 'ENTRANDO...' : 'ENTRAR' }}
       </button>
+
+      <!-- Banner: conta inativa -->
+      <div class="inativo-banner" *ngIf="inativoError">
+        <mat-icon>lock_person</mat-icon>
+        <div class="inativo-banner-text">
+          <strong>Usuário inativo</strong>
+          <span>Seu acesso foi bloqueado. Entre em contato com o administrador para reativação.</span>
+        </div>
+      </div>
+
     </div>
 
   </div>

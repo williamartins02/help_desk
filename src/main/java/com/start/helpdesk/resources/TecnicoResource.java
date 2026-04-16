@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.start.helpdesk.domain.Tecnico;
+import com.start.helpdesk.domain.dtos.ChamadoPendenteInfoDTO;
+import com.start.helpdesk.domain.dtos.ReatribuicaoRequestDTO;
 import com.start.helpdesk.domain.dtos.TecnicoDTO;
 import com.start.helpdesk.domain.dtos.TecnicoRankingDTO;
 import com.start.helpdesk.services.TecnicoService;
@@ -29,66 +31,92 @@ import com.start.helpdesk.services.TecnicoService;
 @RequestMapping(value = "/tecnicos")
 public class TecnicoResource {
 
-	/* representa td resposta HTTP, localhost:8080/tecnicos */
+    @Autowired
+    private TecnicoService service;
 
-	@Autowired
-	private TecnicoService service;
-	
-	
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id) {
+        Tecnico object = service.findById(id);
+        return ResponseEntity.ok().body(new TecnicoDTO(object));
+    }
 
-	/* EndPoint para (BUSCAR) tecnicos por ID */
-	@RequestMapping(value = "/{id}", method=RequestMethod.GET )
-	public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id) {
-		Tecnico object = service.findById(id);
-		
-		return ResponseEntity.ok().body(new TecnicoDTO(object));
-	}
+    @GetMapping
+    public ResponseEntity<List<TecnicoDTO>> findAll() {
+        List<Tecnico> list = service.findAll();
+        List<TecnicoDTO> listDTO = list.stream().map(TecnicoDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok().body(listDTO);
+    }
 
-	/* EndPont litar uma (LIST) de tecnico findAll */
-	@GetMapping
-	public ResponseEntity<List<TecnicoDTO>> findAll() {
-		List<Tecnico> list = service.findAll();
-		List<TecnicoDTO> listDTO = list.stream().map(object -> new TecnicoDTO(object)).collect(Collectors.toList());
-		
-		return ResponseEntity.ok().body(listDTO);
-	}
+    @GetMapping("/ativos")
+    public ResponseEntity<List<TecnicoDTO>> findAllAtivos() {
+        List<Tecnico> list = service.findAllAtivos();
+        List<TecnicoDTO> listDTO = list.stream().map(TecnicoDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok().body(listDTO);
+    }
 
-	/*
-	 * EndPoint para (CREATE) criar tecnico, criando URI de acesso ao ID.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
-	@PostMapping
-	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO) {
-		Tecnico newObject = service.create(objectDTO);
-		TecnicoDTO dto = new TecnicoDTO(newObject);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObject.getId()).toUri();
-		return ResponseEntity.created(uri).body(dto);
-	}
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PostMapping
+    public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objectDTO) {
+        Tecnico newObject = service.create(objectDTO);
+        TecnicoDTO dto = new TecnicoDTO(newObject);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObject.getId()).toUri();
+        return ResponseEntity.created(uri).body(dto);
+    }
 
-	/* EndPoint (ATUALIZAR) criando um tecnico novo. */
-	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
-	@PutMapping(value = "/{id}")
-	public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objectDTO) {
-		Tecnico object = service.update(id, objectDTO);
-		
-		return ResponseEntity.ok().body(new TecnicoDTO(object));
-	}
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<TecnicoDTO> update(@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objectDTO) {
+        Tecnico object = service.update(id, objectDTO);
+        return ResponseEntity.ok().body(new TecnicoDTO(object));
+    }
 
-	/* EndPoint (DELETAR) por ID */
-	@PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
-	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<TecnicoDTO> delete(@PathVariable Integer id) {
-		service.delete(id);
-		
-		return ResponseEntity.noContent().build();
-	}
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<TecnicoDTO> delete(@PathVariable Integer id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 
-	/**
-	 * Endpoint para obter o ranking dos técnicos do mês.
-	 */
-	@GetMapping("/ranking")
-	public ResponseEntity<List<TecnicoRankingDTO>> getRankingTecnicosMes() {
-		List<TecnicoRankingDTO> ranking = service.getRankingTecnicosMes();
-		return ResponseEntity.ok().body(ranking);
-	}
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @GetMapping(value = "/{id}/chamados-pendentes")
+    public ResponseEntity<List<ChamadoPendenteInfoDTO>> getChamadosPendentes(@PathVariable Integer id) {
+        List<ChamadoPendenteInfoDTO> pendentes = service.getChamadosPendentes(id);
+        return ResponseEntity.ok().body(pendentes);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PostMapping(value = "/{id}/reatribuir-chamados")
+    public ResponseEntity<Void> reatribuirChamados(@PathVariable Integer id,
+            @Valid @RequestBody ReatribuicaoRequestDTO request) {
+        service.reatribuirChamados(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PostMapping(value = "/{id}/reatribuir-e-inativar")
+    public ResponseEntity<Void> reatribuirEInativar(@PathVariable Integer id,
+            @Valid @RequestBody ReatribuicaoRequestDTO request) {
+        service.reatribuirEInativar(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PostMapping(value = "/{id}/inativar")
+    public ResponseEntity<Void> inativarTecnico(@PathVariable Integer id) {
+        service.inativarTecnico(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    @PostMapping(value = "/{id}/reativar")
+    public ResponseEntity<Void> reativarTecnico(@PathVariable Integer id) {
+        service.reativarTecnico(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<TecnicoRankingDTO>> getRankingTecnicosMes() {
+        List<TecnicoRankingDTO> ranking = service.getRankingTecnicosMes();
+        return ResponseEntity.ok().body(ranking);
+    }
 }

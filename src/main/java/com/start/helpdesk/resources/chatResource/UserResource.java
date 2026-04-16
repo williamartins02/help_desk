@@ -55,13 +55,13 @@ public class UserResource {
     }
 
     /**
-     * Lista todos os usuários cadastrados (Técnicos + Clientes) para o chat.
-     * Acessível por qualquer usuário autenticado (ADMIN ou TÉCNICO).
-     * Não aplicar restrição de perfil.
+     * Lista todos os usuários ATIVOS (Técnicos + Clientes) para o chat.
+     * Usuários inativos não aparecem na lista de contatos do chat.
      */
     @GetMapping("/all-chat")
     public ResponseEntity<List<PessoaDTO>> findAllForChat() {
         List<PessoaDTO> dto = pessoaRepository.findAll().stream()
+                .filter(Pessoa::isAtivo)
                 .map(PessoaDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dto);
