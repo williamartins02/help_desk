@@ -60,13 +60,16 @@ public class ChamadoService {
 			throw new DataIntegrityViolationException(
 				"Chamado encerrado não pode ser reaberto. Crie um novo chamado se necessário.");
 		}
-								boolean vaiEncerrar = objectDTO.getStatus().equals(Status.ENCERRADO.getCodigo());
-								oldObject = newChamado(objectDTO);
-								Chamado salvo = chamadoRepository.save(oldObject);
-								if (vaiEncerrar) {
-									chamadoEmailService.sendChamadoEncerradoEmail(salvo);
-								}
-								return salvo;
+		boolean vaiEncerrar = objectDTO.getStatus().equals(Status.ENCERRADO.getCodigo());
+		Chamado updated = newChamado(objectDTO);
+		// Preserve original opening date and SLA deadline on updates
+		updated.setDataAbertura(oldObject.getDataAbertura());
+		updated.setPrazoSla(oldObject.getPrazoSla());
+		Chamado salvo = chamadoRepository.save(updated);
+		if (vaiEncerrar) {
+			chamadoEmailService.sendChamadoEncerradoEmail(salvo);
+		}
+		return salvo;
 	}
 
 	/* metodo privado para ATUALIZAR ou CRIAR um novo chamado. */
@@ -74,7 +77,6 @@ public class ChamadoService {
 		Tecnico tecnico = tecnicoService.findById(object.getTecnico());
 		Cliente cliente = clienteService.findById(object.getCliente());
 
-		/* Se o ID do chamado vier NULL criar um novo chamado / se vier com valor ele entende quer ATUALIZAR*/
 		Chamado chamado = new Chamado();
 		if (object.getId() != null) {
 			chamado.setId((object.getId()));
@@ -83,7 +85,10 @@ public class ChamadoService {
 		if (object.getStatus().equals(2)) {
 			chamado.setDataFechamento(LocalDateTime.now());
 		}
-        /*Campos ser ATUALIZADO se caso existir o ID do CHAMADO*/
+		/* Calcula prazoSla apenas em novos chamados (sem ID) */
+		if (object.getId() == null) {
+			chamado.setPrazoSla(calcularPrazoSla(Prioridade.toEnum(object.getPrioridade()), chamado.getDataAbertura()));
+		}
 		chamado.setTecnico(tecnico);
 		chamado.setCliente(cliente);
 		chamado.setPrioridade(Prioridade.toEnum(object.getPrioridade()));
@@ -92,6 +97,20 @@ public class ChamadoService {
 		chamado.setTitulo(object.getTitulo());
 		chamado.setObservacoes(object.getObservacoes());
 		return chamado;
+	}
+
+	/**
+	 * Calcula o prazo de SLA com base na prioridade do chamado:
+	 * BAIXA → 24h | MEDIA → 8h | ALTA → 4h | CRITICA → 2h
+	 */
+	public static LocalDateTime calcularPrazoSla(Prioridade prioridade, LocalDateTime dataAbertura) {
+		switch (prioridade) {
+			case BAIXA:   return dataAbertura.plusHours(24);
+			case MEDIA:   return dataAbertura.plusHours(8);
+			case ALTA:    return dataAbertura.plusHours(4);
+			case CRITICA: return dataAbertura.plusHours(2);
+			default:      return dataAbertura.plusHours(8);
+		}
 	}
 
 }

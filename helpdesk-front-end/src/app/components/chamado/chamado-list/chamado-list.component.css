@@ -309,3 +309,35 @@ table{width:100%}
     background: rgba(21, 101, 192, 0.08);
     margin: 0.1rem 0;
 }
+
+/* ── SLA Column ─────────────────────────────────────────────────────────── */
+.sla-header{display:inline-flex;align-items:center;gap:.25rem;font-weight:700}
+
+.sla-cell{display:flex;flex-direction:column;gap:.18rem;align-items:flex-start}
+
+.sla-badge{display:inline-flex;align-items:center;gap:.22rem;padding:.22rem .6rem;border-radius:999px;font-size:.7rem;font-weight:700;white-space:nowrap;letter-spacing:.3px}
+.sla-icon{font-size:.82rem!important;width:.82rem!important;height:.82rem!important}
+
+.sla-ok           {background:rgba(76,175,80,.12);color:#2e7d32;border:1px solid rgba(76,175,80,.3)}
+.sla-alerta       {background:rgba(255,152,0,.12);color:#e65100;border:1px solid rgba(255,152,0,.35)}
+.sla-atrasado     {background:rgba(244,67,54,.12);color:#c62828;border:1px solid rgba(244,67,54,.35)}
+.sla-encerrado    {background:rgba(158,158,158,.12);color:#616161;border:1px solid rgba(158,158,158,.3)}
+.sla-enc-ok       {background:rgba(56,142,60,.15);color:#1b5e20;border:1px solid rgba(56,142,60,.4)}
+.sla-enc-atrasado {background:rgba(183,28,28,.12);color:#b71c1c;border:1px solid rgba(183,28,28,.35)}
+.sla-sem-sla      {background:rgba(176,190,197,.12);color:#78909c;border:1px solid rgba(176,190,197,.3)}
+
+.sla-countdown-enc-ok      {color:#2e7d32;font-weight:700}
+.sla-countdown-enc-atrasado{color:#c62828;font-weight:700}
+.sla-frozen{opacity:.8;font-style:italic}
+
+.sla-countdown{font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.5px;color:#546e7a;padding-left:.2rem}
+.sla-countdown-alerta  {color:#e65100;animation:sla-pulse 2s ease-in-out infinite}
+.sla-countdown-atrasado{color:#c62828;animation:sla-pulse 1s ease-in-out infinite}
+
+@keyframes sla-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* ── SLA badges inside ctc tooltip card ──────────────────────────────────── */
+.ctc-sla-badge{display:inline-flex;align-items:center;padding:.15rem .52rem;border-radius:999px;font-size:.69rem;font-weight:700;white-space:nowrap}
+.ctc-sla-ok       {background:rgba(76,175,80,.15);color:#2e7d32}
+.ctc-sla-alerta   {background:rgba(255,152,0,.15);color:#e65100}
+.ctc-sla-atrasado {background:rgba(244,67,54,.15);color:#c62828}

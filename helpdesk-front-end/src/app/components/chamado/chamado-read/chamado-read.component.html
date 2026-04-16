@@ -30,12 +30,12 @@
         </span>
         <span
           class="chip"
-          [class.chip-aberto]="chamado.status === '0'"
-          [class.chip-andamento]="chamado.status === '1'"
-          [class.chip-encerrado]="chamado.status === '2'"
+          [class.chip-aberto]="chamado.status == '0'"
+          [class.chip-andamento]="chamado.status == '1'"
+          [class.chip-encerrado]="chamado.status == '2'"
         >
           <mat-icon>
-            {{ chamado.status === '0' ? 'radio_button_checked' : chamado.status === '1' ? 'autorenew' : 'check_circle' }}
+            {{ chamado.status == '0' ? 'radio_button_checked' : chamado.status == '1' ? 'autorenew' : 'check_circle' }}
           </mat-icon>
           {{ retornaStatus(chamado.status) }}
         </span>
@@ -71,6 +71,22 @@
             {{ chamado.classificacao === '0' ? 'memory' : chamado.classificacao === '1' ? 'code' : chamado.classificacao === '2' ? 'lan' : 'storage' }}
           </mat-icon>
           {{ retornaClassificacao(chamado.classificacao) }}
+        </span>
+      </div>
+
+      <!-- SLA item in status row -->
+      <div class="divider-v" *ngIf="chamado.prazoSla"></div>
+      <div class="status-item" *ngIf="chamado.prazoSla">
+        <span class="status-label">
+          <mat-icon class="label-icon">timer</mat-icon>
+          SLA
+        </span>
+        <span class="chip"
+              [class.chip-sla-ok]="slaStatus === 'DENTRO_PRAZO' || slaStatus === 'ENCERRADO_NO_PRAZO'"
+              [class.chip-sla-alerta]="slaStatus === 'ALERTA'"
+              [class.chip-sla-atrasado]="slaStatus === 'ATRASADO' || slaStatus === 'ENCERRADO_ATRASADO'">
+          <mat-icon>{{ slaIcon }}</mat-icon>
+          {{ slaLabel }}
         </span>
       </div>
     </div>
@@ -114,6 +130,53 @@
         <mat-label>Descrição do problema</mat-label>
         <textarea [(ngModel)]="chamado.observacoes" name="observacoes" class="observacoes" [disabled]="true" matInput></textarea>
       </mat-form-field>
+
+      <!-- ── Seção SLA ── -->
+      <ng-container *ngIf="chamado.prazoSla">
+        <div class="section-header">
+          <mat-icon class="section-icon">timer</mat-icon>
+          <span>Controle de SLA</span>
+        </div>
+
+        <div class="sla-compact"
+             [class.sla-compact-ok]="slaStatus === 'DENTRO_PRAZO'"
+             [class.sla-compact-enc-ok]="slaStatus === 'ENCERRADO_NO_PRAZO'"
+             [class.sla-compact-alerta]="slaStatus === 'ALERTA'"
+             [class.sla-compact-atrasado]="slaStatus === 'ATRASADO'"
+             [class.sla-compact-enc-atrasado]="slaStatus === 'ENCERRADO_ATRASADO'">
+
+          <!-- Ícone + status -->
+          <div class="sla-compact-left">
+            <mat-icon class="sla-compact-icon">{{ slaIcon }}</mat-icon>
+            <div class="sla-compact-texts">
+              <span class="sla-compact-label">{{ slaLabel }}</span>
+              <span class="sla-compact-sub" *ngIf="chamado.status == '2'">
+                Tempo restante no encerramento
+              </span>
+              <span class="sla-compact-sub" *ngIf="chamado.status != '2'">
+                Em andamento
+              </span>
+            </div>
+          </div>
+
+          <!-- Countdown centralizado -->
+          <div class="sla-compact-timer">
+            {{ slaCountdown }}
+          </div>
+
+          <!-- Datas -->
+          <div class="sla-compact-dates">
+            <span class="sla-date-item">
+              <mat-icon class="sla-date-icon">event</mat-icon>
+              Prazo: <strong>{{ chamado.prazoSla }}</strong>
+            </span>
+            <span class="sla-date-item">
+              <mat-icon class="sla-date-icon">calendar_today</mat-icon>
+              Abertura: <strong>{{ chamado.dataAbertura }}</strong>
+            </span>
+          </div>
+        </div>
+      </ng-container>
 
       <!-- ── Ações ── -->
       <div class="dialog-actions">

@@ -6,6 +6,7 @@
   background: #fff;
   border-radius: 1.25rem;
   overflow: hidden;
+  max-height: 90vh;
 }
 
 /* ===== Cabeçalho gradiente ===== */
@@ -16,6 +17,7 @@
   flex-direction: column;
   gap: 0.875rem;
   color: #fff;
+  flex-shrink: 0;
 }
 
 /* Badge pill */
@@ -93,6 +95,9 @@
   position: relative;
   z-index: 1;
   padding: 1.5rem 1.75rem 1rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* ===== Faixa de chips de status ===== */
@@ -278,6 +283,7 @@
   color: #bdbdbd;
   letter-spacing: 0.3px;
   border-top: 1px solid #f5f5f5;
+  flex-shrink: 0;
 }
 
 .footer-icon {
@@ -338,4 +344,120 @@ mat-icon {
   .btn-return {
     width: 100%;
   }
+}
+
+/* ===== SLA Panel ===== */
+.chip-sla-ok      { background: #e8f5e9; color: #2e7d32; }
+.chip-sla-alerta  { background: #fff3e0; color: #e65100; }
+.chip-sla-atrasado{ background: #fce4ec; color: #c62828; }
+
+/* ── Compact SLA row ── */
+.sla-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-radius: 0.85rem;
+  border: 1.5px solid #e3ecff;
+  background: #f8faff;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sla-compact-ok          { border-color: rgba(76,175,80,.4);  background: rgba(76,175,80,.06); }
+.sla-compact-enc-ok      { border-color: rgba(27,94,32,.4);   background: rgba(27,94,32,.06); }
+.sla-compact-alerta      { border-color: rgba(255,152,0,.45); background: rgba(255,152,0,.06); animation: sla-read-pulse 2s ease-in-out infinite; }
+.sla-compact-atrasado    { border-color: rgba(244,67,54,.45); background: rgba(244,67,54,.06); animation: sla-read-pulse 1s ease-in-out infinite; }
+.sla-compact-enc-atrasado{ border-color: rgba(183,28,28,.45); background: rgba(183,28,28,.06); }
+
+@keyframes sla-read-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .75; }
+}
+
+/* Left: icon + label */
+.sla-compact-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.sla-compact-icon {
+  font-size: 1.5rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  flex-shrink: 0;
+}
+.sla-compact-ok      .sla-compact-icon { color: #43a047; }
+.sla-compact-enc-ok  .sla-compact-icon { color: #1b5e20; }
+.sla-compact-alerta  .sla-compact-icon { color: #fb8c00; }
+.sla-compact-atrasado .sla-compact-icon { color: #e53935; }
+.sla-compact-enc-atrasado .sla-compact-icon { color: #b71c1c; }
+
+.sla-compact-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.sla-compact-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  line-height: 1.2;
+}
+.sla-compact-ok      .sla-compact-label { color: #2e7d32; }
+.sla-compact-enc-ok  .sla-compact-label { color: #1b5e20; }
+.sla-compact-alerta  .sla-compact-label { color: #e65100; }
+.sla-compact-atrasado .sla-compact-label { color: #c62828; }
+.sla-compact-enc-atrasado .sla-compact-label { color: #b71c1c; }
+
+.sla-compact-sub {
+  font-size: 0.68rem;
+  color: #90a4ae;
+  font-style: italic;
+}
+
+/* Timer — center */
+.sla-compact-timer {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+.sla-compact-ok           .sla-compact-timer { color: #2e7d32; }
+.sla-compact-enc-ok       .sla-compact-timer { color: #1b5e20; opacity: .9; }
+.sla-compact-alerta       .sla-compact-timer { color: #e65100; }
+.sla-compact-atrasado     .sla-compact-timer { color: #c62828; }
+.sla-compact-enc-atrasado .sla-compact-timer { color: #b71c1c; opacity: .9; }
+
+/* Right: dates */
+.sla-compact-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  text-align: right;
+}
+
+.sla-date-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  color: #78909c;
+}
+
+.sla-date-item strong {
+  color: #546e7a;
+  font-weight: 600;
+}
+
+.sla-date-icon {
+  font-size: 0.72rem !important;
+  width: 0.72rem !important;
+  height: 0.72rem !important;
+  opacity: 0.6;
 }

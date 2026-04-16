@@ -37,6 +37,9 @@ public class Chamado implements Serializable {
 	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
 	private LocalDateTime dataFechamento;
 
+	@JsonFormat(pattern = "dd/MM/yyyy - HH:mm")
+	private LocalDateTime prazoSla;
+
 	private Prioridade prioridade;
 	private Status status;
 	private Classificacao classificacao;

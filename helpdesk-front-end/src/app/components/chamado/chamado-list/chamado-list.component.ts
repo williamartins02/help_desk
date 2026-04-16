@@ -19,6 +19,7 @@ import { ActivatedRoute } from "@angular/router";
 import { ChamadoService } from "src/app/services/chamado.service";
 import { ChamadoUpdateComponent } from '../chamado-update/chamado-update.component';
 import { ChamadoReadComponent } from '../chamado-read/chamado-read.component';
+import { SlaService, SlaAlert } from 'src/app/services/sla.service';
 
 @Component({
   selector: "app-chamado-list",
@@ -77,7 +78,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     } as any
   };
 
-  displayedColumns: string[] = ['id', 'titulo', 'classificacao', 'cliente', 'tecnico', 'dataAbertura', 'prioridade', 'status', 'acoes'];
+  displayedColumns: string[] = ['id', 'titulo', 'classificacao', 'cliente', 'tecnico', 'dataAbertura', 'prioridade', 'status', 'sla', 'acoes'];
   dataSource = new MatTableDataSource<Chamado>(this.CHAMADO_DATA);
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -98,18 +99,37 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   tooltipX = 0;
   tooltipY = 0;
 
+  /* ── SLA countdown timer ──────────────────────────────── */
+  private slaTimerInterval: any;
+  slaCountdowns: { [id: string]: string } = {};
+  private slaAlertSub: Subscription;
+
   constructor(
       public dialog: MatDialog,
       private service: ChamadoService,
       private toast: ToastrService,
       public dialogRef: MatDialogRef<ChamadoListComponent>,
       private route: ActivatedRoute,
-      private authService: AuthenticationService
+      private authService: AuthenticationService,
+      private slaService: SlaService
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
 
   ngOnInit(): void {
+    // Conecta ao WebSocket para receber alertas de SLA
+    this.slaService.connect();
+    this.slaAlertSub = this.slaService.alert$.subscribe();
+
+    // Atualiza contadores regressivos a cada segundo — APENAS chamados NÃO encerrados
+    this.slaTimerInterval = setInterval(() => {
+      this.CHAMADO_DATA.forEach(c => {
+        if (c.prazoSla && String(c.status) !== '2') {
+          this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
+        }
+      });
+    }, 1000);
+
     // Lê query params para aplicar filtros vindos de navegação externa (ex: alerta de críticos)
     this.route.queryParamMap.subscribe(params => {
       this.highlightId = params.get('highlightId');
@@ -150,6 +170,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   findAllByTecnico(): void {
     this.service.findMyChamados().subscribe((resposta) => {
       this.CHAMADO_DATA = resposta;
+      this.initSlaCountdowns();
       this.applyAllFilters();
       this.updateDoughnutChart();
     }, (error) => {
@@ -214,11 +235,22 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   findAll(): void {
     this.service.findAll().subscribe((resposta) => {
       this.CHAMADO_DATA = resposta;
+      this.initSlaCountdowns();
       this.applyAllFilters();
       this.updateDoughnutChart();
     }, (error) => {
       this.toast.error('Na listagem de chamado, procurar suporte', 'ERROR');
       return throwError(error.error.error);
+    });
+  }
+
+  private initSlaCountdowns(): void {
+    this.CHAMADO_DATA.forEach(c => {
+      if (c.prazoSla) {
+        // For closed chamados: freeze immediately at closure time
+        // For open chamados: compute live from now
+        this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
+      }
     });
   }
 
@@ -241,8 +273,106 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  // ── SLA helpers ───────────────────────────────────────────────────────────
+
+  /** Returns countdown string "HH:MM:SS" or "-HH:MM:SS" when overdue.
+   *  For ENCERRADO chamados, freezes at closure time. */
+  computeSlaCountdown(prazoSla: string, chamado?: Chamado): string {
+    if (!prazoSla) return '--:--:--';
+    const prazo = this.parseDatetime(prazoSla);
+    if (!prazo) return '--:--:--';
+
+    // For closed chamados: freeze at the moment of closure
+    if (chamado && String(chamado.status) === '2' && chamado.dataFechamento) {
+      const fechamento = this.parseDatetime(chamado.dataFechamento);
+      if (fechamento) {
+        return this.formatCountdownMs(prazo.getTime() - fechamento.getTime());
+      }
+    }
+
+    return this.formatCountdownMs(prazo.getTime() - Date.now());
+  }
+
+  private formatCountdownMs(diffMs: number): string {
+    const sign = diffMs < 0 ? '-' : '';
+    const abs = Math.abs(diffMs);
+    const hh = Math.floor(abs / 3600000);
+    const mm = Math.floor((abs % 3600000) / 60000);
+    const ss = Math.floor((abs % 60000) / 1000);
+    return `${sign}${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+  }
+
+  /** Computes SLA status — for ENCERRADO uses dataFechamento vs prazoSla */
+  computeSlaStatus(chamado: Chamado): string {
+    if (!chamado.prazoSla) return 'N/A';
+    const prazo = this.parseDatetime(chamado.prazoSla);
+    if (!prazo) return 'N/A';
+
+    if (String(chamado.status) === '2') {
+      // Closed: check if resolved within SLA
+      if (chamado.dataFechamento) {
+        const fechamento = this.parseDatetime(chamado.dataFechamento);
+        if (fechamento) {
+          return fechamento.getTime() <= prazo.getTime()
+            ? 'ENCERRADO_NO_PRAZO'
+            : 'ENCERRADO_ATRASADO';
+        }
+      }
+      return 'ENCERRADO_NO_PRAZO';
+    }
+
+    const now = Date.now();
+    if (now > prazo.getTime()) return 'ATRASADO';
+    const abertura = chamado.dataAbertura ? this.parseDatetime(chamado.dataAbertura) : null;
+    if (abertura) {
+      const total = prazo.getTime() - abertura.getTime();
+      const remaining = prazo.getTime() - now;
+      if (total > 0 && remaining < total / 2) return 'ALERTA';
+    }
+    return 'DENTRO_PRAZO';
+  }
+
+  getSlaColor(chamado: Chamado): string {
+    const s = chamado.statusSla || this.computeSlaStatus(chamado);
+    if (s === 'ATRASADO' || s === 'ENCERRADO_ATRASADO') return '#f44336';
+    if (s === 'ALERTA')                                  return '#ff9800';
+    if (s === 'ENCERRADO_NO_PRAZO')                      return '#43a047';
+    return '#4caf50';
+  }
+
+  getSlaIcon(chamado: Chamado): string {
+    const s = chamado.statusSla || this.computeSlaStatus(chamado);
+    if (s === 'ATRASADO')           return 'timer_off';
+    if (s === 'ALERTA')             return 'timer';
+    if (s === 'ENCERRADO_NO_PRAZO') return 'verified';
+    if (s === 'ENCERRADO_ATRASADO') return 'running_with_errors';
+    return 'schedule';
+  }
+
+  getSlaLabel(chamado: Chamado): string {
+    const s = chamado.statusSla || this.computeSlaStatus(chamado);
+    if (s === 'ATRASADO')           return 'ATRASADO';
+    if (s === 'ALERTA')             return 'ALERTA';
+    if (s === 'ENCERRADO_NO_PRAZO') return 'NO PRAZO';
+    if (s === 'ENCERRADO_ATRASADO') return 'ATRASADO';
+    if (s === 'N/A')                return 'SEM SLA';
+    return 'NO PRAZO';
+  }
+
+  /** Parses backend date string "dd/MM/yyyy - HH:mm" to Date */
+  private parseDatetime(str: string): Date | null {
+    if (!str) return null;
+    // Format: "16/04/2026 - 14:30"
+    const m = str.match(/(\d{2})\/(\d{2})\/(\d{4}) - (\d{2}):(\d{2})/);
+    if (!m) return null;
+    return new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+  }
+
   ngOnDestroy(): void {
     this.refreshTable.unsubscribe();
+    if (this.slaAlertSub) this.slaAlertSub.unsubscribe();
+    if (this.slaTimerInterval) clearInterval(this.slaTimerInterval);
+    this.slaService.disconnect();
   }
 
   refresh(): void {

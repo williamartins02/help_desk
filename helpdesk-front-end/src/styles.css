@@ -182,6 +182,36 @@ table {
   flex-direction: column;
 }
 
+/* ── Scrollbar profissional ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(21, 101, 192, 0.22);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(21, 101, 192, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(21, 101, 192, 0.22) transparent;
+}
+
 @keyframes fadeInZoom {
   from {
     opacity: 0;
