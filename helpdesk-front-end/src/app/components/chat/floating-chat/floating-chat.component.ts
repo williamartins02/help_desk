@@ -107,18 +107,29 @@ export class FloatingChatComponent implements OnInit, OnDestroy, AfterViewChecke
 
     // Janelas abertas — detecta novas janelas e agenda scroll p/ a última mensagem
     this.windowsSub = this.chatWindowService.windows$.subscribe(wins => {
-      const prevIds = new Set(this.windows.map(w => w.userId));
+      // Guarda o estado ANTERIOR de cada janela (minimized) para detectar transições.
+      // Agora que os métodos do serviço criam novos objetos (imutabilidade), o prevMap
+      // captura corretamente o estado ANTES da mudança.
+      const prevMap = new Map(this.windows.map(w => [w.userId, w.minimized]));
       this.windows = wins;
-      // Quando uma janela NÃO-minimizada é adicionada, rola até a última mensagem
       wins.forEach(w => {
-        if (!prevIds.has(w.userId) && !w.minimized) {
+        const wasMinimized = prevMap.get(w.userId);
+        if (wasMinimized === undefined && !w.minimized) {
+          // Janela nova, já aberta → rola até o fim
+          this.shouldScrolls[w.userId] = true;
+        } else if (wasMinimized === true && !w.minimized) {
+          // Janela que estava minimizada e foi aberta (via notificação ou header) → rola
           this.shouldScrolls[w.userId] = true;
         }
       });
+      // Força CD para garantir que a UI reflita imediatamente o novo estado das janelas
+      // (especialmente a transição minimized→expandido disparada pela notificação de clique)
+      this.cdr.detectChanges();
     });
 
-    // Carrega usuários → pré-popula histórico e resolve o myUserId
-    this.usuarioService.findAll().subscribe(users => {
+    // Carrega usuários → pré-popula histórico e resolve o myUserId.
+    // Usa findAllForChat() que é acessível a TODOS os perfis (admin, técnico, cliente).
+    this.usuarioService.findAllForChat().subscribe(users => {
       this.usuarios = users;
       const me = users.find(u => u.email === this.myEmail);
       if (me) {
@@ -217,13 +228,12 @@ export class FloatingChatComponent implements OnInit, OnDestroy, AfterViewChecke
 
     if (msg.username !== this.myEmail) {
       if (win.minimized) {
-        // Janela minimizada: incrementa badge na janela e no FAB.
-        // Será limpo automaticamente quando o usuário abrir a janela (toggleMinimize).
-        this.chatWindowService.addUnread(win.userId);
+        // Janela minimizada: badge gerenciado por ChatNotificationComponent via
+        // incrementUnreadByEmail() — não incrementar aqui para evitar contagem dupla.
+        // O service já sincroniza naoLidas quando incrementUnreadByEmail é chamado.
       } else {
         // Janela aberta: a mensagem fica visível via auto-scroll — não incrementa badge.
-        // Limpa qualquer badge residual (ex: de antes de a janela ser aberta) e
-        // rola até a última mensagem. O toast via chat-bubble notifica o usuário.
+        // Limpa qualquer badge residual e rola até a última mensagem.
         this.chatWindowService.clearUnreadByEmail(win.email);
         this.shouldScrolls[win.userId] = true;
       }
@@ -261,8 +271,12 @@ export class FloatingChatComponent implements OnInit, OnDestroy, AfterViewChecke
 
   // ── Janelas ───────────────────────────────────────────────────────────────
   toggle(win: IChatWindow): void {
+    // win.minimized é o estado ANTES de alternar.
+    // Captura ANTES de chamar toggleMinimize (que agora cria novo objeto, não muta).
+    const expanding = win.minimized;
     this.chatWindowService.toggleMinimize(win.userId);
-    if (!win.minimized) {
+    if (expanding) {
+      // Vai expandir → scroll para o fim (windowsSub também cuidará, redundância segura)
       this.shouldScrolls[win.userId] = true;
     }
   }
@@ -273,11 +287,13 @@ export class FloatingChatComponent implements OnInit, OnDestroy, AfterViewChecke
   }
 
   abrir(win: IChatWindow): void {
+    // Captura estado ANTES do toggle (objetos agora são imutáveis — win permanece o antigo)
+    const estaMinimizado = win.minimized;
     this.chatWindowService.toggleMinimize(win.userId);
-    if (!win.minimized) {
+    if (estaMinimizado) {
+      // Estava minimizado → vai expandir → scroll para o fim
       this.shouldScrolls[win.userId] = true;
       // Marca todas as mensagens da conversa como lidas
-      const sala = this.getConversaId(win.userId);
       const msgs = this.getMensagens(win);
       msgs.filter(m => m.status !== 'read' && m.username !== this.myEmail && m.id)
         .forEach(m => this.chatService.marcarComoLida(m));

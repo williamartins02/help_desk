@@ -47,10 +47,12 @@ export class ChatWindowService {
     const count = (this.unreadEmailSubject.value[email] ?? 0) + 1;
     this._setEmailCount(email, count);
     const wins = this.windowsSubject.value;
-    const win  = wins.find(w => w.email === email);
-    if (win && win.minimized) {
-      win.naoLidas++;
-      this.windowsSubject.next([...wins]);
+    const idx  = wins.findIndex(w => w.email === email);
+    if (idx !== -1 && wins[idx].minimized) {
+      const newWindows = wins.map((w, i) =>
+        i === idx ? { ...w, naoLidas: w.naoLidas + 1 } : w
+      );
+      this.windowsSubject.next(newWindows);
     }
   }
 
@@ -59,10 +61,12 @@ export class ChatWindowService {
     const count = (this.unreadEmailSubject.value[email] ?? 0) + qtd;
     this._setEmailCount(email, count);
     const wins = this.windowsSubject.value;
-    const win  = wins.find(w => w.email === email);
-    if (win && win.minimized) {
-      win.naoLidas = (win.naoLidas ?? 0) + qtd;
-      this.windowsSubject.next([...wins]);
+    const idx  = wins.findIndex(w => w.email === email);
+    if (idx !== -1 && wins[idx].minimized) {
+      const newWindows = wins.map((w, i) =>
+        i === idx ? { ...w, naoLidas: (w.naoLidas ?? 0) + qtd } : w
+      );
+      this.windowsSubject.next(newWindows);
     }
   }
 
@@ -71,10 +75,10 @@ export class ChatWindowService {
     if (!email) return;
     this._setEmailCount(email, 0);
     const wins = this.windowsSubject.value;
-    const win  = wins.find(w => w.email === email);
-    if (win && win.naoLidas > 0) {
-      win.naoLidas = 0;
-      this.windowsSubject.next([...wins]);
+    const idx  = wins.findIndex(w => w.email === email);
+    if (idx !== -1 && wins[idx].naoLidas > 0) {
+      const newWindows = wins.map((w, i) => i === idx ? { ...w, naoLidas: 0 } : w);
+      this.windowsSubject.next(newWindows);
     }
   }
 
@@ -120,16 +124,18 @@ export class ChatWindowService {
    *                   Não afeta janelas já abertas.
    */
   open(user: IUsuario, minimized = false): void {
-    const windows  = this.windowsSubject.value;
-    const existing = windows.find(w => w.userId === user.id.toString());
-    if (existing) {
+    const windows = this.windowsSubject.value;
+    const idx     = windows.findIndex(w => w.userId === user.id.toString());
+    if (idx !== -1) {
       if (!minimized) {
-        // Abertura explícita pelo usuário: maximiza e zera não-lidas
-        existing.minimized = false;
-        existing.naoLidas  = 0;
-        this._setEmailCount(existing.email, 0);
-        this.windowsSubject.next([...windows]);
+        // Abertura explícita pelo usuário: cria novo objeto (sem mutar) para CD detectar a mudança
+        const newWindows = windows.map((w, i) =>
+          i === idx ? { ...w, minimized: false, naoLidas: 0 } : w
+        );
+        this._setEmailCount(user.email, 0);
+        this.windowsSubject.next(newWindows);
       }
+      // Se minimized=true e a janela já existe: não faz nada
     } else {
       this.windowsSubject.next([...windows, {
         userId:     user.id.toString(),
@@ -137,10 +143,32 @@ export class ChatWindowService {
         nome:       user.nome,
         cor:        this._avatarCor(user.nome),
         minimized,
-        naoLidas:   0,
+        // Quando minimizada, usa o contador já acumulado no email map
+        // (ChatNotificationComponent pode ter chamado incrementUnreadByEmail antes de a janela existir)
+        naoLidas:   minimized ? (this.unreadEmailSubject.value[user.email] ?? 0) : 0,
         fotoPerfil: user.fotoPerfil
       }]);
     }
+  }
+
+  /**
+   * Maximiza (expande) a janela de conversa pelo e-mail — sem precisar do objeto IUsuario.
+   * Útil quando a janela já foi criada (minimizada) pelo FloatingChatComponent.
+   * Retorna true se a janela existia e foi expandida; false se não havia janela.
+   * Cria novo objeto (imutável) para que o change detection detecte corretamente a transição.
+   */
+  maximizeByEmail(email: string): boolean {
+    const windows = this.windowsSubject.value;
+    const idx = windows.findIndex(w => w.email === email);
+    if (idx === -1) return false;
+    // Cria novo objeto em vez de mutar — garante que prevMap no FloatingChatComponent
+    // capture o estado ANTERIOR (minimized: true) antes de emitir o novo estado.
+    const newWindows = windows.map((w, i) =>
+      i === idx ? { ...w, minimized: false, naoLidas: 0 } : w
+    );
+    this._setEmailCount(email, 0);
+    this.windowsSubject.next(newWindows);
+    return true;
   }
 
   /** Abre janela buscando o usuário pelo e-mail */
@@ -156,42 +184,56 @@ export class ChatWindowService {
     );
   }
 
-  /** Minimiza / maximiza a janela */
+  /** Minimiza / maximiza a janela — cria novo objeto para CD detectar a transição */
   toggleMinimize(userId: string): void {
     const windows = this.windowsSubject.value;
-    const w = windows.find(win => win.userId === userId);
-    if (w) {
-      w.minimized = !w.minimized;
-      if (!w.minimized) {
-        // Expandindo: zera não-lidas e sincroniza email map
-        w.naoLidas = 0;
-        this._setEmailCount(w.email, 0);
-      }
-      this.windowsSubject.next([...windows]);
+    const idx = windows.findIndex(win => win.userId === userId);
+    if (idx === -1) return;
+    const w = windows[idx];
+    const newW: IChatWindow = { ...w, minimized: !w.minimized };
+    if (!newW.minimized) {
+      // Expandindo: zera não-lidas e sincroniza email map
+      newW.naoLidas = 0;
+      this._setEmailCount(w.email, 0);
     }
+    const newWindows = windows.map((win, i) => i === idx ? newW : win);
+    this.windowsSubject.next(newWindows);
   }
 
   /** Incrementa contador de não-lidas (somente quando minimizada). Sincroniza email map. */
   addUnread(userId: string): void {
     const windows = this.windowsSubject.value;
-    const w = windows.find(win => win.userId === userId);
-    if (w && w.minimized) {
-      w.naoLidas++;
-      this.windowsSubject.next([...windows]);
+    const idx = windows.findIndex(win => win.userId === userId);
+    if (idx !== -1 && windows[idx].minimized) {
+      const newWindows = windows.map((w, i) => i === idx ? { ...w, naoLidas: w.naoLidas + 1 } : w);
+      this.windowsSubject.next(newWindows);
       // Sincroniza email map
-      const count = (this.unreadEmailSubject.value[w.email] ?? 0) + 1;
-      this._setEmailCount(w.email, count);
+      const count = (this.unreadEmailSubject.value[windows[idx].email] ?? 0) + 1;
+      this._setEmailCount(windows[idx].email, count);
+    }
+  }
+
+  /**
+   * Incrementa APENAS o badge visual da janela (naoLidas) SEM atualizar o email map (FAB).
+   * Use quando o email map é gerenciado externamente (ex: ChatNotificationComponent).
+   */
+  addWindowBadgeOnly(userId: string): void {
+    const windows = this.windowsSubject.value;
+    const idx = windows.findIndex(win => win.userId === userId);
+    if (idx !== -1 && windows[idx].minimized) {
+      const newWindows = windows.map((w, i) => i === idx ? { ...w, naoLidas: w.naoLidas + 1 } : w);
+      this.windowsSubject.next(newWindows);
     }
   }
 
   /** Zera contador de não-lidas da janela e sincroniza email map. */
   clearUnread(userId: string): void {
     const windows = this.windowsSubject.value;
-    const w = windows.find(win => win.userId === userId);
-    if (w) {
-      w.naoLidas = 0;
-      this.windowsSubject.next([...windows]);
-      this._setEmailCount(w.email, 0);
+    const idx = windows.findIndex(win => win.userId === userId);
+    if (idx !== -1) {
+      const newWindows = windows.map((w, i) => i === idx ? { ...w, naoLidas: 0 } : w);
+      this.windowsSubject.next(newWindows);
+      this._setEmailCount(windows[idx].email, 0);
     }
   }
 

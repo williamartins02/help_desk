@@ -321,10 +321,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
                 // Só notifica se a mensagem for endereçada a este usuário (DM) ou for de canal (sem destinatário)
                 const isParaMim = !msg.destinatario || msg.destinatario === this.mensagem.username;
                 if (isParaMim) {
-                    const sender = this.usuarios.find(u => u.email === msg.username);
-                    const nome = sender?.nome || msg.username;
-                    this.toast.info(`Nova mensagem de <b>${nome}</b>`, '💬 Chat',
-                        {timeOut: 4000, enableHtml: true});
+                    // Toast removido — ChatNotificationComponent exibe a notificação visual
                     // Incrementa contador persistente apenas se não silenciada
                     if (!this.silenciadaMap.get(sala)) {
                         this.naoLidasMap.set(sala, (this.naoLidasMap.get(sala) ?? 0) + 1);

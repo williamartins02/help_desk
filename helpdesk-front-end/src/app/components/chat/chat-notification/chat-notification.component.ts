@@ -10,14 +10,15 @@ import { IUsuario }          from '../../../models/usuario';
 
 /** Notificação individual por remetente */
 interface IChatNotif {
-  id:       string;   // email do remetente (chave única)
-  email:    string;
-  nome:     string;
-  avatar?:  string;
-  unread:   number;
-  preview:  string;   // prévia da última mensagem
-  online:   boolean;
-  timerId:  any;
+  id:      string;    // email do remetente (chave única)
+  email:   string;
+  nome:    string;
+  user?:   IUsuario;  // objeto completo quando disponível (para abrir a janela)
+  avatar?: string;
+  unread:  number;
+  preview: string;    // prévia da última mensagem
+  online:  boolean;
+  timerId: any;
 }
 
 @Component({
@@ -41,15 +42,16 @@ export class ChatNotificationComponent implements OnInit, OnDestroy {
   /** Lista de notificações visíveis (uma por remetente) */
   notifications: IChatNotif[] = [];
 
-  private myEmail    = '';
-  private usuarios:  IUsuario[] = [];
-  private onlineList: string[]  = [];
+  private myEmail     = '';
+  private usuarios:   IUsuario[] = [];
+  private onlineList: string[]   = [];
 
   /** Duração da notificação antes do auto-dismiss (ms) */
   private readonly DISMISS_MS = 8000;
 
-  private msgSub:    Subscription;
-  private onlineSub: Subscription;
+  private msgSub:     Subscription;
+  private onlineSub:  Subscription;
+  private windowsSub: Subscription;
 
   constructor(
     private chatService:       ChatService,
@@ -61,44 +63,79 @@ export class ChatNotificationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.myEmail = this.chatService.getUsername();
 
-    // Carrega lista de usuários para obter nomes e fotos
-    this.usuarioService.findAll().subscribe(users => {
+    // Carrega lista de usuários para obter nomes, fotos e objetos IUsuario.
+    // Usa findAllForChat() que é acessível a TODOS os perfis (admin, técnico, cliente).
+    this.usuarioService.findAllForChat().subscribe(users => {
       this.usuarios = users;
+      // Preenche user? nas notificações que chegaram antes do findAllForChat()
+      this.notifications.forEach(n => {
+        if (!n.user) {
+          const u = users.find(u => u.email === n.email);
+          if (u) { n.nome = u.nome; n.avatar = u.fotoPerfil; n.user = u; }
+        }
+      });
     });
 
-    // Monitora usuários online para atualizar o indicador
+    // Monitora usuários online para atualizar o indicador de status
     this.onlineSub = this.chatService.getUsuariosOnline().subscribe(list => {
       this.onlineList = list;
       this.notifications.forEach(n => { n.online = list.includes(n.email); });
       this.cdr.detectChanges();
     });
 
+    // Auto-dismiss quando o usuário abre a janela de conversa diretamente
+    // (ex: clicando no bubble/floating-chat sem passar pelo modal de notificação)
+    this.windowsSub = this.chatWindowService.windows$.subscribe(wins => {
+      const removidos: string[] = [];
+      this.notifications.forEach(notif => {
+        const win = wins.find(w => w.email === notif.email);
+        if (win && !win.minimized) {
+          // Janela aberta → usuário está vendo o chat → descarta o modal
+          clearTimeout(notif.timerId);
+          removidos.push(notif.id);
+        }
+      });
+      if (removidos.length > 0) {
+        this.notifications = this.notifications.filter(n => !removidos.includes(n.id));
+        this.cdr.detectChanges();
+      }
+    });
+
     // Escuta mensagens em tempo-real — lógica completamente independente
     this.msgSub = this.chatService.getMensagem().subscribe(msg => {
-      if (msg.type !== 'MENSAGEM')                           return;
-      if (msg.username === this.myEmail)                     return; // própria mensagem
-      if (msg.destinatario && msg.destinatario !== this.myEmail) return; // DM não é para mim
+      if (msg.type !== 'MENSAGEM')                                return;
+      if (msg.username === this.myEmail)                          return;
+      if (msg.destinatario && msg.destinatario !== this.myEmail)  return;
 
       this._exibirNotificacao(msg.username, msg.texto || '');
     });
   }
 
   private _exibirNotificacao(email: string, texto: string): void {
+    // Não mostrar notificação se o usuário já está visualizando esta conversa
+    // (janela flutuante aberta ou chat principal com esta conversa ativa)
+    if (this.chatWindowService.isBeingViewed(email)) {
+      this.chatWindowService.clearUnreadByEmail(email);
+      return;
+    }
+
+    const user      = this.usuarios.find(u => u.email === email);
     const existente = this.notifications.find(n => n.id === email);
 
     if (existente) {
       // Atualiza notificação já visível: incrementa contador e reinicia timer
       existente.unread++;
       existente.preview = texto;
+      if (user && !existente.user) { existente.user = user; existente.nome = user.nome; existente.avatar = user.fotoPerfil; }
       clearTimeout(existente.timerId);
       existente.timerId = this._iniciarTimer(email);
     } else {
       // Cria nova notificação
-      const user = this.usuarios.find(u => u.email === email);
       const notif: IChatNotif = {
         id:      email,
         email,
         nome:    user?.nome || email,
+        user,
         avatar:  user?.fotoPerfil,
         unread:  1,
         preview: texto,
@@ -108,6 +145,9 @@ export class ChatNotificationComponent implements OnInit, OnDestroy {
       notif.timerId = this._iniciarTimer(email);
       this.notifications.push(notif);
     }
+
+    // Incrementa o badge do FAB (ícone de bolha) — fonte única para o contador do ícone
+    this.chatWindowService.incrementUnreadByEmail(email);
     this.cdr.detectChanges();
   }
 
@@ -115,16 +155,53 @@ export class ChatNotificationComponent implements OnInit, OnDestroy {
     return setTimeout(() => this.fechar(email), this.DISMISS_MS);
   }
 
-  /** Abre a janela de conversa e fecha a notificação */
+  /**
+   * Abre a janela de conversa flutuante e fecha o modal de notificação.
+   * Também zera o contador (badge do FAB e badge da janela).
+   */
   abrir(notif: IChatNotif): void {
-    const user = this.usuarios.find(u => u.email === notif.email);
-    if (user) {
-      this.chatWindowService.open(user);
+    // 1. Caminho mais comum: FloatingChatComponent já criou a janela minimizada
+    //    quando a mensagem chegou → basta maximizá-la pelo e-mail (não precisa do IUsuario).
+    if (this.chatWindowService.maximizeByEmail(notif.email)) {
+        // windowsSub já remove a notificação via auto-dismiss, mas garante remoção
+      this.fechar(notif.id);
+      return;
     }
-    this.fechar(notif.id);
+
+    // 2. Janela ainda não existe → criá-la aberta com o objeto IUsuario
+    const user = notif.user || this.usuarios.find(u => u.email === notif.email);
+    if (user) {
+      this.chatWindowService.open(user);           // abre expandida (minimized=false)
+      this.chatWindowService.clearUnreadByEmail(notif.email);
+      this.fechar(notif.id);
+      return;
+    }
+
+    // 3. Race condition: lista de usuários ainda não carregada → recarrega e tenta novamente.
+    // Usa findAllForChat() que é acessível a TODOS os perfis.
+    this.usuarioService.findAllForChat().subscribe(users => {
+      this.usuarios = users;
+      this.notifications.forEach(n => {
+        if (!n.user) {
+          const u = users.find(u => u.email === n.email);
+          if (u) { n.nome = u.nome; n.avatar = u.fotoPerfil; n.user = u; }
+        }
+      });
+      // Tenta maximizar novamente (FloatingChat pode ter criado a janela nesse interim)
+      if (!this.chatWindowService.maximizeByEmail(notif.email)) {
+        const u = users.find(u => u.email === notif.email);
+        if (u) this.chatWindowService.open(u);     // abre expandida
+      }
+      this.chatWindowService.clearUnreadByEmail(notif.email);
+      this.fechar(notif.id);
+      this.cdr.detectChanges();
+    });
   }
 
-  /** Fecha/descarta a notificação */
+  /**
+   * Fecha/descarta o modal de notificação sem abrir o chat.
+   * O badge do FAB permanece até o usuário ler as mensagens.
+   */
   fechar(id: string): void {
     const idx = this.notifications.findIndex(n => n.id === id);
     if (idx === -1) return;
@@ -160,6 +237,7 @@ export class ChatNotificationComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.msgSub?.unsubscribe();
     this.onlineSub?.unsubscribe();
+    this.windowsSub?.unsubscribe();
     this.notifications.forEach(n => clearTimeout(n.timerId));
   }
 }

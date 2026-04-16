@@ -6,7 +6,6 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { ChatService, ConexaoStatus }       from '../../../services/chat.service';
 import { ChatWindowService } from '../../../services/chat-window.service';
 import { UsuarioService }    from '../../../services/usuario.service';
-import { ToastrService }     from 'ngx-toastr';
 import { IUsuario }          from '../../../models/usuario';
 
 @Component({
@@ -69,7 +68,6 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
     private chatService:       ChatService,
     private chatWindowService: ChatWindowService,
     private usuarioService:    UsuarioService,
-    private toast:             ToastrService,
     private router:            Router
   ) {
     this.routerSub = this.router.events.pipe(
@@ -108,8 +106,8 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
     });
 
     // ── Mensagens em tempo-real ───────────────────────────────────────────
-    // Cuida de: badge do FAB, notificação in-panel e toast.
-    // O badge por remetente é atualizado pelo FloatingChatComponent via addUnread().
+    // Cuida de: badge do FAB e notificação in-panel.
+    // O toast foi removido — substituído pelo ChatNotificationComponent.
     this.msgSub = this.chatService.getMensagem().subscribe(msg => {
       if (msg.type !== 'MENSAGEM') return;
       if (msg.username === this.myEmail) return;
@@ -118,7 +116,6 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
       if (msg.destinatario && msg.destinatario !== this.myEmail) return;
 
       // Suprime a notificação SOMENTE quando o chat principal está com esta conversa ativa.
-      // Janelas flutuantes abertas NÃO suprimem o toast — o usuário pode não estar olhando.
       if (this.chatWindowService.isMainChatActive(msg.username)) return;
 
       const sender = this.usuarios.find(u => u.email === msg.username);
@@ -129,15 +126,8 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
         this.notificacaoAtiva = { nome, texto: msg.texto };
         if (this.notifTimer) clearTimeout(this.notifTimer);
         this.notifTimer = setTimeout(() => { this.notificacaoAtiva = null; }, 4000);
-      } else {
-        // Painel fechado → toast (o badge do FAB é atualizado via unreadByEmail$)
-        if (!this.isOnChatPage) {
-          const corpo = `<b>${nome}</b> enviou uma mensagem.<br><small>Clique para responder</small>`;
-          const toastRef = this.toast.info(corpo, '💬 Nova mensagem',
-            { timeOut: 7000, enableHtml: true, positionClass: 'toast-bottom-left' });
-          if (sender) toastRef.onTap.subscribe(() => this.chatWindowService.open(sender));
-        }
       }
+      // Toast removido — ChatNotificationComponent exibe a notificação visual
     });
 
     // ── Mensagens offline (pendentes) ─────────────────────────────────────
@@ -148,15 +138,6 @@ export class ChatBubbleComponent implements OnInit, OnDestroy {
       // Atualiza contagem por remetente no serviço centralizado
       // (o badge do FAB é recalculado automaticamente via unreadByEmail$)
       this.chatWindowService.addBatchUnreadByEmail(notif.remetente, notif.qtd);
-
-      if (!this.isOnChatPage) {
-        const user = this.usuarios.find(u => u.email === notif.remetente);
-        const nome = user?.nome || notif.remetente;
-        const corpo = `<b>${nome}</b> enviou <b>${notif.qtd}</b> ${notif.qtd === 1 ? 'mensagem' : 'mensagens'} enquanto você estava offline.<br><small>Clique para visualizar</small>`;
-        const toastRef = this.toast.info(corpo, '📬 Mensagens pendentes',
-          { timeOut: 7000, enableHtml: true, positionClass: 'toast-bottom-left' });
-        if (user) toastRef.onTap.subscribe(() => this.chatWindowService.open(user));
-      }
     });
 
     this._carregarUsuarios();
