@@ -222,3 +222,218 @@ table {
     transform: scale(1);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   🌙 DARK MODE — aplica-se quando body.dark-mode está ativo
+   ══════════════════════════════════════════════════════════════════ */
+
+body.dark-mode {
+  background: #0f1117 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Fundo do content area */
+body.dark-mode .main-content,
+body.dark-mode .sidenav-content {
+  background: #0f1117 !important;
+}
+
+/* ── Cards, painéis, surfaces ── */
+body.dark-mode .mat-card,
+body.dark-mode mat-card,
+body.dark-mode .mat-mdc-card {
+  background: #1e2130 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.45) !important;
+}
+
+/* ── Toolbar (header) ── */
+body.dark-mode .header-toolbar {
+  background: linear-gradient(90deg, #0a1628 0%, #0d1f3c 35%, #0a2540 70%, #062233 100%) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.55) !important;
+}
+
+/* ── Sidenav ── */
+body.dark-mode .sidenav,
+body.dark-mode .mat-drawer {
+  background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 30%, #0a2540 70%, #062233 100%) !important;
+  box-shadow: 4px 0 28px rgba(0,0,0,0.55) !important;
+}
+
+body.dark-mode .mat-drawer-container,
+body.dark-mode .mat-drawer-backdrop {
+  background-color: #0f1117 !important;
+}
+
+/* ── Tabela ── */
+body.dark-mode .mat-table,
+body.dark-mode table.mat-mdc-table {
+  background: #1e2130 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .mat-row,
+body.dark-mode .mat-mdc-row,
+body.dark-mode .mat-header-row,
+body.dark-mode .mat-mdc-header-row,
+body.dark-mode tr.mat-mdc-header-row,
+body.dark-mode tr.mat-mdc-row {
+  background: #1e2130 !important;
+}
+
+body.dark-mode .mat-row:hover,
+body.dark-mode .mat-mdc-row:hover {
+  background: #252b3b !important;
+}
+
+body.dark-mode .mat-cell,
+body.dark-mode .mat-mdc-cell,
+body.dark-mode td.mat-mdc-cell {
+  color: #cbd5e1 !important;
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+}
+
+body.dark-mode .mat-header-cell,
+body.dark-mode .mat-mdc-header-cell,
+body.dark-mode th.mat-mdc-header-cell {
+  color: #94a3b8 !important;
+  background: #161b27 !important;
+  border-bottom-color: rgba(255,255,255,0.10) !important;
+}
+
+/* ── Inputs, selects, form fields ── */
+body.dark-mode .mat-form-field,
+body.dark-mode mat-form-field,
+body.dark-mode .mat-mdc-form-field {
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .mat-form-field-appearance-fill .mat-form-field-flex,
+body.dark-mode .mat-mdc-text-field-wrapper {
+  background-color: #252b3b !important;
+}
+
+body.dark-mode .mat-input-element,
+body.dark-mode input.mat-mdc-input-element,
+body.dark-mode textarea.mat-mdc-input-element {
+  color: #e2e8f0 !important;
+  caret-color: #60a5fa !important;
+}
+
+body.dark-mode .mat-form-field-label,
+body.dark-mode .mat-mdc-floating-label,
+body.dark-mode label.mdc-floating-label {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .mat-select-value,
+body.dark-mode .mat-mdc-select-value {
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .mat-select-panel,
+body.dark-mode .mat-mdc-select-panel {
+  background: #1e2130 !important;
+}
+
+body.dark-mode .mat-option,
+body.dark-mode .mat-mdc-option {
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .mat-option:hover,
+body.dark-mode .mat-mdc-option:hover {
+  background: rgba(96,165,250,0.12) !important;
+}
+
+/* ── Botões ── */
+body.dark-mode .mat-stroked-button:not([disabled]) {
+  border-color: rgba(255,255,255,0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .mat-icon-button {
+  color: #cbd5e1 !important;
+}
+
+/* ── Dialogs / Modals ── */
+body.dark-mode .mat-dialog-container,
+body.dark-mode .mat-mdc-dialog-surface {
+  background: #1e2130 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .critical-alert-dialog-panel .mat-mdc-dialog-surface,
+body.dark-mode .no-padding-dialog .mat-mdc-dialog-surface,
+body.dark-mode .ranking-dialog-panel .mat-mdc-dialog-surface,
+body.dark-mode .custom-dialog-container .mat-mdc-dialog-surface,
+body.dark-mode .usuario-detalhe-panel .mat-mdc-dialog-surface {
+  background: #1e2130 !important;
+}
+
+/* ── Chips ── */
+body.dark-mode .mat-chip,
+body.dark-mode .mat-mdc-chip {
+  background: #252b3b !important;
+  color: #cbd5e1 !important;
+}
+
+/* ── Dividers ── */
+body.dark-mode .mat-divider {
+  border-top-color: rgba(255,255,255,0.10) !important;
+}
+
+/* ── Paginator ── */
+body.dark-mode .mat-paginator,
+body.dark-mode .mat-mdc-paginator {
+  background: #1e2130 !important;
+  color: #94a3b8 !important;
+}
+
+/* ── Tooltip ── */
+body.dark-mode .mat-tooltip,
+body.dark-mode .mat-mdc-tooltip {
+  background: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ── Scrollbar in dark mode ── */
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: rgba(96,165,250,0.25) !important;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(96,165,250,0.5) !important;
+}
+
+/* ── Textos gerais ── */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
+body.dark-mode h4, body.dark-mode h5, body.dark-mode p,
+body.dark-mode span, body.dark-mode label {
+  color: inherit;
+}
+
+/* ── Badge ── */
+body.dark-mode .mat-badge-content {
+  background: #3b82f6 !important;
+  color: #fff !important;
+}
+
+/* ── Progress bar / spinner ── */
+body.dark-mode .mat-progress-bar-fill::after {
+  background-color: #3b82f6 !important;
+}
+
+/* ── Toastr ── */
+body.dark-mode .toast-container .ngx-toastr {
+  background-color: #1e2130 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+}
+
+/* ── Transition suave em tudo ── */
+body, body * {
+  transition: background-color 0.25s ease, color 0.15s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+}
+
+

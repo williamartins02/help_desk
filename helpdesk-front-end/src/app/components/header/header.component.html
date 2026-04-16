@@ -25,6 +25,13 @@
 
   <!-- ── Direita / Usuário + Relógio ── -->
   <div class="header-right">
+    <!-- Dark Mode Toggle -->
+    <button class="theme-toggle-btn" mat-icon-button
+            (click)="themeService.toggle()"
+            [attr.aria-label]="themeService.isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+            [title]="themeService.isDarkMode ? 'Modo Claro' : 'Modo Escuro'">
+      <mat-icon>{{ themeService.isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
     <div class="header-datetime">
       <mat-icon class="datetime-icon">access_time</mat-icon>
       <div class="datetime-text">

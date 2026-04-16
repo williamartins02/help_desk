@@ -1,15 +1,306 @@
+<section class="db-wrapper">
 
-<h1>Gráfico Prioridades </h1>
-
-<div>
-  <div>
-    <div>
-      <div style="display: block">
-        <canvas baseChart [data]="barChartData" [options]="barChartOptions"
-          [type]="barChartType" (chartHover)="chartHovered($event)"
-          (chartClick)="chartClicked($event)"></canvas>
+  <!-- ══════════════ HERO HEADER ══════════════ -->
+  <div class="db-hero">
+    <div class="hero-left">
+      <div class="hero-icon-ring">
+        <mat-icon>dashboard</mat-icon>
       </div>
-      <button mat-button mat-raised-button color="primary" (click)="randomize()">Update</button>
+      <div>
+        <h1 class="hero-title">Dashboard</h1>
+        <p class="hero-sub">Central de inteligência operacional</p>
+      </div>
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ filteredChamados().length }}</span>
+        <span class="hero-stat-lbl">chamados no período</span>
+      </div>
+      <div class="hero-stat-sep"></div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ slaOkPercent }}<span class="hero-stat-unit">%</span></span>
+        <span class="hero-stat-lbl">SLA em dia</span>
+      </div>
+      <div class="hero-stat-sep"></div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ resolucaoPercent }}<span class="hero-stat-unit">%</span></span>
+        <span class="hero-stat-lbl">taxa de resolução</span>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <div class="sync-pill" [class.syncing]="isRefreshing">
+        <mat-icon>{{ isRefreshing ? 'sync' : 'wifi' }}</mat-icon>
+        <span>{{ isRefreshing ? 'Atualizando…' : (ultimaAtualizacao | date:'HH:mm:ss') }}</span>
+      </div>
+      <button class="icon-btn" (click)="loadDados(false)" matTooltip="Atualizar dados" [disabled]="isRefreshing">
+        <mat-icon [class.spinning]="isRefreshing">refresh</mat-icon>
+      </button>
     </div>
   </div>
-</div>
+
+  <!-- ══════════════ TOOLBAR ══════════════ -->
+  <div class="db-toolbar">
+    <!-- Period pills -->
+    <div class="period-pills">
+      <button class="pill" [class.active]="periodo==='hoje'" (click)="setPeriodo('hoje')">Hoje</button>
+      <button class="pill" [class.active]="periodo==='7'"    (click)="setPeriodo('7')">7 dias</button>
+      <button class="pill" [class.active]="periodo==='30'"   (click)="setPeriodo('30')">30 dias</button>
+      <button class="pill" [class.active]="periodo==='custom'" (click)="setPeriodo('custom')">
+        <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle">date_range</mat-icon>
+        Personalizado
+      </button>
+    </div>
+
+    <!-- Custom date range -->
+    <div class="custom-range" *ngIf="showCustom">
+      <input type="date" [formControl]="customStart" class="date-in" />
+      <span class="date-sep">→</span>
+      <input type="date" [formControl]="customEnd"   class="date-in" />
+      <button class="pill active" (click)="applyCustom()">Aplicar</button>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="toolbar-actions">
+      <button class="action-chip chip-primary" (click)="navegarNovoChamado()">
+        <mat-icon>add</mat-icon><span>Novo chamado</span>
+      </button>
+      <button class="action-chip chip-danger" (click)="navegarChamados({sla:'ATRASADO'})">
+        <mat-icon>alarm_off</mat-icon><span>Ver atrasados</span>
+      </button>
+      <button class="action-chip chip-neutral" (click)="navegarChamados()">
+        <mat-icon>manage_search</mat-icon><span>Gerenciar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════ SKELETON ══════════════ -->
+  <ng-container *ngIf="isLoading">
+    <div class="kpi-grid">
+      <div class="sk-kpi" *ngFor="let _ of [1,2,3,4]">
+        <div class="sk-block" style="width:40%;height:12px"></div>
+        <div class="sk-block" style="width:30%;height:36px;margin-top:12px"></div>
+        <div class="sk-block" style="width:55%;height:10px;margin-top:10px"></div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="sk-chart-card" *ngFor="let _ of [1,2,3,4]">
+        <div class="sk-block" style="width:50%;height:14px;margin-bottom:16px"></div>
+        <div class="sk-block" style="height:200px"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════ KPI CARDS ══════════════ -->
+  <div class="kpi-grid" *ngIf="!isLoading">
+    <div class="kpi-card kpi-{{ card.colorClass }}"
+         *ngFor="let card of kpiCards"
+         (click)="navegarChamados(card.queryParam)"
+         matTooltip="Clique para filtrar chamados"
+         matTooltipPosition="above">
+      <div class="kpi-header">
+        <span class="kpi-label">{{ card.label }}</span>
+        <div class="kpi-icon-box">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+      </div>
+      <div class="kpi-value">{{ card.value }}</div>
+      <div class="kpi-footer">
+        <mat-icon class="trend-icon"
+          [class.trend-up]="card.trend === 'up'"
+          [class.trend-down]="card.trend === 'down'">
+          {{ card.trend === 'up' ? 'trending_up' : card.trend === 'down' ? 'trending_down' : 'trending_flat' }}
+        </mat-icon>
+        <span class="kpi-trend-label">{{ card.trendLabel }}</span>
+      </div>
+      <div class="kpi-shine"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ INSIGHTS STRIP ══════════════ -->
+  <div class="insights-strip" *ngIf="!isLoading && insights.length">
+    <div class="insight-card"
+         *ngFor="let ins of insights"
+         [class.insight-urgent]="ins.urgente"
+         [style.background]="ins.bgColor"
+         [style.border-color]="ins.color">
+      <div class="insight-icon-wrap" [style.color]="ins.color">
+        <mat-icon>{{ ins.icon }}</mat-icon>
+      </div>
+      <span class="insight-text">{{ ins.texto }}</span>
+      <button class="insight-action-btn" *ngIf="ins.actionLabel"
+              [style.color]="ins.color"
+              (click)="navegarInsight(ins)">
+        {{ ins.actionLabel }} →
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════ CHART GRID 2×2 ══════════════ -->
+  <div class="chart-grid" *ngIf="!isLoading">
+
+    <!-- 1. STATUS -->
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div class="chart-label-group">
+          <span class="chart-category">Distribuição</span>
+          <h3 class="chart-title">Status dos Chamados</h3>
+        </div>
+        <div class="chart-top-badge badge-blue">{{ filteredChamados().length }} total</div>
+      </div>
+      <div class="donut-wrap">
+        <canvas baseChart [data]="statusChartData" [options]="statusChartOptions" [type]="statusChartType"></canvas>
+        <div class="donut-center">
+          <span class="donut-num">{{ filteredChamados().length }}</span>
+          <span class="donut-lbl">chamados</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PRIORIDADE -->
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div class="chart-label-group">
+          <span class="chart-category">Análise</span>
+          <h3 class="chart-title">Chamados por Prioridade</h3>
+        </div>
+        <div class="chart-top-badge badge-orange" *ngIf="kpiAtrasados > 0">
+          <mat-icon style="font-size:13px;width:13px;height:13px">warning</mat-icon>
+          {{ kpiAtrasados }} críticos
+        </div>
+      </div>
+      <div class="chart-body">
+        <canvas baseChart [data]="prioridadeChartData" [options]="prioridadeChartOptions" [type]="prioridadeChartType"></canvas>
+      </div>
+    </div>
+
+    <!-- 3. SLA ⭐ -->
+    <div class="chart-card chart-card-sla" [class.sla-danger]="kpiAtrasados > 0">
+      <div class="chart-card-top">
+        <div class="chart-label-group">
+          <span class="chart-category">⭐ Mais Importante</span>
+          <h3 class="chart-title">Monitoramento SLA</h3>
+        </div>
+        <div class="sla-ok-pill" [class.sla-ok-danger]="kpiAtrasados > 0">
+          {{ slaOkPercent }}% em dia
+        </div>
+      </div>
+      <div class="donut-wrap">
+        <canvas baseChart [data]="slaChartData" [options]="slaChartOptions" [type]="slaChartType"></canvas>
+        <div class="donut-center">
+          <span class="donut-num" [class.donut-danger]="kpiAtrasados > 0">{{ kpiAtrasados }}</span>
+          <span class="donut-lbl">atrasados</span>
+        </div>
+      </div>
+      <!-- SLA progress bar -->
+      <div class="sla-bar-wrap">
+        <div class="sla-bar-track">
+          <div class="sla-bar-fill" [style.width.%]="slaOkPercent"
+               [class.sla-bar-good]="slaOkPercent >= 80"
+               [class.sla-bar-warn]="slaOkPercent >= 50 && slaOkPercent < 80"
+               [class.sla-bar-bad]="slaOkPercent < 50"></div>
+        </div>
+        <span class="sla-bar-label">{{ slaOkPercent }}% dentro do prazo</span>
+      </div>
+    </div>
+
+    <!-- 4. TÉCNICOS -->
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div class="chart-label-group">
+          <span class="chart-category">Equipe</span>
+          <h3 class="chart-title">Carga por Técnico</h3>
+        </div>
+        <div class="chart-top-badge badge-purple">{{ tecnicoStats.length }} ativos</div>
+      </div>
+      <div class="chart-body-tall">
+        <canvas baseChart [data]="tecnicoChartData" [options]="tecnicoChartOptions" [type]="tecnicoChartType"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ EVOLUÇÃO ══════════════ -->
+  <div class="wide-card" *ngIf="!isLoading">
+    <div class="chart-card-top">
+      <div class="chart-label-group">
+        <span class="chart-category">Tendência</span>
+        <h3 class="chart-title">Evolução de Chamados no Tempo</h3>
+      </div>
+      <div class="period-display">
+        {{ periodo === 'hoje' ? 'Hoje' : periodo === '7' ? 'Últimos 7 dias' : periodo === '30' ? 'Últimos 30 dias' : 'Personalizado' }}
+      </div>
+    </div>
+    <div class="evolucao-body">
+      <canvas baseChart [data]="evolucaoChartData" [options]="evolucaoChartOptions" [type]="evolucaoChartType"></canvas>
+    </div>
+  </div>
+
+  <!-- ══════════════ EQUIPE TABLE ══════════════ -->
+  <div class="wide-card team-card" *ngIf="!isLoading && tecnicoStats.length > 0">
+    <div class="chart-card-top">
+      <div class="chart-label-group">
+        <span class="chart-category">Gestão</span>
+        <h3 class="chart-title">Situação da Equipe Técnica</h3>
+      </div>
+      <span class="team-total-badge">{{ tecnicos.length }} técnicos cadastrados</span>
+    </div>
+
+    <div class="team-list">
+      <div class="team-row" *ngFor="let t of tecnicoStats; let i = index"
+           [class.team-row-overload]="t.sobrecarregado">
+        <!-- Rank + Avatar -->
+        <div class="team-rank">#{{ i + 1 }}</div>
+        <div class="team-avatar" [style.background]="t.avatarColor">{{ t.iniciais }}</div>
+
+        <!-- Info -->
+        <div class="team-info">
+          <span class="team-name">{{ t.nome }}</span>
+          <span class="team-sub">{{ t.abertos }} abertos · {{ t.andamento }} em andamento</span>
+        </div>
+
+        <!-- Load bar -->
+        <div class="team-load-wrap">
+          <div class="team-load-track">
+            <div class="team-load-bar"
+                 [style.width.%]="t.pctSobreCarga > 100 ? 100 : t.pctSobreCarga"
+                 [class.load-ok]="!t.sobrecarregado"
+                 [class.load-bad]="t.sobrecarregado">
+            </div>
+          </div>
+          <span class="team-load-num">{{ t.total }} ativ.</span>
+        </div>
+
+        <!-- Badge -->
+        <div class="team-badge">
+          <span class="badge-tag tag-overload" *ngIf="t.sobrecarregado">
+            <mat-icon>priority_high</mat-icon>Sobrecarregado
+          </span>
+          <span class="badge-tag tag-ok" *ngIf="!t.sobrecarregado && t.total > 0">
+            <mat-icon>check</mat-icon>Normal
+          </span>
+          <span class="badge-tag tag-free" *ngIf="t.total === 0">
+            <mat-icon>radio_button_unchecked</mat-icon>Livre
+          </span>
+        </div>
+
+        <!-- Action -->
+        <button class="team-action-btn" (click)="navegarChamados({search: t.nome})"
+                matTooltip="Ver chamados de {{ t.nome }}">
+          <mat-icon>open_in_new</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer watermark -->
+  <div class="db-footer" *ngIf="!isLoading">
+    <mat-icon>update</mat-icon>
+    <span>Atualizado automaticamente a cada 30s</span>
+    <span class="footer-sep">·</span>
+    <span>{{ now | date:'dd/MM/yyyy HH:mm' }}</span>
+  </div>
+
+</section>
+
