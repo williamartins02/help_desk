@@ -5,97 +5,166 @@
 /* ── Wrapper principal ─────────────────────────────────────────── */
 .agenda-container {
   max-width: 1020px;
-  margin: 28px auto;
-  padding: 0 20px 48px;
+  margin: 0 auto;
+  padding: 1.25rem 20px 48px;
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   CABEÇALHO
+   HERO HEADER — padrão Dashboard azul
    ══════════════════════════════════════════════════════════════════ */
-.agenda-header {
+.agenda-hero {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 20px 24px;
-  background: #ffffff;
+  background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #1565c0 100%);
   border-radius: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
-  border: 1px solid #e2e8f0;
+  padding: 1.4rem 1.8rem;
+  margin: 0 0 24px;
+  box-shadow: 0 4px 24px rgba(26,35,126,.35);
+  position: relative;
+  overflow: hidden;
 }
 
-.header-left {
+.agenda-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.05);
+  pointer-events: none;
+}
+
+.agenda-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: 160px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,.04);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Esquerda */
+.hero-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
+  flex: 1;
+  min-width: 200px;
 }
 
-.agenda-icon {
-  font-size: 38px;
-  width: 38px;
-  height: 38px;
-  color: #1976d2;
-  background: #eff6ff;
-  border-radius: 12px;
-  padding: 6px;
-  box-sizing: content-box;
+.hero-icon-ring {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.hero-icon-ring mat-icon {
+  font-size: 28px; width: 28px; height: 28px;
+  color: #fff;
 }
 
-.agenda-titulo {
+.hero-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.3px;
+  color: #fff;
+  letter-spacing: -.3px;
 }
 
-.agenda-subtitulo {
-  margin: 3px 0 0;
+.hero-sub {
+  margin: 4px 0 0;
   font-size: 13px;
-  color: #64748b;
+  color: rgba(255,255,255,.82);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+}
+.hero-sub-icon {
+  font-size: 14px; width: 14px; height: 14px;
+  color: rgba(255,255,255,.82);
 }
 
-.subtitulo-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-  color: #1976d2;
-  vertical-align: middle;
-}
 
-.header-actions {
+/* Direita: ações */
+.hero-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
-.data-input {
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 7px 12px;
-  font-size: 14px;
-  width: 108px;
+.hero-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 10px;
+  padding: 4px 8px;
+}
+
+.hero-nav-btn {
+  background: none; border: none;
+  cursor: pointer; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.hero-nav-btn:hover { background: rgba(255,255,255,.2); }
+.hero-nav-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+.hero-date-input {
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  width: 96px;
   text-align: center;
   outline: none;
-  background: #f8fafc;
-  color: #1e293b;
-  transition: border-color .2s, box-shadow .2s;
-  font-weight: 500;
 }
-.data-input:focus {
-  border-color: #1976d2;
-  box-shadow: 0 0 0 3px rgba(25,118,210,.12);
-  background: #fff;
-}
+.hero-date-input::placeholder { color: rgba(255,255,255,.6); }
 
-.btn-hoje { font-size: 13px; }
-.btn-nova { font-weight: 600; letter-spacing: 0.2px; }
+.hero-hoje-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  font-size: 12px; font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.hero-hoje-btn:hover { background: rgba(255,255,255,.3); }
+.hero-hoje-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+.hero-nova-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #fff;
+  color: #1565c0;
+  border: none;
+  font-size: 13px; font-weight: 700;
+  padding: 9px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: transform .15s, box-shadow .15s;
+  white-space: nowrap;
+}
+.hero-nova-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.2);
+}
+.hero-nova-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
 
 /* ══════════════════════════════════════════════════════════════════
    KPIs — Cards de Resumo

@@ -71,8 +71,10 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
   // ── JWT / WebSocket ───────────────────────────────────────────────────────
 
-  private jwtHelper = new JwtHelperService();
+  private jwtHelper  = new JwtHelperService();
   private wsSub!: Subscription;
+  /** Escuta atualizações no cadastro de técnicos (ativar/inativar) */
+  private tecnicoSub!: Subscription;
 
   // ── Expostos para o template ──────────────────────────────────────────────
 
@@ -114,7 +116,8 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.wsSub) this.wsSub.unsubscribe();
+    if (this.wsSub)      this.wsSub.unsubscribe();
+    if (this.tecnicoSub) this.tecnicoSub.unsubscribe();
     this.agendaWs.disconnect();
   }
 
@@ -283,6 +286,14 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
   // ── Carregamento de dados ─────────────────────────────────────────────────
 
+  /** Recarrega lista de técnicos ativos (chamado no init e ao detectar mudança via refresh$) */
+  private carregarTecnicosAtivos(): void {
+    this.tecnicoService.findAllAtivos().subscribe({
+      next: (lista) => { this.tecnicos = lista; },
+      error: () => this.toastr.error('Erro ao carregar técnicos.')
+    });
+  }
+
   private carregarTarefas(): void {
     this.carregando = true;
 
@@ -325,11 +336,19 @@ export class AgendaComponent implements OnInit, OnDestroy {
         // Técnico puro = tem ROLE_TECNICO mas NÃO tem ROLE_ADMIN
         this.isAdmin = authorities.includes('ROLE_ADMIN');
 
-        // Admin carrega lista de técnicos para o select de filtro
+        // Admin carrega apenas técnicos ATIVOS para o select de filtro
+        // (técnicos inativados na tela de Equipe Técnica não aparecem aqui)
         if (this.isAdmin) {
-          this.tecnicoService.findAll().subscribe({
-            next: (lista) => { this.tecnicos = lista; },
-            error: () => this.toastr.error('Erro ao carregar técnicos.')
+          this.carregarTecnicosAtivos();
+
+          // Atualiza a lista automaticamente quando um técnico é ativado ou inativado
+          this.tecnicoSub = this.tecnicoService.refresh$.subscribe(() => {
+            this.carregarTecnicosAtivos();
+            // Se o técnico selecionado foi inativado, limpa o filtro
+            if (this.tecnicoFiltroId !== null) {
+              const ainda = this.tecnicos.find(t => t.id === this.tecnicoFiltroId);
+              if (!ainda) { this.limparTodosFiltros(); }
+            }
           });
         }
 

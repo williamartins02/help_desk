@@ -3,50 +3,56 @@
      ═══════════════════════════════════════════════════════════════ -->
 <div class="agenda-container">
 
-  <!-- ── Cabeçalho ─────────────────────────────────────────────── -->
-  <div class="agenda-header">
-    <div class="header-left">
-      <mat-icon class="agenda-icon">event_note</mat-icon>
-      <div class="header-titles">
-        <h1 class="agenda-titulo">Agenda de Tarefas</h1>
-        <p class="agenda-subtitulo">
-          <span *ngIf="isAdmin">
-            <mat-icon class="subtitulo-icon">admin_panel_settings</mat-icon>
-            Visão Admin
-            <ng-container *ngIf="tecnicoFiltroId !== null"> — {{ nomeTecnicoFiltro }}</ng-container>
-          </span>
-          <span *ngIf="!isAdmin">
-            <mat-icon class="subtitulo-icon">person</mat-icon>
-            {{ nomeUsuario || 'Minha Agenda' }} — {{ dataFormatada() }}
-          </span>
+  <!-- ── Hero Header (padrão Dashboard) ───────────────────────── -->
+  <div class="agenda-hero">
+
+    <!-- Esquerda: ícone + título -->
+    <div class="hero-left">
+      <div class="hero-icon-ring">
+        <mat-icon>event_note</mat-icon>
+      </div>
+      <div>
+        <h1 class="hero-title">Agenda de Tarefas</h1>
+        <p class="hero-sub" *ngIf="isAdmin">
+          <mat-icon class="hero-sub-icon">admin_panel_settings</mat-icon>
+          Visão Admin
+          <ng-container *ngIf="tecnicoFiltroId !== null"> — {{ nomeTecnicoFiltro }}</ng-container>
+        </p>
+        <p class="hero-sub" *ngIf="!isAdmin">
+          <mat-icon class="hero-sub-icon">person</mat-icon>
+          {{ nomeUsuario || 'Minha Agenda' }} — {{ dataFormatada() }}
         </p>
       </div>
     </div>
 
-    <div class="header-actions">
+
+    <!-- Direita: navegação de data + ações -->
+    <div class="hero-actions">
       <!-- Navegação de datas -->
-      <button mat-icon-button (click)="diaAnterior()" matTooltip="Dia anterior">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-
-      <input class="data-input"
-             [value]="dataSelecionada"
-             (change)="onDataChange($any($event.target).value)"
-             placeholder="dd/MM/yyyy"
-             maxlength="10">
-
-      <button mat-icon-button (click)="proximoDia()" matTooltip="Próximo dia">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-
-      <button mat-stroked-button (click)="irParaHoje()" class="btn-hoje">
-        <mat-icon>today</mat-icon> Hoje
-      </button>
-
-      <button mat-raised-button color="primary" (click)="novaTarefa()" class="btn-nova">
-        <mat-icon>add_task</mat-icon> Nova Tarefa
+      <div class="hero-date-nav">
+        <button class="hero-nav-btn" (click)="diaAnterior()" matTooltip="Dia anterior">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <input class="hero-date-input"
+               [value]="dataSelecionada"
+               (change)="onDataChange($any($event.target).value)"
+               placeholder="dd/MM/yyyy"
+               maxlength="10">
+        <button class="hero-nav-btn" (click)="proximoDia()" matTooltip="Próximo dia">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button class="hero-hoje-btn" (click)="irParaHoje()" matTooltip="Ir para hoje">
+          <mat-icon>today</mat-icon>
+          <span>Hoje</span>
+        </button>
+      </div>
+      <!-- Nova tarefa -->
+      <button class="hero-nova-btn" (click)="novaTarefa()">
+        <mat-icon>add_task</mat-icon>
+        <span>Nova Tarefa</span>
       </button>
     </div>
+
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════

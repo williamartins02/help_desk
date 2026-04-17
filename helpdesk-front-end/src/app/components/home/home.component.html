@@ -1,31 +1,31 @@
 <section class="home-wrapper">
 
-  <!-- ── Boas-vindas ───────────────────────────────────────── -->
-  <div class="welcome-bar">
-    <div class="welcome-title-row">
-      <div class="welcome-icon-wrap">
-        <mat-icon class="welcome-icon">home</mat-icon>
+  <!-- ── Hero Header (padrão Dashboard) ──────────────────────── -->
+  <div class="home-hero">
+    <div class="hero-left">
+      <div class="hero-icon-ring">
+        <mat-icon>home</mat-icon>
       </div>
-      <div class="welcome-divider-vert"></div>
-      <div class="welcome-text">
-        <h2 class="welcome-title">
-          Bem-vindo(a),&nbsp;<span class="welcome-name">{{ nomeUsuario }}</span>!
-        </h2>
-        <p class="welcome-sub">Aqui está um resumo das últimas atualizações.</p>
+      <div>
+        <h1 class="hero-title">
+          Bem-vindo(a), <span class="hero-name">{{ nomeUsuario }}</span>!
+        </h1>
+        <p class="hero-sub">Aqui está um resumo das últimas atualizações do sistema.</p>
       </div>
+    </div>
 
-      <!-- Botão Ranking — visível apenas para ROLE_ADMIN -->
-      <button class="ranking-btn"
+
+    <!-- Ações -->
+    <div class="hero-actions-right">
+      <button class="hero-ranking-btn"
               *appShowForRoles="['ROLE_ADMIN']"
               (click)="openRanking()"
-              matTooltip="Ver ranking de desempenho"
-              matTooltipPosition="below"
-              [disabled]="isLoading">
+              [disabled]="isLoading"
+              matTooltip="Ver ranking de desempenho">
         <mat-icon>leaderboard</mat-icon>
-        <span class="ranking-btn-label">Ranking</span>
+        <span>Ranking</span>
       </button>
     </div>
-    <div class="welcome-divider"></div>
   </div>
 
   <!-- ── KPI cards (full-width row) ────────────────────────── -->
