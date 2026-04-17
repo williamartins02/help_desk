@@ -9,6 +9,7 @@ import com.start.helpdesk.services.exception.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.start.helpdesk.services.EncerrarChamadoEmail.ChamadoEmailService;
+import com.start.helpdesk.services.AgendaEventPublisher;
 import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.Cliente;
 import com.start.helpdesk.domain.Tecnico;
@@ -31,6 +32,19 @@ public class ChamadoService {
 	@Autowired
 	private ChamadoEmailService chamadoEmailService;
 
+	/**
+	 * Injeção via setter para evitar dependência circular com TarefaService.
+	 * TarefaService → ChamadoService → TarefaService (ciclo).
+	 * Com @Lazy o Spring resolve sem erro de startup.
+	 */
+	@Autowired(required = false)
+	@org.springframework.context.annotation.Lazy
+	private com.start.helpdesk.services.TarefaService tarefaService;
+
+	/** Publisher WebSocket para notificar clientes em tempo real. */
+	@Autowired
+	private AgendaEventPublisher agendaEventPublisher;
+
 	public Chamado findById(Integer id) {
 		Optional<Chamado> object = chamadoRepository.findById(id);
 		return object.orElseThrow(() -> new ObjectnotFoundException("Objeto não econtrado! ID:" + id));
@@ -49,7 +63,19 @@ public class ChamadoService {
 	}
 
 	public Chamado create(@Valid ChamadoDTO objectDTO) {
-		return chamadoRepository.save(newChamado(objectDTO));
+		Chamado chamado = chamadoRepository.save(newChamado(objectDTO));
+
+		// Criação automática de tarefa na agenda do técnico ao abrir um chamado
+		if (tarefaService != null) {
+			try {
+				Tecnico tecnico = tecnicoService.findById(chamado.getTecnico().getId());
+				tarefaService.criarTarefaParaChamado(chamado, tecnico);
+			} catch (Exception e) {
+				// Falha na criação da tarefa não impede a criação do chamado
+			}
+		}
+
+		return chamado;
 	}
 
 	public Chamado update(Integer id, @Valid ChamadoDTO objectDTO) {
@@ -69,6 +95,25 @@ public class ChamadoService {
 		if (vaiEncerrar) {
 			chamadoEmailService.sendChamadoEncerradoEmail(salvo);
 		}
+
+		// ── Sincroniza as Tarefas vinculadas (Agenda ↔ Central) ──────────────
+		// Converte o status do chamado e atualiza todas as tarefas vinculadas via TarefaService.
+		// O TarefaService também publica o evento WebSocket para a Agenda recarregar ao vivo.
+		if (tarefaService != null) {
+			try {
+				tarefaService.sincronizarStatusPorChamado(salvo.getId(), salvo.getStatus().getCodigo());
+			} catch (Exception ignored) { /* Sync não deve bloquear o save do chamado */ }
+		}
+
+		// ── Notifica Central de Chamados via WebSocket (auto-refresh da lista) ─
+		try {
+			agendaEventPublisher.publicarChamadoAtualizado(
+				salvo.getId(),
+				salvo.getStatus().getCodigo(),
+				salvo.getTecnico().getId()
+			);
+		} catch (Exception ignored) { /* WebSocket não deve bloquear a operação */ }
+
 		return salvo;
 	}
 

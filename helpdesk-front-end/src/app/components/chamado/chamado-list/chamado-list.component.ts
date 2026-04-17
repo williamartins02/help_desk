@@ -20,6 +20,7 @@ import { ChamadoService } from "src/app/services/chamado.service";
 import { ChamadoUpdateComponent } from '../chamado-update/chamado-update.component';
 import { ChamadoReadComponent } from '../chamado-read/chamado-read.component';
 import { SlaService, SlaAlert } from 'src/app/services/sla.service';
+import { AgendaWsService } from 'src/app/services/agenda-ws.service';
 
 @Component({
   selector: "app-chamado-list",
@@ -104,6 +105,9 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   slaCountdowns: { [id: string]: string } = {};
   private slaAlertSub: Subscription;
 
+  /** Subscription WebSocket da agenda — limpada no ngOnDestroy */
+  private agendaWsSub!: Subscription;
+
   constructor(
       public dialog: MatDialog,
       private service: ChamadoService,
@@ -111,7 +115,8 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
       public dialogRef: MatDialogRef<ChamadoListComponent>,
       private route: ActivatedRoute,
       private authService: AuthenticationService,
-      private slaService: SlaService
+      private slaService: SlaService,
+      private agendaWs: AgendaWsService
   ) {
     this.genericDialog = new GenericDialog(dialog);
   }
@@ -120,6 +125,24 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     // Conecta ao WebSocket para receber alertas de SLA
     this.slaService.connect();
     this.slaAlertSub = this.slaService.alert$.subscribe();
+
+    // ── WebSocket da Agenda: recarrega chamados em tempo real ─────────────
+    // Quando um técnico conclui uma tarefa na Agenda, o chamado vinculado
+    // é atualizado (ABERTO → ANDAMENTO) e a lista recarrega automaticamente.
+    this.agendaWs.connect();
+    this.agendaWsSub = this.agendaWs.tarefaAtualizada$.subscribe(evento => {
+      if (this.usuarioLogado && this.usuarioLogado.tipo === 'TECNICO') {
+        this.findAllByTecnico();
+      } else {
+        this.findAll();
+      }
+      const statusLabel: Record<number, string> = { 0: 'Pendente', 1: 'Em Execução', 2: 'Concluída' };
+      this.toast.info(
+        `Tarefa #${evento.entityId} → ${statusLabel[evento.novoStatus] ?? ''} — chamado atualizado`,
+        '🔄 Agenda sincronizada',
+        { timeOut: 3000, positionClass: 'toast-bottom-right' }
+      );
+    });
 
     // Atualiza contadores regressivos a cada segundo — APENAS chamados NÃO encerrados
     this.slaTimerInterval = setInterval(() => {
@@ -371,8 +394,10 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.refreshTable.unsubscribe();
     if (this.slaAlertSub) this.slaAlertSub.unsubscribe();
+    if (this.agendaWsSub) this.agendaWsSub.unsubscribe();
     if (this.slaTimerInterval) clearInterval(this.slaTimerInterval);
     this.slaService.disconnect();
+    this.agendaWs.disconnect();
   }
 
   refresh(): void {

@@ -1,0 +1,137 @@
+<div class="dialog-wrapper">
+
+  <!-- ── Cabeçalho gradiente ── -->
+  <div class="dialog-header">
+    <span class="page-badge">
+      <mat-icon>event_note</mat-icon>
+      Agenda de Tarefas
+    </span>
+
+    <div class="header-content">
+      <div class="header-brand">
+        <div class="header-icon-badge">
+          <mat-icon class="header-icon">{{ isEdicao ? 'edit_calendar' : 'add_task' }}</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>{{ isEdicao ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
+          <p class="header-subtitle">
+            {{ isEdicao ? 'Atualize os dados da tarefa na agenda' : 'Preencha os dados para agendar uma tarefa' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Corpo — card lift sobre o header ── -->
+  <div class="dialog-body">
+    <form class="main-form" [formGroup]="form" (ngSubmit)="salvar()">
+
+      <!-- Seção: Identificação -->
+      <div class="section-header">
+        <mat-icon class="section-icon">assignment</mat-icon>
+        <span>Identificação</span>
+      </div>
+
+      <!-- Título (largura total) -->
+      <mat-form-field class="field field-full" appearance="outline">
+        <mat-label>Título da tarefa</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">title</mat-icon>
+        <input matInput formControlName="titulo"
+               placeholder="Ex.: Verificar servidor de produção"
+               maxlength="150" />
+        <mat-hint align="end">{{ form.get('titulo')?.value?.length || 0 }}/150</mat-hint>
+        <mat-error *ngIf="form.get('titulo')?.hasError('required')">Título é obrigatório</mat-error>
+      </mat-form-field>
+
+      <!-- Descrição -->
+      <mat-form-field class="field field-full" appearance="outline">
+        <mat-label>Descrição detalhada</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">description</mat-icon>
+        <textarea matInput formControlName="descricao"
+                  class="textarea-descricao"
+                  placeholder="Descreva o que precisa ser feito..."></textarea>
+      </mat-form-field>
+
+      <!-- Seção: Agendamento -->
+      <div class="section-header">
+        <mat-icon class="section-icon">schedule</mat-icon>
+        <span>Agendamento</span>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Data -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Data</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">calendar_today</mat-icon>
+          <input matInput formControlName="data" placeholder="dd/MM/yyyy" maxlength="10" />
+          <mat-error *ngIf="form.get('data')?.hasError('required')">Data é obrigatória</mat-error>
+        </mat-form-field>
+
+        <!-- Prioridade -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Prioridade</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">flag</mat-icon>
+          <mat-select formControlName="prioridade">
+            <mat-option *ngFor="let p of prioridades" [value]="p.codigo">
+              {{ p.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Hora Início -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Hora Início</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">play_circle_outline</mat-icon>
+          <input matInput formControlName="horaInicio" placeholder="HH:mm" maxlength="5" />
+          <mat-hint>Formato 24h</mat-hint>
+        </mat-form-field>
+
+        <!-- Hora Fim -->
+        <mat-form-field class="field" appearance="outline">
+          <mat-label>Hora Fim</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">stop_circle</mat-icon>
+          <input matInput formControlName="horaFim" placeholder="HH:mm" maxlength="5" />
+          <mat-hint>Formato 24h</mat-hint>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Seção: Vínculo (opcional) -->
+      <div class="section-header">
+        <mat-icon class="section-icon">link</mat-icon>
+        <span>Vínculo com Chamado <span class="section-optional">(opcional)</span></span>
+      </div>
+
+      <mat-form-field class="field field-full" appearance="outline">
+        <mat-label>Nº do Chamado</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon">receipt_long</mat-icon>
+        <input matInput type="number" formControlName="chamado"
+               placeholder="Deixe em branco para tarefa interna" />
+        <mat-hint>Ao vincular, a tarefa aparecerá associada ao chamado</mat-hint>
+      </mat-form-field>
+
+      <!-- ── Ações ── -->
+      <div class="dialog-actions">
+        <button type="button" mat-stroked-button color="warn"
+                class="btn-cancel" (click)="cancelar()" [disabled]="salvando">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+
+        <button type="submit" mat-flat-button color="primary"
+                class="btn-save" [disabled]="salvando || form.invalid">
+          <mat-icon>{{ salvando ? 'hourglass_top' : (isEdicao ? 'save' : 'playlist_add_check') }}</mat-icon>
+          {{ salvando ? 'Salvando...' : (isEdicao ? 'Atualizar Tarefa' : 'Criar Tarefa') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <mat-icon class="footer-icon">event_note</mat-icon>
+    <span>Help Desk · Agenda de Tarefas</span>
+  </footer>
+
+</div>

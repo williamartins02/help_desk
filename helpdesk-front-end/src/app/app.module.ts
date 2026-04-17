@@ -91,6 +91,9 @@ import { SharedModule } from './components/shared/shared.module';
 import { CriticalAlertDialogComponent } from './components/molecules/critical-alert-dialog/critical-alert-dialog.component';
 import { RankingDialogComponent } from './components/home/ranking-dialog/ranking-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
+import {TarefaFormDialogComponent} from "./components/agenda/tarefa-form-dialog/tarefa-form-dialog.component";
+import {AgendaWsService} from "./services/agenda-ws.service";
 
 
 @NgModule({
@@ -137,6 +140,9 @@ import { MatDialogRef } from '@angular/material/dialog';
     ChatNotificationComponent,
 
     UsuariosListComponent,
+
+      AgendaComponent,
+    TarefaFormDialogComponent,
 
     UsuarioDetalheDialogComponent,
 
@@ -198,6 +204,7 @@ import { MatDialogRef } from '@angular/material/dialog';
       useValue: {}
     },
     ChatService,
+    AgendaWsService,
   ],
 
   bootstrap: [AppComponent]

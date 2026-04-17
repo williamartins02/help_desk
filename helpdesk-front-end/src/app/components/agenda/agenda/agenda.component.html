@@ -1,0 +1,373 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Agenda de Tarefas — Layout principal
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="agenda-container">
+
+  <!-- ── Cabeçalho ─────────────────────────────────────────────── -->
+  <div class="agenda-header">
+    <div class="header-left">
+      <mat-icon class="agenda-icon">event_note</mat-icon>
+      <div class="header-titles">
+        <h1 class="agenda-titulo">Agenda de Tarefas</h1>
+        <p class="agenda-subtitulo">
+          <span *ngIf="isAdmin">
+            <mat-icon class="subtitulo-icon">admin_panel_settings</mat-icon>
+            Visão Admin
+            <ng-container *ngIf="tecnicoFiltroId !== null"> — {{ nomeTecnicoFiltro }}</ng-container>
+          </span>
+          <span *ngIf="!isAdmin">
+            <mat-icon class="subtitulo-icon">person</mat-icon>
+            {{ nomeUsuario || 'Minha Agenda' }} — {{ dataFormatada() }}
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Navegação de datas -->
+      <button mat-icon-button (click)="diaAnterior()" matTooltip="Dia anterior">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <input class="data-input"
+             [value]="dataSelecionada"
+             (change)="onDataChange($any($event.target).value)"
+             placeholder="dd/MM/yyyy"
+             maxlength="10">
+
+      <button mat-icon-button (click)="proximoDia()" matTooltip="Próximo dia">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <button mat-stroked-button (click)="irParaHoje()" class="btn-hoje">
+        <mat-icon>today</mat-icon> Hoje
+      </button>
+
+      <button mat-raised-button color="primary" (click)="novaTarefa()" class="btn-nova">
+        <mat-icon>add_task</mat-icon> Nova Tarefa
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Cards de resumo (KPIs) — aparecem ANTES dos filtros
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="resumo-cards">
+
+    <mat-card class="card-resumo card-pendente">
+      <mat-card-content>
+        <div class="kpi-inner">
+          <div class="kpi-icon-wrap">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ pendentes.length }}</span>
+            <span class="kpi-label">Pendentes</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card-resumo card-execucao">
+      <mat-card-content>
+        <div class="kpi-inner">
+          <div class="kpi-icon-wrap">
+            <mat-icon>play_circle</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ emExecucao.length }}</span>
+            <span class="kpi-label">Em Execução</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card-resumo card-concluido">
+      <mat-card-content>
+        <div class="kpi-inner">
+          <div class="kpi-icon-wrap">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ concluidas.length }}</span>
+            <span class="kpi-label">Concluídas</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card-resumo card-total">
+      <mat-card-content>
+        <div class="kpi-inner">
+          <div class="kpi-icon-wrap">
+            <mat-icon>list_alt</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ tarefasFiltradas.length }}</span>
+            <span class="kpi-label">Total filtrado</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       BARRA DE FILTROS — acima da lista, abaixo dos KPIs
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="filtros-card">
+
+    <!-- Cabeçalho da seção de filtros -->
+    <div class="filtros-header">
+      <div class="filtros-header-left">
+        <div class="filtros-header-icon">
+          <mat-icon>tune</mat-icon>
+        </div>
+        <div>
+          <span class="filtros-header-title">Filtros</span>
+          <span class="filtros-header-sub">Refine a visualização das tarefas</span>
+        </div>
+      </div>
+      <button mat-stroked-button
+              *ngIf="filtrosAtivos || tecnicoFiltroId !== null"
+              (click)="limparTodosFiltros()"
+              class="btn-limpar-filtros">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpar filtros
+      </button>
+    </div>
+
+    <!-- Linha divisória -->
+    <div class="filtros-divider"></div>
+
+    <!-- Campos de filtro -->
+    <div class="filtros-campos">
+
+      <!-- Select de técnico — somente Admin -->
+      <div class="filtro-grupo" *ngIf="isAdmin">
+        <label class="filtro-label">
+          <mat-icon>engineering</mat-icon> Técnico
+        </label>
+        <mat-form-field class="filtro-field" appearance="outline">
+          <mat-select [(ngModel)]="tecnicoFiltroId"
+                      (ngModelChange)="selecionarTecnico($event)"
+                      placeholder="Todos os técnicos">
+            <mat-option [value]="null">
+              <span class="option-todos">— Todos os técnicos</span>
+            </mat-option>
+            <mat-option *ngFor="let tec of tecnicos" [value]="tec.id">
+              {{ tec.nome }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Separador vertical — somente quando o select de técnico está visível -->
+      <div class="filtro-sep" *ngIf="isAdmin"></div>
+
+      <!-- Busca por título ou chamado -->
+      <div class="filtro-grupo filtro-grupo-flex">
+        <label class="filtro-label">
+          <mat-icon>search</mat-icon> Busca
+        </label>
+        <mat-form-field class="filtro-field" appearance="outline">
+          <input matInput
+                 [(ngModel)]="filtroBusca"
+                 (ngModelChange)="onFiltroChange()"
+                 placeholder="Título da tarefa ou nº do chamado...">
+          <button *ngIf="filtroBusca" matSuffix mat-icon-button
+                  matTooltip="Limpar"
+                  (click)="filtroBusca=''; onFiltroChange()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <!-- Separador vertical -->
+      <div class="filtro-sep"></div>
+
+      <!-- Filtro de prioridade -->
+      <div class="filtro-grupo">
+        <label class="filtro-label">
+          <mat-icon>flag</mat-icon> Prioridade
+        </label>
+        <mat-form-field class="filtro-field" appearance="outline">
+          <mat-select [(ngModel)]="filtroPrioridade"
+                      (ngModelChange)="onFiltroChange()"
+                      placeholder="Todas">
+            <mat-option [value]="null">— Todas</mat-option>
+            <mat-option *ngFor="let op of opcoesPrioridade" [value]="op.valor">
+              {{ op.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+    </div>
+
+    <!-- Rodapé: badge de resultados quando filtros ativos -->
+    <div class="filtros-footer" *ngIf="filtrosAtivos || tecnicoFiltroId !== null">
+      <mat-icon>info_outline</mat-icon>
+      <span>Exibindo <strong>{{ tarefasFiltradas.length }}</strong> tarefa(s) com os filtros aplicados</span>
+    </div>
+
+  </div>
+
+  <!-- ── Spinner de carregamento ──────────────────────────────── -->
+  <div *ngIf="carregando" class="loading-wrapper">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Carregando tarefas...</p>
+  </div>
+
+  <!-- ── Abas: Pendentes / Em Execução / Concluídas ───────────── -->
+  <mat-tab-group *ngIf="!carregando" animationDuration="200ms" class="agenda-tabs">
+
+    <!-- ────── ABA: PENDENTES ────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon icon-pendente">pending_actions</mat-icon>
+        Pendentes
+        <span class="badge badge-pendente" *ngIf="pendentes.length > 0">{{ pendentes.length }}</span>
+      </ng-template>
+      <div class="tarefa-lista">
+        <p *ngIf="pendentes.length === 0" class="empty-msg">Nenhuma tarefa pendente para este dia.</p>
+        <mat-card *ngFor="let t of pendentesPaginadas" class="tarefa-card card-borda-pendente">
+          <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+        </mat-card>
+      </div>
+      <mat-paginator [length]="pendentes.length"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="opcoesItemsPorPagina"
+                     [pageIndex]="pageIndexPendentes"
+                     (page)="onPagePendentes($event)"
+                     showFirstLastButtons
+                     class="agenda-paginator">
+      </mat-paginator>
+    </mat-tab>
+
+    <!-- ────── ABA: EM EXECUÇÃO ────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon icon-execucao">play_circle</mat-icon>
+        Em Execução
+        <span class="badge badge-execucao" *ngIf="emExecucao.length > 0">{{ emExecucao.length }}</span>
+      </ng-template>
+      <div class="tarefa-lista">
+        <p *ngIf="emExecucao.length === 0" class="empty-msg">Nenhuma tarefa em execução.</p>
+        <mat-card *ngFor="let t of emExecucaoPaginadas" class="tarefa-card card-borda-execucao">
+          <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+        </mat-card>
+      </div>
+      <mat-paginator [length]="emExecucao.length"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="opcoesItemsPorPagina"
+                     [pageIndex]="pageIndexExecucao"
+                     (page)="onPageExecucao($event)"
+                     showFirstLastButtons
+                     class="agenda-paginator">
+      </mat-paginator>
+    </mat-tab>
+
+    <!-- ────── ABA: CONCLUÍDAS ────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon icon-concluido">task_alt</mat-icon>
+        Concluídas
+        <span class="badge badge-concluido" *ngIf="concluidas.length > 0">{{ concluidas.length }}</span>
+      </ng-template>
+      <div class="tarefa-lista">
+        <p *ngIf="concluidas.length === 0" class="empty-msg">Nenhuma tarefa concluída neste dia.</p>
+        <mat-card *ngFor="let t of concluidasPaginadas" class="tarefa-card card-borda-concluido">
+          <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+        </mat-card>
+      </div>
+      <mat-paginator [length]="concluidas.length"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="opcoesItemsPorPagina"
+                     [pageIndex]="pageIndexConcluidas"
+                     (page)="onPageConcluidas($event)"
+                     showFirstLastButtons
+                     class="agenda-paginator">
+      </mat-paginator>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Template reutilizável para renderizar cada card de tarefa
+     ═══════════════════════════════════════════════════════════════ -->
+<ng-template #tarefaTemplate let-t="t">
+
+  <mat-card-header class="tarefa-header">
+    <div class="tarefa-titulo-wrap">
+      <mat-icon class="tarefa-icon-status"
+                [class.icon-pendente]="t.status === 0"
+                [class.icon-execucao]="t.status === 1"
+                [class.icon-concluido]="t.status === 2">
+        {{ t.status === 0 ? 'radio_button_unchecked' : t.status === 1 ? 'timelapse' : 'check_circle' }}
+      </mat-icon>
+      <div class="tarefa-titulo-col">
+        <h3 class="tarefa-titulo" [class.concluida]="t.status === 2">{{ t.titulo }}</h3>
+        <!-- Nome do técnico — exibido sempre para Admin -->
+        <span *ngIf="isAdmin && nomeTecnicoDaTarefa(t)"
+              class="tarefa-tecnico-label">
+          <mat-icon>engineering</mat-icon> {{ nomeTecnicoDaTarefa(t) }}
+        </span>
+      </div>
+    </div>
+
+    <span class="chip-prioridade" [style.background-color]="corPrioridade(t.prioridade)">
+      {{ labelPrioridade(t.prioridade) }}
+    </span>
+  </mat-card-header>
+
+  <mat-card-content class="tarefa-body">
+    <p *ngIf="t.descricao" class="tarefa-descricao">{{ t.descricao }}</p>
+
+    <div class="tarefa-meta">
+      <span *ngIf="t.horaInicio" class="meta-item">
+        <mat-icon>schedule</mat-icon>
+        {{ t.horaInicio }}{{ t.horaFim ? ' – ' + t.horaFim : '' }}
+      </span>
+      <span *ngIf="t.chamado" class="meta-item">
+        <mat-icon>receipt_long</mat-icon>
+        Chamado #{{ t.chamado }}<span *ngIf="t.tituloChamado"> — {{ t.tituloChamado }}</span>
+      </span>
+      <span *ngIf="t.nomeCliente" class="meta-item">
+        <mat-icon>person</mat-icon> {{ t.nomeCliente }}
+      </span>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="tarefa-actions">
+    <!-- Iniciar (PENDENTE) -->
+    <button mat-stroked-button color="accent"
+            *ngIf="t.status === 0"
+            (click)="iniciarTarefa(t)"
+            matTooltip="Iniciar tarefa">
+      <mat-icon>play_arrow</mat-icon> Iniciar
+    </button>
+
+    <!-- Concluir (EM_EXECUCAO) -->
+    <button mat-stroked-button color="primary"
+            *ngIf="t.status === 1"
+            (click)="concluirTarefa(t)"
+            matTooltip="Marcar como concluída">
+      <mat-icon>check</mat-icon> Concluir
+    </button>
+
+    <span class="actions-spacer"></span>
+
+    <button mat-icon-button (click)="editarTarefa(t)" matTooltip="Editar tarefa">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <button mat-icon-button color="warn" (click)="excluirTarefa(t)" matTooltip="Excluir tarefa">
+      <mat-icon>delete_outline</mat-icon>
+    </button>
+  </mat-card-actions>
+
+</ng-template>
+

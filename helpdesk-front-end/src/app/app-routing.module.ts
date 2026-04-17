@@ -15,6 +15,7 @@ import { LineChartComponent } from './components/chamado/chart/line-chart/line-c
 import { ChatComponent } from './components/chat/chat/chat.component';
 import { UsuariosListComponent } from './components/usuarios/usuarios-list/usuarios-list.component';
 import {RelatorioChamadoComponent} from "./components/chamado/relatorio-chamado/relatorio-chamado.component";
+import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
 
 //Fica toda roda do projeto para ser renderizado.
 const routes: Routes = [
@@ -43,6 +44,7 @@ const routes: Routes = [
       { path: 'chamados/relatorios', component: RelatorioChamadoComponent },
       { path: 'chat', component: ChatComponent },
       { path: 'usuarios', component: UsuariosListComponent },
+      { path: 'agenda', component: AgendaComponent },
     ]
   }
 ];
