@@ -60,75 +60,118 @@
                 </div>
             </div>
 
-            <!-- ── Distribuição de perfis ── -->
-            <div class="perfil-dist" *ngIf="!isLoading && totalTecnicos > 0">
-                <p class="dist-title">
-                    <mat-icon>pie_chart</mat-icon>
-                    Distribuição da equipe
-                </p>
+            <!-- ── KPI cards ── -->
+            <div class="team-kpi-bar" *ngIf="!isLoading && totalTecnicos > 0">
 
-                <div class="dist-row">
-                    <div class="dist-meta">
-                        <mat-icon class="dist-icon dist-admin-icon">admin_panel_settings</mat-icon>
-                        <span class="dist-label">Admin</span>
-                        <strong class="dist-count">{{ countAdmin }}</strong>
+                <div class="team-kpi-card kpi-ativos"
+                     [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
+                    <div class="kpi-icon-wrap">
+                        <mat-icon>check_circle</mat-icon>
                     </div>
-                    <div class="dist-track">
-                        <div class="dist-fill dist-fill-admin"
-                             [style.width.%]="adminBarPercent"
-                             [matTooltip]="countAdmin + ' técnico(s) com perfil Admin'">
+                    <div class="kpi-info">
+                        <div class="kpi-top">
+                            <strong>{{ countAtivos }}</strong>
+                            <span class="kpi-pct kpi-pct-green">{{ ativosPct }}%</span>
+                        </div>
+                        <span class="kpi-label">Ativos</span>
+                        <div class="kpi-track">
+                            <div class="kpi-fill kpi-fill-green" [style.width.%]="ativosPct"></div>
                         </div>
                     </div>
-                    <span class="dist-pct">{{ adminBarPercent }}%</span>
                 </div>
 
-                <div class="dist-row">
-                    <div class="dist-meta">
-                        <mat-icon class="dist-icon dist-tecnico-icon">build</mat-icon>
-                        <span class="dist-label">Técnico</span>
-                        <strong class="dist-count">{{ countTecnico }}</strong>
+                <div class="team-kpi-card kpi-inativos"
+                     [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
+                    <div class="kpi-icon-wrap">
+                        <mat-icon>person_off</mat-icon>
                     </div>
-                    <div class="dist-track">
-                        <div class="dist-fill dist-fill-tecnico"
-                             [style.width.%]="tecnicoBarPercent"
-                             [matTooltip]="countTecnico + ' técnico(s) com perfil Técnico'">
+                    <div class="kpi-info">
+                        <div class="kpi-top">
+                            <strong>{{ countInativos }}</strong>
+                            <span class="kpi-pct kpi-pct-red">{{ inativosPct }}%</span>
+                        </div>
+                        <span class="kpi-label">Inativos</span>
+                        <div class="kpi-track">
+                            <div class="kpi-fill kpi-fill-red" [style.width.%]="inativosPct"></div>
                         </div>
                     </div>
-                    <span class="dist-pct">{{ tecnicoBarPercent }}%</span>
                 </div>
+
+                <div class="team-kpi-card kpi-novos"
+                     [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
+                    <div class="kpi-icon-wrap">
+                        <mat-icon>person_add</mat-icon>
+                    </div>
+                    <div class="kpi-info">
+                        <div class="kpi-top">
+                            <strong>{{ countNovosMes }}</strong>
+                        </div>
+                        <span class="kpi-label">Novos este mês</span>
+                        <span class="kpi-sublabel">{{ mesAtual }}</span>
+                    </div>
+                </div>
+
             </div>
-
-            <!-- ── Resumo dinâmico ── -->
-            <p class="hero-summary" *ngIf="!isLoading && totalTecnicos > 0">
-                <mat-icon class="summary-icon">groups</mat-icon>
-                A equipe conta com <strong>{{ totalTecnicos }}</strong> profissional(is) —
-                <strong>{{ countAdmin }}</strong> administrador(es) e
-                <strong>{{ countTecnico }}</strong> técnico(s) ativo(s).
-            </p>
         </div>
 
         <div class="hero-stats">
-            <div class="stat-card stat-total">
-                <div class="stat-icon-wrap">
-                    <mat-icon class="stat-icon">engineering</mat-icon>
+
+            <!-- Card: Total cadastrados -->
+            <div class="stat-card stat-total"
+                 matTooltip="Total de técnicos registrados no sistema">
+                <div class="stat-card-header">
+                    <div class="stat-icon-wrap">
+                        <mat-icon class="stat-icon">engineering</mat-icon>
+                    </div>
+                    <span class="stat-label">Total cadastrados</span>
                 </div>
-                <span>Total cadastrados</span>
-                <strong>{{ totalTecnicos }}</strong>
+                <strong class="stat-value">{{ totalTecnicos }}</strong>
+                <div class="stat-sub-row">
+                    <span class="stat-sub stat-sub-green">
+                        <mat-icon>check_circle</mat-icon>
+                        {{ countAtivos }} ativo(s)
+                    </span>
+                    <span class="stat-sub stat-sub-red" *ngIf="countInativos > 0">
+                        <mat-icon>person_off</mat-icon>
+                        {{ countInativos }} inativo(s)
+                    </span>
+                </div>
+                <div class="stat-track">
+                    <div class="stat-fill" [style.width.%]="ativosPct"
+                         [matTooltip]="ativosPct + '% ativos'"></div>
+                </div>
             </div>
 
-
+            <!-- Card: Resultados / Filtro ativo -->
             <div class="stat-card"
                  [class.stat-filter-active]="hasActiveFilter"
                  [class.stat-filter]="!hasActiveFilter"
-                 [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : ''"
+                 [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
                  (click)="hasActiveFilter ? clearFilter(input) : null"
                  [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
-                <div class="stat-icon-wrap">
-                    <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+                <div class="stat-card-header">
+                    <div class="stat-icon-wrap">
+                        <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+                    </div>
+                    <span class="stat-label">{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
                 </div>
-                <span>{{ hasActiveFilter ? 'Filtrados' : 'Resultados exibidos' }}</span>
-                <strong>{{ filteredCount }}</strong>
+                <strong class="stat-value">{{ filteredCount }}</strong>
+                <div class="stat-sub-row">
+                    <span class="stat-sub stat-sub-white" *ngIf="hasActiveFilter">
+                        <mat-icon>close</mat-icon>
+                        Limpar filtro
+                    </span>
+                    <span class="stat-sub stat-sub-white" *ngIf="!hasActiveFilter">
+                        <mat-icon>done_all</mat-icon>
+                        Todos visíveis
+                    </span>
+                </div>
+                <div class="stat-track stat-track-white">
+                    <div class="stat-fill stat-fill-white"
+                         [style.width.%]="totalTecnicos > 0 ? (filteredCount / totalTecnicos) * 100 : 0"></div>
+                </div>
             </div>
+
         </div>
     </section>
 

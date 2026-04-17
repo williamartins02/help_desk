@@ -98,23 +98,42 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     return !this.isLoading && this.filteredCount === 0;
   }
 
-  /* ── Distribuição de perfis ──────────────────────────────── */
-  get countAdmin(): number {
-    return this.TECNICO_DATA.filter(t => t.perfis.includes(0)).length;
+  /* ── KPIs da equipe ──────────────────────────────────────── */
+  get countAtivos(): number {
+    return this.TECNICO_DATA.filter(t => t.ativo !== false).length;
   }
 
-  get countTecnico(): number {
-    return this.TECNICO_DATA.filter(t => t.perfis.includes(2)).length;
+  get countInativos(): number {
+    return this.TECNICO_DATA.filter(t => t.ativo === false).length;
   }
 
-  get adminBarPercent(): number {
-    const max = Math.max(this.countAdmin, this.countTecnico, 1);
-    return Math.round((this.countAdmin / max) * 100);
+  get ativosPct(): number {
+    if (this.totalTecnicos === 0) return 0;
+    return Math.round((this.countAtivos / this.totalTecnicos) * 100);
   }
 
-  get tecnicoBarPercent(): number {
-    const max = Math.max(this.countAdmin, this.countTecnico, 1);
-    return Math.round((this.countTecnico / max) * 100);
+  get inativosPct(): number {
+    if (this.totalTecnicos === 0) return 0;
+    return Math.round((this.countInativos / this.totalTecnicos) * 100);
+  }
+
+  get mesAtual(): string {
+    return new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+
+  get countNovosMes(): number {
+    const now = new Date();
+    return this.TECNICO_DATA.filter(t => {
+      const dateStr = (t as any).dataHoraCriacao || t.dataCriacao;
+      if (!dateStr) return false;
+      try {
+        const datePart = String(dateStr).split(' ')[0];
+        const [day, month, year] = datePart.split('/').map(Number);
+        if (!day || !month || !year) return false;
+        const d = new Date(year, month - 1, day);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      } catch { return false; }
+    }).length;
   }
 
 
