@@ -1,70 +1,121 @@
 <div class="container">
 
-  <!-- ══ Hero Panel ══════════════════════════════════════════════════════════ -->
+  <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
   <section class="hero-panel">
-    <div class="hero-content">
-      <span class="page-badge">
+    <div class="hero-left">
+      <div class="hero-icon-ring">
         <mat-icon>manage_accounts</mat-icon>
-        Gestão de Usuários
-      </span>
-      <h1>Usuários do Sistema</h1>
-      <p>Visualize, filtre e acompanhe todos os usuários cadastrados — técnicos, clientes e administradores.</p>
-
-      <div class="hero-meta" *ngIf="USUARIO_DATA.length > 0">
-        <div class="hero-status-footer">
-          <span class="meta-label">Distribuição por perfil</span>
-          <div class="hero-kpis">
-            <span class="kpi-pill kpi-total">
-              <mat-icon>groups</mat-icon>
-              {{ USUARIO_DATA.length }} total
-            </span>
-            <span class="kpi-pill kpi-admin">
-              <mat-icon>admin_panel_settings</mat-icon>
-              {{ totalAdmin }} admin{{ totalAdmin !== 1 ? 's' : '' }}
-            </span>
-            <span class="kpi-pill kpi-tecnico">
-              <mat-icon>engineering</mat-icon>
-              {{ totalTecnico }} técnico{{ totalTecnico !== 1 ? 's' : '' }}
-            </span>
-            <span class="kpi-pill kpi-cliente">
-              <mat-icon>person</mat-icon>
-              {{ totalCliente }} cliente{{ totalCliente !== 1 ? 's' : '' }}
-            </span>
-          </div>
-        </div>
+      </div>
+      <div class="hero-text">
+        <span class="page-badge">
+          <mat-icon>people</mat-icon>
+          Administração do Sistema
+        </span>
+        <h1>Gestão de Usuários</h1>
+        <p>Visualize, filtre e acompanhe todos os usuários cadastrados — técnicos, clientes e administradores.</p>
       </div>
     </div>
 
-    <div class="hero-stats">
-      <div class="stat-card stat-total">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">groups</mat-icon></div>
-        <span>Total cadastrados</span>
-        <strong>{{ USUARIO_DATA.length }}</strong>
+    <!-- Quick stats strip — canto superior direito -->
+    <div class="hero-stats-strip">
+      <div class="hero-stat-item">
+        <span class="hero-stat-value">{{ USUARIO_DATA.length }}</span>
+        <span class="hero-stat-label">Total</span>
       </div>
-      <div class="stat-card stat-admin">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">admin_panel_settings</mat-icon></div>
-        <span>Administradores</span>
-        <strong>{{ totalAdmin }}</strong>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat-item">
+        <span class="hero-stat-value">{{ totalTecnico }}</span>
+        <span class="hero-stat-label">Técnicos</span>
       </div>
-      <div class="stat-card stat-tecnico">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">engineering</mat-icon></div>
-        <span>Técnicos</span>
-        <strong>{{ totalTecnico }}</strong>
-      </div>
-      <div class="stat-card stat-cliente">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person</mat-icon></div>
-        <span>Clientes</span>
-        <strong>{{ totalCliente }}</strong>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat-item">
+        <span class="hero-stat-value">{{ totalCliente }}</span>
+        <span class="hero-stat-label">Clientes</span>
       </div>
     </div>
   </section>
 
-  <!-- ══ Table Card ══════════════════════════════════════════════════════════ -->
+  <!-- ══ 2. KPI CARDS ════════════════════════════════════════════════════ -->
+  <div class="kpi-section">
+
+    <div class="stat-card stat-total">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">groups</mat-icon>
+        </div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Total Cadastrados</span>
+        <strong>{{ USUARIO_DATA.length }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-admin">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">admin_panel_settings</mat-icon>
+        </div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Administradores</span>
+        <strong>{{ totalAdmin }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-tecnico">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">engineering</mat-icon>
+        </div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Técnicos</span>
+        <strong>{{ totalTecnico }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-cliente">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">person</mat-icon>
+        </div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Clientes</span>
+        <strong>{{ totalCliente }}</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ 3. CONTENT CARD ════════════════════════════════════════════════ -->
   <section class="content-card">
 
-    <!-- Toolbar -->
-    <div class="toolbar">
+    <!-- Cabeçalho do card -->
+    <div class="card-header-bar">
+      <div class="card-header-left">
+        <div class="card-header-icon">
+          <mat-icon>table_rows</mat-icon>
+        </div>
+        <div>
+          <h2 class="card-header-title">Lista de Usuários</h2>
+          <span class="card-header-sub">Acompanhe perfis, tipos e datas de cadastro em tempo real</span>
+        </div>
+      </div>
+      <div class="card-header-right">
+        <span class="total-badge">
+          <mat-icon>people</mat-icon>
+          {{ USUARIO_DATA.length }} usuário(s)
+        </span>
+        <span *ngIf="hasFilters" class="filter-indicator">
+          <mat-icon>filter_list</mat-icon>
+          {{ dataSource.filteredData.length }} filtrado(s)
+        </span>
+      </div>
+    </div>
 
+    <!-- Toolbar de filtros -->
+    <div class="toolbar">
       <div class="tipo-tabs">
         <button class="tipo-tab" [class.active]="selectedTipo === ''" (click)="onTipoChange('')">
           <mat-icon>groups</mat-icon>
@@ -83,7 +134,7 @@
         </button>
       </div>
 
-      <div class="toolbar-right">
+      <div class="toolbar-actions">
         <div class="search-wrap">
           <mat-icon class="search-icon">search</mat-icon>
           <input class="search-input"
@@ -103,159 +154,152 @@
           {{ dataSource.filteredData.length }} resultado(s)
         </span>
 
-        <button mat-icon-button class="refresh-btn"
+        <button mat-icon-button class="refresh-button"
                 (click)="findAll()"
                 [disabled]="isLoading"
-                matTooltip="Recarregar lista">
-          <mat-icon [class.is-spinning]="isLoading">refresh</mat-icon>
+                matTooltip="Recarregar lista"
+                [class.spinning]="isLoading">
+          <mat-icon>refresh</mat-icon>
         </button>
       </div>
     </div>
 
-    <!-- Table header -->
-    <div class="table-header">
-      <div>
-        <h2>Lista de usuários</h2>
-        <p>Acompanhe perfis, tipos e datas de cadastro em tempo real.</p>
-      </div>
-      <span *ngIf="hasFilters" class="filter-indicator">
-        <mat-icon>filter_alt</mat-icon>
-        {{ dataSource.filteredData.length }} resultado(s) filtrado(s)
-      </span>
-    </div>
-
     <!-- Table Wrapper -->
-    <div class="table-wrapper">
+    <div class="table-section">
+      <div class="table-wrapper">
 
-      <!-- Loading overlay -->
-      <div *ngIf="isLoading" class="loading-overlay">
-        <mat-spinner diameter="44"></mat-spinner>
-        <span>Carregando usuários...</span>
-      </div>
+        <!-- Loading overlay -->
+        <div *ngIf="isLoading" class="loading-overlay">
+          <mat-spinner diameter="46"></mat-spinner>
+          <span>Carregando usuários...</span>
+        </div>
 
-      <mat-table [dataSource]="dataSource" matSort class="usuarios-table">
+        <mat-table [dataSource]="dataSource" matSort class="usuarios-table professional-table">
 
-        <!-- Avatar -->
-        <ng-container matColumnDef="avatar">
-          <mat-header-cell *matHeaderCellDef class="col-avatar"></mat-header-cell>
-          <mat-cell *matCellDef="let u" class="col-avatar">
-            <img *ngIf="u.fotoPerfil"
-                 [src]="u.fotoPerfil"
-                 [alt]="u.nome"
-                 class="user-avatar-img"
-                 [matTooltip]="u.nome">
-            <div *ngIf="!u.fotoPerfil"
-                 class="user-avatar"
-                 [style.background]="getAvatarColor(u)"
-                 [matTooltip]="u.nome">
-              {{ getInitials(u.nome) }}
-            </div>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Nome -->
-        <ng-container matColumnDef="nome">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Nome</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <div class="nome-col">
-              <span class="user-nome">{{ u.nome }}</span>
-              <span class="user-id">#{{ u.id }}</span>
-            </div>
-          </mat-cell>
-        </ng-container>
-
-        <!-- E-mail -->
-        <ng-container matColumnDef="email">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>E-mail</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <span class="email-txt">{{ u.email }}</span>
-          </mat-cell>
-        </ng-container>
-
-        <!-- CPF -->
-        <ng-container matColumnDef="cpf">
-          <mat-header-cell *matHeaderCellDef>CPF</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <span class="cpf-txt">{{ maskCpf(u.cpf) }}</span>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Perfis -->
-        <ng-container matColumnDef="perfis">
-          <mat-header-cell *matHeaderCellDef>Perfis</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <div class="chips-wrap">
-              <span *ngFor="let p of u.perfis"
-                    class="perfil-chip"
-                    [style.background]="getPerfilBg(p)"
-                    [style.color]="getPerfilColor(p)"
-                    [style.border]="'1px solid ' + getPerfilColor(p) + '35'">
-                {{ getPerfilLabel(p) }}
-              </span>
-            </div>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Tipo -->
-        <ng-container matColumnDef="tipo">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <span class="tipo-badge"
-                  [style.background]="getTipoBg(u.tipo)"
-                  [style.color]="getTipoColor(u.tipo)"
-                  [style.border]="'1px solid ' + getTipoColor(u.tipo) + '35'">
-              {{ getTipoLabel(u.tipo) }}
-            </span>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Data Cadastro -->
-        <ng-container matColumnDef="dataCriacao">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Cadastro</mat-header-cell>
-          <mat-cell *matCellDef="let u">
-            <div class="date-col">
-              <mat-icon class="date-icon">calendar_today</mat-icon>
-              <span>{{ formatDate(u.dataCriacao) }}</span>
-            </div>
-          </mat-cell>
-        </ng-container>
-
-        <!-- Ações -->
-        <ng-container matColumnDef="acoes">
-          <mat-header-cell *matHeaderCellDef class="col-acoes"></mat-header-cell>
-          <mat-cell *matCellDef="let u" class="col-acoes">
-            <button class="btn-view" (click)="openDetalhes(u, $event)" matTooltip="Ver detalhes" matTooltipPosition="left">
-              <mat-icon>person_search</mat-icon>
-              <span>Detalhes</span>
-            </button>
-          </mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"
-                 class="table-row"
-                 (click)="openDetalhes(row)"
-                 matTooltip="Clique para ver detalhes"
-                 matTooltipShowDelay="600"></mat-row>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell no-data-row" colspan="8">
-            <div class="empty-state">
-              <div class="empty-icon">
-                <mat-icon>search_off</mat-icon>
+          <!-- Avatar -->
+          <ng-container matColumnDef="avatar">
+            <mat-header-cell *matHeaderCellDef class="col-avatar"></mat-header-cell>
+            <mat-cell *matCellDef="let u" class="col-avatar">
+              <img *ngIf="u.fotoPerfil"
+                   [src]="u.fotoPerfil"
+                   [alt]="u.nome"
+                   class="user-avatar-img"
+                   [matTooltip]="u.nome">
+              <div *ngIf="!u.fotoPerfil"
+                   class="user-avatar"
+                   [style.background]="getAvatarColor(u)"
+                   [matTooltip]="u.nome">
+                {{ getInitials(u.nome) }}
               </div>
-              <h3>Nenhum usuário encontrado</h3>
-              <p>Nenhum usuário correspondente ao filtro aplicado. Tente ajustar os critérios de busca.</p>
-            </div>
-          </td>
-        </tr>
+            </mat-cell>
+          </ng-container>
 
-      </mat-table>
+          <!-- Nome -->
+          <ng-container matColumnDef="nome">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Nome</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <div class="nome-col">
+                <span class="user-nome">{{ u.nome }}</span>
+                <span class="user-id">#{{ u.id }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
 
-      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
-                     showFirstLastButtons
-                     class="paginator">
-      </mat-paginator>
+          <!-- E-mail -->
+          <ng-container matColumnDef="email">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>E-mail</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <span class="email-txt">{{ u.email }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- CPF -->
+          <ng-container matColumnDef="cpf">
+            <mat-header-cell *matHeaderCellDef>CPF</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <span class="cpf-txt">{{ maskCpf(u.cpf) }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Perfis -->
+          <ng-container matColumnDef="perfis">
+            <mat-header-cell *matHeaderCellDef>Perfis</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <div class="chips-wrap">
+                <span *ngFor="let p of u.perfis"
+                      class="perfil-chip"
+                      [style.background]="getPerfilBg(p)"
+                      [style.color]="getPerfilColor(p)"
+                      [style.border]="'1px solid ' + getPerfilColor(p) + '35'">
+                  {{ getPerfilLabel(p) }}
+                </span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Tipo -->
+          <ng-container matColumnDef="tipo">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <span class="tipo-badge"
+                    [style.background]="getTipoBg(u.tipo)"
+                    [style.color]="getTipoColor(u.tipo)"
+                    [style.border]="'1px solid ' + getTipoColor(u.tipo) + '35'">
+                {{ getTipoLabel(u.tipo) }}
+              </span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Data Cadastro -->
+          <ng-container matColumnDef="dataCriacao">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Cadastro</mat-header-cell>
+            <mat-cell *matCellDef="let u">
+              <div class="date-col">
+                <mat-icon class="date-icon">calendar_today</mat-icon>
+                <span>{{ formatDate(u.dataCriacao) }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Ações -->
+          <ng-container matColumnDef="acoes">
+            <mat-header-cell *matHeaderCellDef class="col-acoes"></mat-header-cell>
+            <mat-cell *matCellDef="let u" class="col-acoes">
+              <button class="btn-view" (click)="openDetalhes(u, $event)" matTooltip="Ver detalhes" matTooltipPosition="left">
+                <mat-icon>person_search</mat-icon>
+                <span>Detalhes</span>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"
+                   class="table-row"
+                   (click)="openDetalhes(row)"
+                   matTooltip="Clique para ver detalhes"
+                   matTooltipShowDelay="600"></mat-row>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data-row" colspan="8">
+              <div class="empty-state">
+                <div class="empty-state-icon-wrap">
+                  <mat-icon>search_off</mat-icon>
+                </div>
+                <span>Nenhum usuário encontrado</span>
+                <p>Nenhum usuário correspondente ao filtro aplicado. Tente ajustar os critérios de busca.</p>
+              </div>
+            </td>
+          </tr>
+
+        </mat-table>
+
+        <div class="table-footer">
+          <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+                         showFirstLastButtons
+                         class="pagination">
+          </mat-paginator>
+        </div>
+      </div>
     </div>
 
   </section>
