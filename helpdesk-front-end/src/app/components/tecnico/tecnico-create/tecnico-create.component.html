@@ -1,147 +1,175 @@
 <div class="dialog-wrapper">
 
-  <!-- ── Cabeçalho gradiente ── -->
+  <!-- ── Cabeçalho ── -->
   <div class="dialog-header">
-    <span class="page-badge">
-      <mat-icon>engineering</mat-icon>
-      Novo técnico
-    </span>
+    <div class="dh-circle dh-circle-1"></div>
+    <div class="dh-circle dh-circle-2"></div>
 
-    <div class="header-content">
-      <div class="header-brand">
-        <div class="header-icon-badge">
-          <mat-icon class="header-icon">person_add_alt</mat-icon>
-        </div>
-        <div class="header-text">
-          <h2>Cadastrar Técnico</h2>
-          <p class="header-subtitle">Preencha os dados do novo técnico</p>
-        </div>
+    <div class="dh-top">
+      <span class="page-badge">
+        <mat-icon>engineering</mat-icon>
+        Equipe técnica
+      </span>
+      <span class="dh-step">Novo membro</span>
+    </div>
+
+    <div class="header-brand">
+      <div class="header-icon-badge">
+        <mat-icon class="header-icon">person_add_alt</mat-icon>
       </div>
+      <div class="header-text">
+        <h2>Cadastrar Técnico</h2>
+        <p class="header-subtitle">Preencha os dados para adicionar um novo membro à equipe</p>
+      </div>
+    </div>
+
+    <div class="dh-chips">
+      <span class="dh-chip"><mat-icon>verified_user</mat-icon>Acesso configurável</span>
+      <span class="dh-chip"><mat-icon>photo_camera</mat-icon>Foto opcional</span>
+      <span class="dh-chip dh-chip-green"><mat-icon>bolt</mat-icon>Ativação imediata</span>
     </div>
   </div>
 
-  <!-- ── Corpo — card lift sobre o header ── -->
+  <!-- ── Corpo ── -->
   <div class="dialog-body">
     <form class="main-form">
 
-        <!-- Seção: Foto de perfil -->
-      <div class="section-header">
-        <mat-icon class="section-icon">photo_camera</mat-icon>
-        <span>Foto de perfil <span class="optional-label">(opcional)</span></span>
-      </div>
-
-      <div class="avatar-upload-section">
-        <div class="avatar-preview">
-          <img *ngIf="previewUrl" [src]="previewUrl" class="avatar-img" alt="Prévia da foto">
-          <div *ngIf="!previewUrl" class="avatar-placeholder">
-            <mat-icon>person</mat-icon>
+      <!-- ══ Seção 1: Foto de perfil ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap section-icon-purple">
+            <mat-icon>photo_camera</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Foto de Perfil</span>
+            <span class="section-sub">Opcional — um avatar será gerado automaticamente se não enviada</span>
           </div>
         </div>
-        <div class="avatar-actions">
-          <div class="avatar-btn-row">
-            <button type="button" mat-stroked-button color="primary" (click)="fileInput.click()" class="btn-upload">
-              <mat-icon>upload</mat-icon>
-              {{ previewUrl ? 'Alterar foto' : 'Enviar foto' }}
-            </button>
-            <button type="button" mat-icon-button color="warn" *ngIf="previewUrl" (click)="removePhoto()" matTooltip="Remover foto">
-              <mat-icon>delete</mat-icon>
-            </button>
+
+        <div class="avatar-upload-section">
+          <div class="avatar-preview">
+            <img *ngIf="previewUrl" [src]="previewUrl" class="avatar-img" alt="Prévia da foto">
+            <div *ngIf="!previewUrl" class="avatar-placeholder">
+              <mat-icon>person</mat-icon>
+            </div>
           </div>
-          <input #fileInput type="file" accept="image/png,image/jpeg,image/jpg,image/webp" (change)="onFileSelected($event)" style="display:none">
-          <p class="avatar-hint">
-            <mat-icon class="hint-icon">auto_awesome</mat-icon>
-            Se não enviar uma foto, um avatar será gerado automaticamente.
-          </p>
+          <div class="avatar-actions">
+            <div class="avatar-btn-row">
+              <button type="button" class="btn-upload" (click)="fileInput.click()">
+                <mat-icon>upload</mat-icon>
+                {{ previewUrl ? 'Alterar foto' : 'Enviar foto' }}
+              </button>
+              <button type="button" class="btn-remove-photo" *ngIf="previewUrl"
+                      (click)="removePhoto()" matTooltip="Remover foto">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <input #fileInput type="file" accept="image/png,image/jpeg,image/jpg,image/webp"
+                   (change)="onFileSelected($event)" style="display:none">
+            <p class="avatar-hint">
+              <mat-icon class="hint-icon">auto_awesome</mat-icon>
+              Se não enviar uma foto, um avatar será gerado automaticamente.
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Seção: Perfis -->
-      <div class="section-header">
-        <mat-icon class="section-icon">manage_accounts</mat-icon>
-        <span>Perfis de acesso</span>
+      <!-- ══ Seção 2: Perfis de acesso ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap section-icon-amber">
+            <mat-icon>manage_accounts</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Perfis de Acesso</span>
+            <span class="section-sub">Selecione um ou mais perfis para este técnico</span>
+          </div>
+        </div>
+
+        <div class="perfis-section">
+          <div class="perfil-chip" [class.active-admin]="tecnico.perfis.includes(0)">
+            <mat-checkbox (change)="addPerfil(0, $event.checked)" [checked]="tecnico.perfis.includes(0)" color="primary">
+              <span class="chip-content chip-admin">
+                <mat-icon>admin_panel_settings</mat-icon>Admin
+              </span>
+            </mat-checkbox>
+          </div>
+          <div class="perfil-chip" [class.active-cliente]="tecnico.perfis.includes(1)">
+            <mat-checkbox (change)="addPerfil(1, $event.checked)" [checked]="tecnico.perfis.includes(1)" color="primary">
+              <span class="chip-content chip-cliente">
+                <mat-icon>person</mat-icon>Cliente
+              </span>
+            </mat-checkbox>
+          </div>
+          <div class="perfil-chip" [class.active-tecnico]="tecnico.perfis.includes(2)">
+            <mat-checkbox (change)="addPerfil(2, $event.checked)" [checked]="tecnico.perfis.includes(2)" color="primary">
+              <span class="chip-content chip-tecnico">
+                <mat-icon>build</mat-icon>Técnico
+              </span>
+            </mat-checkbox>
+          </div>
+        </div>
       </div>
 
-      <div class="perfis-section">
-        <div class="perfil-chip" [class.active]="tecnico.perfis.includes(0)">
-          <mat-checkbox (change)="addPerfil(0, $event.checked)" [checked]="tecnico.perfis.includes(0)" color="primary">
-            <span class="chip-content">
-              <mat-icon>admin_panel_settings</mat-icon>Admin
-            </span>
-          </mat-checkbox>
+      <!-- ══ Seção 3: Dados pessoais ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <mat-icon>badge</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Dados Pessoais</span>
+            <span class="section-sub">Informações de identificação e acesso ao sistema</span>
+          </div>
         </div>
-        <div class="perfil-chip" [class.active]="tecnico.perfis.includes(1)">
-          <mat-checkbox (change)="addPerfil(1, $event.checked)" [checked]="tecnico.perfis.includes(1)" color="primary">
-            <span class="chip-content">
-              <mat-icon>person</mat-icon>Cliente
-            </span>
-          </mat-checkbox>
-        </div>
-        <div class="perfil-chip" [class.active]="tecnico.perfis.includes(2)">
-          <mat-checkbox (change)="addPerfil(2, $event.checked)" [checked]="tecnico.perfis.includes(2)" color="primary">
-            <span class="chip-content">
-              <mat-icon>build</mat-icon>Técnico
-            </span>
-          </mat-checkbox>
-        </div>
-      </div>
 
-      <!-- Seção: Dados pessoais -->
-      <div class="section-header">
-        <mat-icon class="section-icon">badge</mat-icon>
-        <span>Dados pessoais</span>
-      </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>Nome completo</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
+            <input [(ngModel)]="tecnico.nome" name="nome" [formControl]="nome"
+                   matInput placeholder="Ex: Fulano de Tal" maxlength="50" required>
+            <mat-error *ngIf="nome.invalid">Mínimo de 3 caracteres</mat-error>
+          </mat-form-field>
 
-      <!-- Linha: Nome + CPF -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>Nome completo</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
-          <input [(ngModel)]="tecnico.nome" name="nome" [formControl]="nome"
-                 matInput placeholder="Ex: Fulano de Tal" maxlength="50" required>
-          <mat-error *ngIf="nome.invalid">Mínimo de 3 caracteres</mat-error>
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>CPF</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">pin</mat-icon>
+            <input [(ngModel)]="tecnico.cpf" name="cpf" [formControl]="cpf"
+                   matInput placeholder="000.000.000-00" mask="000.000.000-00" required>
+            <mat-error *ngIf="cpf.invalid">CPF é obrigatório</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>E-mail</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">email</mat-icon>
+          <input [(ngModel)]="tecnico.email" name="email" [formControl]="email"
+                 matInput placeholder="Ex: fulano@gmail.com" maxlength="50" required>
+          <mat-error *ngIf="email.invalid">Informe um e-mail válido</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="field-half">
-          <mat-label>CPF</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">pin</mat-icon>
-          <input [(ngModel)]="tecnico.cpf" name="cpf" [formControl]="cpf"
-                 matInput placeholder="000.000.000-00" mask="000.000.000-00" required>
-          <mat-error *ngIf="cpf.invalid">CPF é obrigatório</mat-error>
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Senha</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">lock</mat-icon>
+          <input matInput [type]="hide ? 'password' : 'text'"
+                 [(ngModel)]="tecnico.senha" name="senha" [formControl]="senha"
+                 placeholder="Mínimo 3 caracteres" required>
+          <button mat-icon-button matSuffix (click)="hide = !hide" type="button"
+                  [attr.aria-label]="'Alternar visibilidade'" [attr.aria-pressed]="hide">
+            <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="senha.invalid">A senha deve ter no mínimo 3 caracteres</mat-error>
         </mat-form-field>
       </div>
-
-      <!-- E-mail -->
-      <mat-form-field appearance="outline" class="field-full">
-        <mat-label>E-mail</mat-label>
-        <mat-icon matPrefix class="field-prefix-icon">email</mat-icon>
-        <input [(ngModel)]="tecnico.email" name="email" [formControl]="email"
-               matInput placeholder="Ex: fulano@gmail.com" maxlength="50" required>
-        <mat-error *ngIf="email.invalid">Informe um e-mail válido</mat-error>
-      </mat-form-field>
-
-      <!-- Senha -->
-      <mat-form-field appearance="outline" class="field-full">
-        <mat-label>Senha</mat-label>
-        <mat-icon matPrefix class="field-prefix-icon">lock</mat-icon>
-        <input matInput [type]="hide ? 'password' : 'text'"
-               [(ngModel)]="tecnico.senha" name="senha" [formControl]="senha"
-               placeholder="Mínimo 3 caracteres" required>
-        <button mat-icon-button matSuffix (click)="hide = !hide" type="button"
-                [attr.aria-label]="'Alternar visibilidade'" [attr.aria-pressed]="hide">
-          <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-        <mat-error *ngIf="senha.invalid">A senha deve ter no mínimo 3 caracteres</mat-error>
-      </mat-form-field>
 
       <!-- ── Ações ── -->
       <div class="dialog-actions">
-        <button mat-stroked-button color="warn" class="btn-cancel"
-                (click)="onNoClick()" type="button">
-          <mat-icon>cancel</mat-icon>
+        <button class="btn-cancel" (click)="onNoClick()" type="button">
+          <mat-icon>close</mat-icon>
           Cancelar
         </button>
-        <button mat-flat-button color="primary" class="btn-save"
-                (click)="create()" [disabled]="!validaCampos()" type="button">
+        <button class="btn-save" (click)="create()" [disabled]="!validaCampos()" type="button">
           <mat-icon>how_to_reg</mat-icon>
           Cadastrar Técnico
         </button>

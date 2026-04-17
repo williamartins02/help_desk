@@ -129,6 +129,11 @@
     flex: 0 1 auto;
 }
 
+/* Bordas temáticas por tipo de hint */
+.hero-hint-item:has(.hint-blue)   { border-color: rgba(100,181,246,.55); }
+.hero-hint-item:has(.hint-purple) { border-color: rgba(206,147,216,.55); }
+.hero-hint-item:has(.hint-green)  { border-color: rgba(165,214,167,.55); }
+
 .hero-hint-item:hover {
     background: rgba(255,255,255,.25);
     box-shadow: 0 4px 12px rgba(0,0,0,.18);
@@ -317,19 +322,19 @@
 .kpi-ativos .kpi-icon-wrap { background: rgba(105,240,174,.25); }
 .kpi-ativos .kpi-icon-wrap mat-icon { color: #a5d6a7; }
 .kpi-ativos .kpi-label { color: #a5d6a7; }
-.kpi-ativos { border-color: rgba(105,240,174,.25); }
+.kpi-ativos { border-color: rgba(105,240,174,.6); }
 
 /* Variante: Inativos */
 .kpi-inativos .kpi-icon-wrap { background: rgba(255,205,210,.2); }
 .kpi-inativos .kpi-icon-wrap mat-icon { color: #ffcdd2; }
 .kpi-inativos .kpi-label { color: #ffcdd2; }
-.kpi-inativos { border-color: rgba(255,205,210,.25); }
+.kpi-inativos { border-color: rgba(255,138,128,.6); }
 
 /* Variante: Novos este mês */
 .kpi-novos .kpi-icon-wrap { background: rgba(255,255,255,.2); }
 .kpi-novos .kpi-icon-wrap mat-icon { color: rgba(255,255,255,.9); }
 .kpi-novos .kpi-label { color: rgba(255,255,255,.75); }
-.kpi-novos { border-color: rgba(255,255,255,.2); }
+.kpi-novos { border-color: rgba(144,202,249,.6); }
 
 .hero-stats {
     min-width: 290px;
@@ -337,7 +342,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: var(--sp-2);
     flex-shrink: 0;
-    align-self: flex-start;
+    align-self: center;
 }
 
 /* ══════════════════════════════════════════════════════════════

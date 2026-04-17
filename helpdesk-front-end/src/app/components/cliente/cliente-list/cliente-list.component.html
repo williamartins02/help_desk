@@ -13,14 +13,46 @@
                 Visualize, filtre e administre os clientes cadastrados de forma rápida,
                 mantendo o padrão visual moderno e organizado do sistema.
             </p>
+
+            <div class="hero-meta" *ngIf="CLIENTE_DATA.length > 0">
+                <span class="meta-label">Visão geral da base</span>
+
+                <div class="hero-status-footer">
+                    <div class="hero-urgency">
+                        <span class="meta-label urgency-label">
+                            <mat-icon class="urgency-icon">shield</mat-icon>
+                            Status geral
+                        </span>
+                        <div class="all-good">
+                            <mat-icon>check_circle</mat-icon>
+                            Base de clientes atualizada e organizada
+                        </div>
+                    </div>
+
+                    <div class="hero-kpis">
+                        <span class="kpi-pill kpi-total" matTooltip="Total de clientes registrados">
+                            <mat-icon>group</mat-icon>
+                            {{ totalClientes }} cadastrado(s)
+                        </span>
+                        <span class="kpi-pill kpi-filter"
+                              [class.kpi-active]="hasActiveFilter"
+                              matTooltip="Resultados exibidos na listagem">
+                            <mat-icon>{{ hasActiveFilter ? 'filter_alt' : 'people_outline' }}</mat-icon>
+                            {{ hasActiveFilter ? (filteredCount + ' filtrado(s)') : 'Todos exibidos' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
 
+
+        <!-- ── Stats ── -->
         <div class="hero-stats">
             <div class="stat-card stat-total">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">group</mat-icon>
                 </div>
-                <span>Total cadastrados</span>
+                <span>Total</span>
                 <strong>{{ totalClientes }}</strong>
             </div>
 
@@ -33,8 +65,19 @@
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'people_outline' }}</mat-icon>
                 </div>
-                <span>{{ hasActiveFilter ? 'Filtrados' : 'Resultados exibidos' }}</span>
+                <span>{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
                 <strong>{{ filteredCount }}</strong>
+            </div>
+
+            <div class="stat-card stat-refresh"
+                 matTooltip="Clique para atualizar a lista"
+                 (click)="manualRefresh()"
+                 style="cursor: pointer;">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon" [class.is-spinning]="isLoading">refresh</mat-icon>
+                </div>
+                <span>Atualizado às</span>
+                <strong class="last-refresh-text">{{ lastRefreshedLabel || '—' }}</strong>
             </div>
         </div>
     </section>
@@ -220,3 +263,4 @@
         </div>
     </section>
 </div>
+

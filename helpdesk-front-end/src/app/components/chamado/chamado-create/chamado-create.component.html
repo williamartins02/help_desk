@@ -1,137 +1,181 @@
 <div class="dialog-wrapper">
-  <!-- ── Cabeçalho gradiente ── -->
-  <div class="dialog-header">
-    <span class="page-badge">
-      <mat-icon>support_agent</mat-icon>
-      Novo chamado
-    </span>
 
-    <div class="header-content">
-      <div class="header-brand">
-        <div class="header-icon-badge">
-          <mat-icon class="header-icon">add_task</mat-icon>
-        </div>
-        <div class="header-text">
-          <h2>Criar Chamado</h2>
-          <p class="header-subtitle">Preencha os dados para abrir um atendimento</p>
-        </div>
+  <!-- ── Cabeçalho ── -->
+  <div class="dialog-header">
+    <!-- Círculos decorativos -->
+    <div class="dh-circle dh-circle-1"></div>
+    <div class="dh-circle dh-circle-2"></div>
+
+    <div class="dh-top">
+      <span class="page-badge">
+        <mat-icon>support_agent</mat-icon>
+        Novo chamado
+      </span>
+      <span class="dh-step">Passo 1 de 1</span>
+    </div>
+
+    <div class="header-brand">
+      <div class="header-icon-badge">
+        <mat-icon class="header-icon">add_task</mat-icon>
       </div>
+      <div class="header-text">
+        <h2>Criar Chamado</h2>
+        <p class="header-subtitle">Preencha os dados para abrir um novo atendimento técnico</p>
+      </div>
+    </div>
+
+    <!-- Info chips -->
+    <div class="dh-chips">
+      <span class="dh-chip"><mat-icon>bolt</mat-icon>Abertura imediata</span>
+      <span class="dh-chip"><mat-icon>lock_open</mat-icon>Status: Aberto</span>
+      <span class="dh-chip"><mat-icon>notifications_active</mat-icon>Equipe notificada</span>
     </div>
   </div>
 
-  <!-- ── Corpo — card lift sobre o header ── -->
+  <!-- ── Corpo ── -->
   <div class="dialog-body">
     <form class="main-form" (ngSubmit)="create()">
 
-      <!-- Seção: Dados do chamado -->
-      <div class="section-header">
-        <mat-icon class="section-icon">assignment</mat-icon>
-        <span>Dados do chamado</span>
+      <!-- ══ Seção 1: Identificação ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <mat-icon>assignment</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Identificação</span>
+            <span class="section-sub">Dados principais do chamado</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Título (span 2) -->
+          <mat-form-field class="field field-wide" appearance="outline">
+            <mat-label>Título do chamado</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">title</mat-icon>
+            <input matInput placeholder="Ex.: Trocar teclado"
+                   [(ngModel)]="chamado.titulo" name="titulo"
+                   [formControl]="titulo" required />
+            <mat-hint>Descreva o problema em poucas palavras</mat-hint>
+            <mat-error *ngIf="titulo.invalid">Título é obrigatório</mat-error>
+          </mat-form-field>
+
+          <!-- Status -->
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">toggle_on</mat-icon>
+            <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status">
+              <mat-option value="0">ABERTO</mat-option>
+            </mat-select>
+            <mat-error *ngIf="status.invalid">Selecione um status</mat-error>
+          </mat-form-field>
+
+          <!-- Prioridade -->
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>Prioridade</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">flag</mat-icon>
+            <mat-select [(ngModel)]="chamado.prioridade" name="prioridade" [formControl]="prioridade" required>
+              <mat-option value="">NENHUMA</mat-option>
+              <mat-option value="0">BAIXA</mat-option>
+              <mat-option value="1">MÉDIA</mat-option>
+              <mat-option value="2">ALTA</mat-option>
+              <mat-option value="3">CRÍTICA</mat-option>
+            </mat-select>
+            <mat-error *ngIf="prioridade.invalid">Selecione uma prioridade</mat-error>
+          </mat-form-field>
+
+          <!-- Classificação -->
+          <mat-form-field class="field" appearance="outline">
+            <mat-label>Classificação</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">category</mat-icon>
+            <mat-select [(ngModel)]="chamado.classificacao" name="classificacao" [formControl]="classificacao" required>
+              <mat-option value="">NENHUMA</mat-option>
+              <mat-option value="0">HARDWARE</mat-option>
+              <mat-option value="1">SOFTWARE</mat-option>
+              <mat-option value="2">REDES</mat-option>
+              <mat-option value="3">BANCO DE DADOS</mat-option>
+            </mat-select>
+            <mat-error *ngIf="classificacao.invalid">Selecione uma classificação</mat-error>
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="form-grid">
-        <!-- Título (largura total) -->
-        <mat-form-field class="field field-wide" appearance="outline">
-          <mat-label>Título do chamado</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">title</mat-icon>
-          <input matInput placeholder="Ex.: Trocar teclado"
-                 [(ngModel)]="chamado.titulo" name="titulo"
-                 [formControl]="titulo" required />
-          <mat-error *ngIf="titulo.invalid">Título é obrigatório</mat-error>
-        </mat-form-field>
+      <!-- ══ Seção 2: Atribuição ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap section-icon-green">
+            <mat-icon>people_alt</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Atribuição</span>
+            <span class="section-sub">Responsável e cliente vinculado</span>
+          </div>
+        </div>
 
-        <!-- Status | Prioridade -->
-        <mat-form-field class="field" appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">toggle_on</mat-icon>
-          <mat-select [(ngModel)]="chamado.status" name="status" [formControl]="status">
-            <mat-option value="0">ABERTO</mat-option>
-          </mat-select>
-          <mat-error *ngIf="status.invalid">Selecione um status</mat-error>
-        </mat-form-field>
+        <div class="form-grid">
+          <!-- Técnico (Admin: select | Técnico: bloqueado) -->
+          <mat-form-field class="field" appearance="outline" *ngIf="isAdmin">
+            <mat-label>Técnico responsável</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
+            <mat-select [(ngModel)]="chamado.tecnico" name="tecnico" [formControl]="tecnico" required>
+              <mat-option value="">NENHUM</mat-option>
+              <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="tecnico.invalid">Selecione um técnico</mat-error>
+          </mat-form-field>
 
-        <mat-form-field class="field" appearance="outline">
-          <mat-label>Prioridade</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">flag</mat-icon>
-          <mat-select [(ngModel)]="chamado.prioridade" name="prioridade" [formControl]="prioridade" required>
-            <mat-option value="">NENHUMA</mat-option>
-            <mat-option value="0">BAIXA</mat-option>
-            <mat-option value="1">MÉDIA</mat-option>
-            <mat-option value="2">ALTA</mat-option>
-            <mat-option value="3">CRÍTICA</mat-option>
-          </mat-select>
-          <mat-error *ngIf="prioridade.invalid">Selecione uma prioridade</mat-error>
-        </mat-form-field>
+          <mat-form-field class="field" appearance="outline" *ngIf="!isAdmin">
+            <mat-label>Técnico responsável</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
+            <input matInput [value]="tecnicoLogadoNome" disabled />
+            <mat-icon matSuffix class="field-locked-icon">lock</mat-icon>
+            <mat-hint>Atribuído automaticamente ao técnico logado</mat-hint>
+          </mat-form-field>
 
-        <!-- Classificação | Técnico -->
-        <mat-form-field class="field" appearance="outline">
-          <mat-label>Classificação</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">category</mat-icon>
-          <mat-select [(ngModel)]="chamado.classificacao" name="classificacao" [formControl]="classificacao" required>
-            <mat-option value="">NENHUMA</mat-option>
-            <mat-option value="0">HARDWARE</mat-option>
-            <mat-option value="1">SOFTWARE</mat-option>
-            <mat-option value="2">REDES</mat-option>
-            <mat-option value="3">BANCO DE DADOS</mat-option>
-          </mat-select>
-          <mat-error *ngIf="classificacao.invalid">Selecione uma classificação</mat-error>
-        </mat-form-field>
-
-        <!-- Técnico responsável — Admin: select livre | Técnico: bloqueado no próprio nome -->
-        <mat-form-field class="field" appearance="outline" *ngIf="isAdmin">
-          <mat-label>Técnico responsável</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
-          <mat-select [(ngModel)]="chamado.tecnico" name="tecnico" [formControl]="tecnico" required>
-            <mat-option value="">NENHUM</mat-option>
-            <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="tecnico.invalid">Selecione um técnico</mat-error>
-        </mat-form-field>
-
-        <mat-form-field class="field" appearance="outline" *ngIf="!isAdmin">
-          <mat-label>Técnico responsável</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
-          <input matInput [value]="tecnicoLogadoNome" disabled />
-          <mat-icon matSuffix class="field-locked-icon">lock</mat-icon>
-          <mat-hint>Atribuído automaticamente ao técnico logado</mat-hint>
-        </mat-form-field>
-
-        <!-- Cliente (largura total) -->
-        <mat-form-field class="field field-wide" appearance="outline">
-          <mat-label>Cliente</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
-          <mat-select [(ngModel)]="chamado.cliente" name="cliente" [formControl]="cliente" required>
-            <mat-option value="">NENHUM</mat-option>
-            <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="cliente.invalid">Selecione um cliente</mat-error>
-        </mat-form-field>
+          <!-- Cliente (span 2 se admin, senão span 1) -->
+          <mat-form-field class="field" [class.field-wide]="!isAdmin" appearance="outline">
+            <mat-label>Cliente</mat-label>
+            <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
+            <mat-select [(ngModel)]="chamado.cliente" name="cliente" [formControl]="cliente" required>
+              <mat-option value="">NENHUM</mat-option>
+              <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="cliente.invalid">Selecione um cliente</mat-error>
+          </mat-form-field>
+        </div>
       </div>
 
-      <!-- Seção: Observações -->
-      <div class="section-header">
-        <mat-icon class="section-icon">notes</mat-icon>
-        <span>Observações</span>
-      </div>
+      <!-- ══ Seção 3: Observações ══ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap section-icon-amber">
+            <mat-icon>notes</mat-icon>
+          </div>
+          <div>
+            <span class="section-title">Observações</span>
+            <span class="section-sub">Detalhe o problema para agilizar o atendimento</span>
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="field-full">
-        <mat-label>Descreva o problema</mat-label>
-        <mat-icon matPrefix class="field-prefix-icon">description</mat-icon>
-        <textarea matInput
-                  [(ngModel)]="chamado.observacoes" name="observacoes"
-                  [formControl]="observacoes" required
-                  class="observacoes"
-                  placeholder="Ex.: Trocar bateria de notebook..."></textarea>
-        <mat-error *ngIf="observacoes.invalid">Observações são obrigatórias</mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Descreva o problema</mat-label>
+          <mat-icon matPrefix class="field-prefix-icon">description</mat-icon>
+          <textarea matInput
+                    [(ngModel)]="chamado.observacoes" name="observacoes"
+                    [formControl]="observacoes" required
+                    class="observacoes"
+                    placeholder="Ex.: Trocar bateria de notebook..."></textarea>
+          <mat-error *ngIf="observacoes.invalid">Observações são obrigatórias</mat-error>
+        </mat-form-field>
+      </div>
 
       <!-- ── Ações ── -->
       <div class="dialog-actions">
-        <button type="button" mat-stroked-button color="warn" class="btn-cancel" (click)="onNoClick()">
-          <mat-icon>cancel</mat-icon>
+        <button type="button" class="btn-cancel" (click)="onNoClick()">
+          <mat-icon>close</mat-icon>
           Cancelar
         </button>
-        <button type="submit" mat-flat-button color="primary" class="btn-save" [disabled]="!validaCampos()">
+        <button type="submit" class="btn-save" [disabled]="!validaCampos()">
           <mat-icon>playlist_add_check</mat-icon>
           Abrir Chamado
         </button>

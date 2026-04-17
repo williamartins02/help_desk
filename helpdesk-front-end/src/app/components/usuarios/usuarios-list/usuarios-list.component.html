@@ -10,24 +10,33 @@
       <h1>Usuários do Sistema</h1>
       <p>Visualize, filtre e acompanhe todos os usuários cadastrados — técnicos, clientes e administradores.</p>
 
-      <div class="hero-pills" *ngIf="USUARIO_DATA.length > 0">
-        <span class="pill pill-admin">
-          <mat-icon>admin_panel_settings</mat-icon>
-          {{ totalAdmin }} admin{{ totalAdmin !== 1 ? 's' : '' }}
-        </span>
-        <span class="pill pill-tecnico">
-          <mat-icon>engineering</mat-icon>
-          {{ totalTecnico }} técnico{{ totalTecnico !== 1 ? 's' : '' }}
-        </span>
-        <span class="pill pill-cliente">
-          <mat-icon>person</mat-icon>
-          {{ totalCliente }} cliente{{ totalCliente !== 1 ? 's' : '' }}
-        </span>
+      <div class="hero-meta" *ngIf="USUARIO_DATA.length > 0">
+        <div class="hero-status-footer">
+          <span class="meta-label">Distribuição por perfil</span>
+          <div class="hero-kpis">
+            <span class="kpi-pill kpi-total">
+              <mat-icon>groups</mat-icon>
+              {{ USUARIO_DATA.length }} total
+            </span>
+            <span class="kpi-pill kpi-admin">
+              <mat-icon>admin_panel_settings</mat-icon>
+              {{ totalAdmin }} admin{{ totalAdmin !== 1 ? 's' : '' }}
+            </span>
+            <span class="kpi-pill kpi-tecnico">
+              <mat-icon>engineering</mat-icon>
+              {{ totalTecnico }} técnico{{ totalTecnico !== 1 ? 's' : '' }}
+            </span>
+            <span class="kpi-pill kpi-cliente">
+              <mat-icon>person</mat-icon>
+              {{ totalCliente }} cliente{{ totalCliente !== 1 ? 's' : '' }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="hero-stats">
-      <div class="stat-card stat-all">
+      <div class="stat-card stat-total">
         <div class="stat-icon-wrap"><mat-icon class="stat-icon">groups</mat-icon></div>
         <span>Total cadastrados</span>
         <strong>{{ USUARIO_DATA.length }}</strong>
@@ -51,7 +60,7 @@
   </section>
 
   <!-- ══ Table Card ══════════════════════════════════════════════════════════ -->
-  <section class="content-card mat-elevation-z4">
+  <section class="content-card">
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -89,13 +98,16 @@
           </button>
         </div>
 
-        <span class="result-chip" *ngIf="!isLoading">
-          <mat-icon>filter_list</mat-icon>
+        <span class="result-chip" [class.active]="hasFilters" *ngIf="!isLoading">
+          <mat-icon>{{ hasFilters ? 'filter_alt' : 'filter_list' }}</mat-icon>
           {{ dataSource.filteredData.length }} resultado(s)
         </span>
 
-        <button mat-icon-button class="btn-refresh" (click)="findAll()" matTooltip="Recarregar lista">
-          <mat-icon>refresh</mat-icon>
+        <button mat-icon-button class="refresh-btn"
+                (click)="findAll()"
+                [disabled]="isLoading"
+                matTooltip="Recarregar lista">
+          <mat-icon [class.is-spinning]="isLoading">refresh</mat-icon>
         </button>
       </div>
     </div>
@@ -107,32 +119,31 @@
         <p>Acompanhe perfis, tipos e datas de cadastro em tempo real.</p>
       </div>
       <span *ngIf="hasFilters" class="filter-indicator">
-        <mat-icon>filter_list</mat-icon>
+        <mat-icon>filter_alt</mat-icon>
         {{ dataSource.filteredData.length }} resultado(s) filtrado(s)
       </span>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="isLoading" class="loading-state">
-      <mat-spinner diameter="44"></mat-spinner>
-      <span>Carregando usuários...</span>
-    </div>
+    <!-- Table Wrapper -->
+    <div class="table-wrapper">
 
-    <!-- Table -->
-    <div class="table-wrapper" *ngIf="!isLoading">
+      <!-- Loading overlay -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <mat-spinner diameter="44"></mat-spinner>
+        <span>Carregando usuários...</span>
+      </div>
+
       <mat-table [dataSource]="dataSource" matSort class="usuarios-table">
 
         <!-- Avatar -->
         <ng-container matColumnDef="avatar">
           <mat-header-cell *matHeaderCellDef class="col-avatar"></mat-header-cell>
           <mat-cell *matCellDef="let u" class="col-avatar">
-            <!-- Foto de perfil real (técnicos que têm foto cadastrada) -->
             <img *ngIf="u.fotoPerfil"
                  [src]="u.fotoPerfil"
                  [alt]="u.nome"
                  class="user-avatar-img"
                  [matTooltip]="u.nome">
-            <!-- Fallback: círculo colorido com iniciais -->
             <div *ngIf="!u.fotoPerfil"
                  class="user-avatar"
                  [style.background]="getAvatarColor(u)"
@@ -229,8 +240,13 @@
 
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell no-data-row" colspan="8">
-            <mat-icon>search_off</mat-icon>
-            <span>Nenhum usuário encontrado para o filtro aplicado</span>
+            <div class="empty-state">
+              <div class="empty-icon">
+                <mat-icon>search_off</mat-icon>
+              </div>
+              <h3>Nenhum usuário encontrado</h3>
+              <p>Nenhum usuário correspondente ao filtro aplicado. Tente ajustar os critérios de busca.</p>
+            </div>
           </td>
         </tr>
 

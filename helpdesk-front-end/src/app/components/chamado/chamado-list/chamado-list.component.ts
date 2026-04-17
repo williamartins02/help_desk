@@ -94,6 +94,14 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   highlightId: string | null = null;
   isNew: boolean = false;
   hideNewBadge = false;
+  lastUpdated: Date = new Date();
+
+  get lastUpdatedLabel(): string {
+    const diff = Math.floor((Date.now() - this.lastUpdated.getTime()) / 1000);
+    if (diff < 60) return `Atualizado há ${diff}s`;
+    if (diff < 3600) return `Atualizado há ${Math.floor(diff / 60)}min`;
+    return `Atualizado há ${Math.floor(diff / 3600)}h`;
+  }
 
   /* ── Chamado row tooltip ──────────────────────────────── */
   hoveredChamado: Chamado | null = null;
@@ -193,6 +201,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   findAllByTecnico(): void {
     this.service.findMyChamados().subscribe((resposta) => {
       this.CHAMADO_DATA = resposta;
+      this.lastUpdated = new Date();
       this.initSlaCountdowns();
       this.applyAllFilters();
       this.updateDoughnutChart();
@@ -258,6 +267,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   findAll(): void {
     this.service.findAll().subscribe((resposta) => {
       this.CHAMADO_DATA = resposta;
+      this.lastUpdated = new Date();
       this.initSlaCountdowns();
       this.applyAllFilters();
       this.updateDoughnutChart();
@@ -578,6 +588,54 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isHighlightedNew(id: any): boolean {
     return String(id) === String(this.highlightId) && this.isNew && !this.hideNewBadge;
+  }
+
+  /** Returns initials (up to 2 chars) from a full name */
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  /** Returns relative time label from a date string "dd/MM/yyyy - HH:mm" */
+  getRelativeTime(dateStr: string): string {
+    if (!dateStr) return '—';
+    const d = this.parseDatetime(dateStr);
+    if (!d) return dateStr;
+    const diff = Date.now() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'agora';
+    if (mins < 60) return `há ${mins}min`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `há ${hrs}h`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `há ${days}d`;
+    const months = Math.floor(days / 30);
+    return `há ${months}m`;
+  }
+
+  getPrioridadeIcon(prioridade: any): string {
+    if (prioridade == '0') return 'arrow_downward';
+    if (prioridade == '1') return 'remove';
+    if (prioridade == '2') return 'arrow_upward';
+    return 'priority_high';
+  }
+
+  getStatusIcon(status: any): string {
+    if (status == '0') return 'inbox';
+    if (status == '1') return 'pending_actions';
+    return 'check_circle';
+  }
+
+  manualRefresh(): void {
+    this.isLoading = true;
+    if (this.usuarioLogado && this.usuarioLogado.tipo === 'TECNICO') {
+      this.findAllByTecnico();
+    } else {
+      this.findAll();
+    }
+    setTimeout(() => { this.isLoading = false; }, 900);
   }
 
   /* ── Chamado tooltip (click no título) ───────────────────── */
