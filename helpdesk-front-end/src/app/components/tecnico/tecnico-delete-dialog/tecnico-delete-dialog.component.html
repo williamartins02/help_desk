@@ -51,6 +51,12 @@
       <h2>{{ tecnico.nome }}</h2>
       <span class="header-email">{{ tecnico.email }}</span>
     </div>
+    <div class="header-meta" *ngIf="modoTransferenciaApenas && hasPendentes">
+      <div class="header-kpi">
+        <span class="hkpi-num">{{ chamadosPendentes.length }}</span>
+        <span class="hkpi-label">pendente{{ chamadosPendentes.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
     <button mat-icon-button class="close-btn" (click)="cancel()" matTooltip="Fechar">
       <mat-icon>close</mat-icon>
     </button>

@@ -147,36 +147,32 @@
 
         <!-- ══ Toolbar de filtros e ações ══ -->
         <div class="toolbar">
-            <div class="search-area">
-                <mat-form-field class="search-field" appearance="outline">
-                    <mat-label>Buscar técnico</mat-label>
-                    <mat-icon matPrefix>search</mat-icon>
-                    <input
-                        #searchInput
-                        matInput
-                        [value]="searchTerm"
-                        (keyup)="applyFilter($event)"
-                        placeholder="Pesquise por ID, nome, CPF ou e-mail"
-                    >
-                    <button
-                            *ngIf="searchTerm"
-                            type="button"
-                            mat-icon-button
-                            matSuffix
-                            aria-label="Limpar busca"
-                            (click)="clearFilter(searchInput)"
-                    >
-                        <mat-icon>close</mat-icon>
-                    </button>
-                </mat-form-field>
+            <mat-form-field class="search-field" appearance="outline">
+                <mat-label>Buscar técnico</mat-label>
+                <mat-icon matPrefix>search</mat-icon>
+                <input
+                    #searchInput
+                    matInput
+                    [value]="searchTerm"
+                    (keyup)="applyFilter($event)"
+                    placeholder="Pesquise por ID, nome, CPF ou e-mail"
+                >
+                <button
+                        *ngIf="searchTerm"
+                        type="button"
+                        mat-icon-button
+                        matSuffix
+                        aria-label="Limpar busca"
+                        (click)="clearFilter(searchInput)"
+                >
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
 
-                <div class="toolbar-meta">
-                    <span class="result-chip" [class.active]="hasActiveFilter">
-                        <mat-icon>{{ hasActiveFilter ? 'filter_alt' : 'groups' }}</mat-icon>
-                        {{ hasActiveFilter ? (filteredCount + ' resultado(s) encontrado(s)') : 'Visualizando todos os técnicos' }}
-                    </span>
-                </div>
-            </div>
+            <span class="result-chip" [class.active]="hasActiveFilter">
+                <mat-icon>{{ hasActiveFilter ? 'filter_alt' : 'groups' }}</mat-icon>
+                {{ hasActiveFilter ? (filteredCount + ' resultado(s)') : 'Todos os técnicos' }}
+            </span>
 
             <div class="toolbar-actions">
                 <button

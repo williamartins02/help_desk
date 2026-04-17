@@ -281,13 +281,15 @@
   grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   gap: 1rem;
   align-items: stretch;
+  position: relative;
+  overflow: visible;
 }
 
 .stat-card {
   padding: 1.35rem 1.4rem 1.2rem;
   border-radius: 20px;
   border: none;
-  transition: box-shadow .22s, transform .22s;
+  transition: box-shadow .22s, transform .22s cubic-bezier(.4,0,.2,1), filter .22s, z-index 0s;
   cursor: default;
   position: relative;
   overflow: hidden;
@@ -297,6 +299,7 @@
   min-height: 130px;
   min-width: 0;
   word-break: break-word;
+  z-index: 0;
 }
 /* Círculo decorativo no canto direito */
 .stat-card::after {
@@ -319,7 +322,23 @@
 }
 
 .stat-card[mattooltip] { cursor: pointer; }
-.stat-card:hover { transform: translateY(-5px); }
+.stat-card:hover {
+  transform: translateY(-7px) scale(1.025);
+  filter: brightness(1.06);
+  z-index: 2;
+}
+
+/* Estado ativo (clicado) — igual ao stat-filter-active do modal */
+.stat-card.stat-kpi-active {
+  transform: translateY(-7px) scale(1.025);
+  filter: brightness(1.08);
+  z-index: 3;
+  outline: 2.5px solid rgba(255,255,255,0.55);
+  outline-offset: 2px;
+}
+.stat-card.stat-kpi-active.stat-aberto   { box-shadow: 0 20px 44px rgba(2,119,189,.60); }
+.stat-card.stat-kpi-active.stat-andamento { box-shadow: 0 20px 44px rgba(230,81,0,.60); }
+.stat-card.stat-kpi-active.stat-encerrado { box-shadow: 0 20px 44px rgba(27,94,32,.60); }
 
 /* Topo do card: ícone à esquerda */
 .stat-card-top {
@@ -366,28 +385,28 @@
   background: linear-gradient(135deg, #1a237e 0%, #1565c0 100%);
   box-shadow: 0 8px 24px rgba(26,35,126,.38);
 }
-.stat-card.stat-total:hover { box-shadow: 0 16px 36px rgba(26,35,126,.48); }
+.stat-card.stat-total:hover { box-shadow: 0 20px 44px rgba(26,35,126,.55); }
 
 /* Variante: Abertos — céu azul */
 .stat-card.stat-aberto {
   background: linear-gradient(135deg, #0277bd 0%, #29b6f6 100%);
   box-shadow: 0 8px 24px rgba(2,119,189,.35);
 }
-.stat-card.stat-aberto:hover { box-shadow: 0 16px 36px rgba(2,119,189,.45); }
+.stat-card.stat-aberto:hover { box-shadow: 0 20px 44px rgba(2,119,189,.52); }
 
 /* Variante: Em Andamento — âmbar/laranja */
 .stat-card.stat-andamento {
   background: linear-gradient(135deg, #e65100 0%, #ffa726 100%);
   box-shadow: 0 8px 24px rgba(230,81,0,.32);
 }
-.stat-card.stat-andamento:hover { box-shadow: 0 16px 36px rgba(230,81,0,.42); }
+.stat-card.stat-andamento:hover { box-shadow: 0 20px 44px rgba(230,81,0,.50); }
 
 /* Variante: Encerrados — esmeralda */
 .stat-card.stat-encerrado {
   background: linear-gradient(135deg, #1b5e20 0%, #43a047 100%);
   box-shadow: 0 8px 24px rgba(27,94,32,.32);
 }
-.stat-card.stat-encerrado:hover { box-shadow: 0 16px 36px rgba(27,94,32,.42); }
+.stat-card.stat-encerrado:hover { box-shadow: 0 20px 44px rgba(27,94,32,.50); }
 
 /* Card do gráfico — fundo azul, borda branca */
 .stat-card.stat-chart {

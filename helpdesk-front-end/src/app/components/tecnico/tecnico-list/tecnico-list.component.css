@@ -674,7 +674,7 @@
     flex-wrap: wrap;
     background: #f8fafd;
     border-bottom: 1px solid #edf1f7;
-    padding: .75rem 1.25rem;
+    padding: .65rem 1.25rem;
     margin-bottom: 0;
 }
 
@@ -683,7 +683,8 @@
 }
 
 .search-field {
-    width: 100%;
+    flex: 1 1 340px;
+    min-width: 200px;
 }
 
 .toolbar-meta {
@@ -698,12 +699,14 @@
     display: inline-flex;
     align-items: center;
     gap: var(--sp-2);
-    padding: var(--sp-2) var(--sp-4);
+    padding: 0.3rem var(--sp-4);
     border-radius: var(--radius-pill);
     background: #eef6ff;
     color: #1565c0;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .result-chip.active {
@@ -712,9 +715,9 @@
 }
 
 .result-chip mat-icon {
-    width: 1rem;
-    height: 1rem;
-    font-size: 1rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.9rem;
 }
 
 .add-button {
@@ -752,6 +755,16 @@
 /* Suprime padding de erro dos form-fields na toolbar */
 .toolbar .mat-form-field-wrapper { padding-bottom: 0 !important; }
 .toolbar .mat-form-field-subscript-wrapper { display: none !important; }
+.toolbar .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+.toolbar .mat-mdc-text-field-wrapper { padding-bottom: 0 !important; }
+
+/* ── Toolbar actions ──────────────────────────────────────── */
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
 
 .table-caption {
     color: #90a4ae;
@@ -1052,13 +1065,6 @@ tr.inactive-row:hover { background: rgba(198,40,40,.04) !important; box-shadow: 
     }
 }
 
-/* ── Toolbar actions ──────────────────────────────────────── */
-.toolbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-}
 
 /* ── Sticky table header ──────────────────────────────────── */
 .professional-table .mat-header-row {

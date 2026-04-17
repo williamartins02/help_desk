@@ -50,7 +50,10 @@
       </div>
     </div>
 
-    <div class="stat-card stat-aberto" (click)="onStatusFilterChange('0')" matTooltip="Filtrar por Abertos">
+    <div class="stat-card stat-aberto"
+         [class.stat-kpi-active]="selectedStatus === '0'"
+         (click)="onStatusFilterChange(selectedStatus === '0' ? '' : '0')"
+         matTooltip="Filtrar por Abertos">
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">inbox</mat-icon>
@@ -62,7 +65,10 @@
       </div>
     </div>
 
-    <div class="stat-card stat-andamento" (click)="onStatusFilterChange('1')" matTooltip="Filtrar por Em Andamento">
+    <div class="stat-card stat-andamento"
+         [class.stat-kpi-active]="selectedStatus === '1'"
+         (click)="onStatusFilterChange(selectedStatus === '1' ? '' : '1')"
+         matTooltip="Filtrar por Em Andamento">
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">pending_actions</mat-icon>
@@ -74,7 +80,10 @@
       </div>
     </div>
 
-    <div class="stat-card stat-encerrado" (click)="onStatusFilterChange('2')" matTooltip="Filtrar por Encerrados">
+    <div class="stat-card stat-encerrado"
+         [class.stat-kpi-active]="selectedStatus === '2'"
+         (click)="onStatusFilterChange(selectedStatus === '2' ? '' : '2')"
+         matTooltip="Filtrar por Encerrados">
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">task_alt</mat-icon>

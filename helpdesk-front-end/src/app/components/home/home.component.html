@@ -1,21 +1,26 @@
 <section class="home-wrapper">
 
-  <!-- ── Hero Header (padrão Dashboard) ──────────────────────── -->
+  <!-- ══ HERO HEADER ════════════════════════════════════════════════════ -->
   <div class="home-hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
     <div class="hero-left">
       <div class="hero-icon-ring">
-        <mat-icon>home</mat-icon>
+        <mat-icon>dashboard</mat-icon>
       </div>
-      <div>
+      <div class="hero-text-block">
+        <span class="hero-badge">
+          <mat-icon>home</mat-icon>
+          Dashboard
+        </span>
         <h1 class="hero-title">
-          Bem-vindo(a), <span class="hero-name">{{ nomeUsuario }}</span>!
+          Bem‑vindo(a), <span class="hero-name">{{ nomeUsuario }}</span>!
         </h1>
         <p class="hero-sub">Aqui está um resumo das últimas atualizações do sistema.</p>
       </div>
     </div>
 
-
-    <!-- Ações -->
     <div class="hero-actions-right">
       <button class="hero-ranking-btn"
               *appShowForRoles="['ROLE_ADMIN']"
@@ -28,59 +33,71 @@
     </div>
   </div>
 
-  <!-- ── KPI cards (full-width row) ────────────────────────── -->
+  <!-- ══ KPI CARDS ══════════════════════════════════════════════════════ -->
   <div class="kpi-row" *ngIf="!isLoading; else kpiLoading">
+
     <div class="kpi-card kpi-blue">
-      <div class="kpi-top">
-        <mat-icon>assignment</mat-icon>
+      <div class="kpi-deco"></div>
+      <div class="kpi-deco kpi-deco-2"></div>
+      <div class="kpi-icon-wrap"><mat-icon>assignment</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-num">{{ totalAbertos }}</span>
         <span class="kpi-lbl">Chamados Abertos</span>
       </div>
-      <span class="kpi-num">{{ totalAbertos }}</span>
     </div>
 
     <div class="kpi-card kpi-orange">
-      <div class="kpi-top">
-        <mat-icon>settings</mat-icon>
+      <div class="kpi-deco"></div>
+      <div class="kpi-deco kpi-deco-2"></div>
+      <div class="kpi-icon-wrap"><mat-icon>pending_actions</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-num">{{ totalEmAndamento }}</span>
         <span class="kpi-lbl">Em Andamento</span>
       </div>
-      <span class="kpi-num">{{ totalEmAndamento }}</span>
     </div>
 
     <div class="kpi-card kpi-red">
-      <div class="kpi-top">
-        <mat-icon>warning</mat-icon>
+      <div class="kpi-deco"></div>
+      <div class="kpi-deco kpi-deco-2"></div>
+      <div class="kpi-icon-wrap"><mat-icon>warning_amber</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-num">{{ totalCriticos }}</span>
         <span class="kpi-lbl">Críticos</span>
       </div>
-      <span class="kpi-num">{{ totalCriticos }}</span>
     </div>
 
     <div class="kpi-card kpi-green">
-      <div class="kpi-top">
-        <mat-icon>check_circle</mat-icon>
+      <div class="kpi-deco"></div>
+      <div class="kpi-deco kpi-deco-2"></div>
+      <div class="kpi-icon-wrap"><mat-icon>task_alt</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-num">{{ totalEncerrados }}</span>
         <span class="kpi-lbl">Encerrados</span>
       </div>
-      <span class="kpi-num">{{ totalEncerrados }}</span>
     </div>
+
   </div>
 
   <ng-template #kpiLoading>
     <div class="kpi-row">
-      <div class="kpi-card kpi-blue kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
+      <div class="kpi-card kpi-blue  kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
       <div class="kpi-card kpi-orange kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
-      <div class="kpi-card kpi-red kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
+      <div class="kpi-card kpi-red   kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
       <div class="kpi-card kpi-green kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
     </div>
   </ng-template>
 
-  <!-- ── Dashboard card (activities + chart) ───────────────── -->
+  <!-- ══ DASHBOARD CARD ════════════════════════════════════════════════ -->
   <div class="dashboard-card">
 
     <!-- LEFT: Recent activities -->
     <div class="panel-left">
       <div class="panel-act-header">
-        <h3 class="panel-title">Atividades Recentes</h3>
+        <div class="panel-title-wrap">
+          <div class="panel-title-icon"><mat-icon>bolt</mat-icon></div>
+          <h3 class="panel-title">Atividades Recentes</h3>
+        </div>
         <div class="act-header-right">
-          <!-- Indicador de sincronização silenciosa -->
           <span class="act-sync-label" *ngIf="isRefreshing">
             <mat-icon class="act-sync-icon spin">sync</mat-icon> atualizando…
           </span>
@@ -88,11 +105,8 @@
             <mat-icon class="act-sync-icon">check_circle</mat-icon>
             {{ ultimaAtualizacao | date:'HH:mm:ss' }}
           </span>
-          <!-- Botão de refresh manual -->
-          <button class="act-refresh-btn"
-                  [class.spinning]="isRefreshing"
-                  (click)="loadDados(false)"
-                  title="Atualizar agora">
+          <button class="act-refresh-btn" [class.spinning]="isRefreshing"
+                  (click)="loadDados(false)" title="Atualizar agora">
             <mat-icon>refresh</mat-icon>
           </button>
         </div>
@@ -109,13 +123,12 @@
 
       <div class="act-list" *ngIf="!isLoading && atividadesRecentes.length > 0">
         <div class="act-item" *ngFor="let item of atividadesRecentes">
-          <!-- Colored circle icon -->
           <div class="act-icon-circle" [style.background]="item.iconColor + '20'" [style.color]="item.iconColor">
             <mat-icon>{{ item.icon }}</mat-icon>
           </div>
           <div class="act-body">
             <span class="act-label">{{ item.acaoLabel }}</span>
-            <span class="act-sub">{{ item.detalhe }}<span *ngIf="item.tempo">&nbsp;&bull;&nbsp;{{ item.tempo }}</span></span>
+            <span class="act-sub">{{ item.detalhe }}<span *ngIf="item.tempo">&nbsp;·&nbsp;{{ item.tempo }}</span></span>
           </div>
         </div>
       </div>
@@ -127,7 +140,10 @@
     <!-- RIGHT: Bar chart -->
     <div class="panel-right">
       <div class="chart-header">
-        <h3 class="panel-title">Gráfico de Chamados</h3>
+        <div class="panel-title-wrap">
+          <div class="panel-title-icon panel-title-icon-purple"><mat-icon>bar_chart</mat-icon></div>
+          <h3 class="panel-title">Gráfico de Chamados</h3>
+        </div>
         <div class="period-btns">
           <button class="period-btn" [class.active]="periodo === 7"  (click)="setPeriodo(7)">7 Dias</button>
           <button class="period-btn" [class.active]="periodo === 30" (click)="setPeriodo(30)">30 Dias</button>
@@ -144,12 +160,12 @@
 
   </div>
 
-  <!-- ── Avisos Importantes ─────────────────────────────────── -->
+  <!-- ══ BOTTOM ROW ═════════════════════════════════════════════════════ -->
   <div class="bottom-row">
 
     <div class="avisos-card">
       <div class="avisos-header">
-        <mat-icon class="avisos-title-icon">notifications_active</mat-icon>
+        <div class="avisos-icon-wrap"><mat-icon>notifications_active</mat-icon></div>
         <h3>Avisos Importantes</h3>
       </div>
       <ul class="avisos-list">
@@ -160,19 +176,21 @@
       </ul>
     </div>
 
-    <div class="mini-card">
+    <div class="mini-card mini-card-pending">
+      <div class="mini-deco"></div>
       <div class="mini-card-header">
-        <mat-icon style="color:#1976d2">group</mat-icon>
-        <span>Chamados Pendentes</span>
+        <mat-icon>hourglass_bottom</mat-icon>
+        <span>Pendentes</span>
       </div>
       <span class="mini-num">{{ totalAbertos + totalEmAndamento }}</span>
       <span class="mini-sub">Abertos + Em andamento</span>
     </div>
 
-    <div class="mini-card">
+    <div class="mini-card mini-card-rate">
+      <div class="mini-deco"></div>
       <div class="mini-card-header">
-        <mat-icon style="color:#43a047">trending_up</mat-icon>
-        <span>Taxa de Resolução</span>
+        <mat-icon>trending_up</mat-icon>
+        <span>Resolução</span>
       </div>
       <span class="mini-num">{{ resolucaoPercent }}%</span>
       <span class="mini-sub">Do total de chamados</span>
