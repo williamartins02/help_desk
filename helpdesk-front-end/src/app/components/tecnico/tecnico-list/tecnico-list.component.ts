@@ -26,6 +26,8 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoading = false;
   searchTerm = '';
   roleFilter: number[] = [];
+  /** ID do técnico cujos chamados pendentes estão sendo verificados (pré-check de inativação) */
+  checkingId: number | null = null;
 
   TECNICO_DATA: Tecnico[] = [];
   displayedColumns: string[] = ['foto', 'id', 'nome', 'cpf', 'email', 'perfis', 'acoes'];
@@ -193,10 +195,38 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     })
   }
 
-  delete(id: number): void {
-    const tecnicoSelecionado = this.TECNICO_DATA.find((tecnico) => tecnico.id == id);
+  /**
+   * Verifica chamados pendentes ANTES de abrir o modal de inativação.
+   * Se houver chamados em aberto/andamento, bloqueia a inativação com aviso.
+   */
+  inativarComValidacao(id: number): void {
+    const tecnicoSelecionado = this.TECNICO_DATA.find(t => t.id == id);
     if (!tecnicoSelecionado) return;
 
+    this.checkingId = id;
+    this.service.getChamadosPendentes(id).subscribe({
+      next: (pendentes) => {
+        this.checkingId = null;
+        if (pendentes.length > 0) {
+          this.toast.warning(
+            `<strong>${tecnicoSelecionado.nome}</strong> possui <strong>${pendentes.length}</strong> chamado(s) em aberto / andamento.<br>
+             Transfira-os antes de inativar ou use o botão <strong>Redistribuir chamados</strong>.`,
+            'Inativação bloqueada',
+            { enableHtml: true, timeOut: 7000, progressBar: true }
+          );
+        } else {
+          this.openDialogInativacao(tecnicoSelecionado);
+        }
+      },
+      error: () => {
+        this.checkingId = null;
+        this.toast.error('Erro ao verificar chamados pendentes', 'Erro');
+      }
+    });
+  }
+
+  /** Abre o modal de confirmação de inativação (somente quando não há chamados pendentes). */
+  private openDialogInativacao(tecnicoSelecionado: Tecnico): void {
     const dialogRef = this.dialog.open(TecnicoDeleteDialogComponent, {
       width: '720px',
       maxWidth: '96vw',
@@ -210,13 +240,38 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.success) {
-        this.toast.success(
-          'Técnico inativado com sucesso',
-          tecnicoSelecionado.nome ?? 'Técnico'
-        );
+        this.toast.success('Técnico inativado com sucesso', tecnicoSelecionado.nome ?? 'Técnico');
         this.findAll();
       }
     });
+  }
+
+  /** Abre o modal de redistribuição de chamados diretamente (sem fluxo de inativação). */
+  abrirTransferencia(id: number): void {
+    const tecnicoSelecionado = this.TECNICO_DATA.find(t => t.id == id);
+    if (!tecnicoSelecionado) return;
+
+    const dialogRef = this.dialog.open(TecnicoDeleteDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      disableClose: true,
+      panelClass: 'no-padding-dialog',
+      data: {
+        tecnico: tecnicoSelecionado,
+        todosTecnicos: this.TECNICO_DATA,
+        modoApenas: 'transferencia'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      // Atualiza a lista para refletir possíveis reatribuições
+      this.findAll();
+    });
+  }
+
+  /** @deprecated Use inativarComValidacao() — mantido para compatibilidade interna */
+  delete(id: number): void {
+    this.inativarComValidacao(id);
   }
 
   reativar(id: number): void {
@@ -227,6 +282,7 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
       width: '500px',
       maxWidth: '96vw',
       disableClose: true,
+      panelClass: 'dialog-no-padding',
       data: { tecnico: tecnicoSelecionado }
     });
 

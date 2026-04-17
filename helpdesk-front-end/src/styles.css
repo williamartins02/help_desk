@@ -170,6 +170,19 @@ table {
   height: 100% !important;
 }
 
+/* Dialog sem padding para reativar técnico */
+.dialog-no-padding .mat-dialog-container,
+.dialog-no-padding .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  background: #f8fafc !important;
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Ranking dialog panel */
 .ranking-dialog-panel .mat-dialog-container,
 .ranking-dialog-panel .mat-mdc-dialog-surface {

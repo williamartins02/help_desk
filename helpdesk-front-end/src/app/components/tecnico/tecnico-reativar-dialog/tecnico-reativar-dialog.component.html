@@ -1,41 +1,59 @@
 <div class="dialog-container">
+
+  <!-- ══════════ HEADER ══════════ -->
   <div class="dialog-header">
-    <div class="header-icon-wrap"><mat-icon>person_check</mat-icon></div>
-    <div class="header-text">
-      <h2>Reativar Técnico</h2>
-      <p>{{ tecnico.nome }}</p>
+    <div class="header-avatar">
+      <img *ngIf="tecnico.fotoPerfil" [src]="tecnico.fotoPerfil" [alt]="tecnico.nome" class="header-avatar-img">
+      <div *ngIf="!tecnico.fotoPerfil" class="header-avatar-fallback">
+        <mat-icon>person</mat-icon>
+      </div>
     </div>
-    <button mat-icon-button class="close-btn" (click)="cancel()" matTooltip="Cancelar">
+    <div class="header-text">
+      <div class="header-label"><mat-icon>person_check</mat-icon> Reativar Técnico</div>
+      <h2>{{ tecnico.nome }}</h2>
+      <span class="header-email">{{ tecnico.email }}</span>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()" matTooltip="Fechar">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
+  <!-- ══════════ BODY ══════════ -->
   <div class="dialog-body">
-    <div class="avatar-wrap" *ngIf="tecnico.fotoPerfil">
-      <img [src]="tecnico.fotoPerfil" [alt]="tecnico.nome" class="avatar-img" />
-    </div>
-    <div class="info-banner info-green">
-      <mat-icon>check_circle</mat-icon>
-      <div>
+
+    <!-- Status card -->
+    <div class="status-card">
+      <div class="status-icon-wrap">
+        <mat-icon>verified_user</mat-icon>
+      </div>
+      <div class="status-info">
         <strong>Confirmar reativação</strong>
-        <span>
-          O técnico <strong>{{ tecnico.nome }}</strong> será reativado no sistema,
-          voltando a aparecer nas listas ativas e podendo receber novos chamados.
-        </span>
+        <span>O técnico voltará a aparecer nas listas ativas e poderá receber novos chamados.</span>
       </div>
     </div>
-    <p class="confirm-text">
-      O histórico de chamados encerrados permanece intacto e visível normalmente.
-    </p>
+
+    <!-- Consequence list -->
+    <div class="consequence-list">
+      <p class="consequence-title"><mat-icon>info_outline</mat-icon> O que acontece após a reativação:</p>
+      <ul>
+        <li><mat-icon>check_circle</mat-icon> Técnico adicionado de volta às listas ativas</li>
+        <li><mat-icon>check_circle</mat-icon> Poderá receber novos chamados normalmente</li>
+        <li><mat-icon>check_circle</mat-icon> Acesso ao sistema será restaurado</li>
+        <li><mat-icon>history</mat-icon> Histórico de chamados encerrados preservado</li>
+      </ul>
+    </div>
+
   </div>
 
+  <!-- ══════════ FOOTER ══════════ -->
   <div class="dialog-footer">
     <button mat-stroked-button class="cancel-btn" (click)="cancel()">
       <mat-icon>close</mat-icon> Cancelar
     </button>
-    <button mat-raised-button class="confirm-btn" (click)="confirm()">
+    <button mat-flat-button class="confirm-btn" (click)="confirm()">
       <mat-icon>person_check</mat-icon> Confirmar Reativação
     </button>
   </div>
+
 </div>
 

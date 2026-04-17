@@ -33,6 +33,8 @@ export interface RecebimentoRecord {
 export interface TecnicoDeleteDialogData {
   tecnico: Tecnico;
   todosTecnicos: Tecnico[];
+  /** Se 'transferencia', o modal age somente como painel de redistribuição, sem inativar */
+  modoApenas?: 'transferencia';
 }
 
 /** Fases da dialog */
@@ -142,6 +144,9 @@ export class TecnicoDeleteDialogComponent implements OnInit {
 
   get tecnico(): Tecnico { return this.data.tecnico; }
 
+  /** true quando o modal foi aberto apenas para redistribuição (sem inativar) */
+  get modoTransferenciaApenas(): boolean { return this.data.modoApenas === 'transferencia'; }
+
   get hasPendentes(): boolean { return this.chamadosPendentes.length > 0; }
 
   get chamadosTransferidos(): number { return this.totalInicial - this.chamadosPendentes.length; }
@@ -202,9 +207,9 @@ export class TecnicoDeleteDialogComponent implements OnInit {
           // mantém apenas IDs ainda pendentes selecionados
           const idsRestantes = new Set(pendentes.map(c => c.id));
           this.selectedChamadosIds = new Set([...this.selectedChamadosIds].filter(id => idsRestantes.has(id)));
-          // se zerou → fase confirmação
+          // se zerou → em modo transfer-only apenas fecha; caso contrário vai para confirmação
           if (pendentes.length === 0) {
-            this.fase = 'confirmacao-inativacao';
+            this.fase = this.modoTransferenciaApenas ? 'sem-pendentes' : 'confirmacao-inativacao';
           }
         }
         this.isLoading = false;

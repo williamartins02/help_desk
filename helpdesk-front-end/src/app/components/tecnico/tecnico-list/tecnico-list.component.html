@@ -1,115 +1,123 @@
 <div class="container">
 
-  <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
-  <section class="hero-panel">
-    <div class="hero-left">
-      <div class="hero-icon-ring">
-        <mat-icon>engineering</mat-icon>
-      </div>
-      <div class="hero-content">
+    <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
+    <section class="hero-panel">
+        <div class="hero-left">
+            <div class="hero-icon-ring">
+                <mat-icon>engineering</mat-icon>
+            </div>
+            <div class="hero-content">
         <span class="page-badge">
           <mat-icon>engineering</mat-icon>
           Equipe técnica
         </span>
-        <h1>Gestão de Técnicos</h1>
-        <p>Visualize, filtre e administre os profissionais cadastrados de forma rápida,
-          mantendo o padrão visual moderno e organizado do sistema.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══ 2. KPI CARDS ════════════════════════════════════════════════════ -->
-  <div class="kpi-section">
-
-    <div class="stat-card stat-kpi-total" matTooltip="Total de técnicos registrados no sistema">
-      <div class="stat-card-top">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">engineering</mat-icon></div>
-      </div>
-      <div class="stat-card-bottom">
-        <span>Total</span>
-        <strong>{{ totalTecnicos }}</strong>
-      </div>
-    </div>
-
-    <div class="stat-card stat-kpi-ativos"
-         [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
-      <div class="stat-card-top">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">check_circle</mat-icon></div>
-      </div>
-      <div class="stat-card-bottom">
-        <span>Ativos</span>
-        <strong>{{ countAtivos }}</strong>
-      </div>
-    </div>
-
-    <div class="stat-card stat-kpi-inativos"
-         [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
-      <div class="stat-card-top">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person_off</mat-icon></div>
-      </div>
-      <div class="stat-card-bottom">
-        <span>Inativos</span>
-        <strong>{{ countInativos }}</strong>
-      </div>
-    </div>
-
-    <div class="stat-card stat-kpi-novos"
-         [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
-      <div class="stat-card-top">
-        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person_add</mat-icon></div>
-      </div>
-      <div class="stat-card-bottom">
-        <span>Novos ({{ mesAtual }})</span>
-        <strong>{{ countNovosMes }}</strong>
-      </div>
-    </div>
-
-    <div class="stat-card"
-         [class.stat-kpi-filtrados]="hasActiveFilter"
-         [class.stat-kpi-exibidos]="!hasActiveFilter"
-         [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
-         (click)="hasActiveFilter ? clearFilter(searchInput) : null"
-         [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
-      <div class="stat-card-top">
-        <div class="stat-icon-wrap">
-          <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+                <h1>Gestão de Técnicos</h1>
+                <p>Visualize, filtre e administre os profissionais cadastrados de forma rápida,
+                    mantendo o padrão visual moderno e organizado do sistema.</p>
+            </div>
         </div>
-      </div>
-      <div class="stat-card-bottom">
-        <span>{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
-        <strong>{{ filteredCount }}</strong>
-      </div>
+    </section>
+
+    <!-- ══ 2. KPI CARDS ════════════════════════════════════════════════════ -->
+    <div class="kpi-section">
+
+        <div class="stat-card stat-kpi-total" matTooltip="Total de técnicos registrados no sistema">
+            <div class="stat-card-top">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">engineering</mat-icon>
+                </div>
+            </div>
+            <div class="stat-card-bottom">
+                <span>Total</span>
+                <strong>{{ totalTecnicos }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card stat-kpi-ativos"
+             [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
+            <div class="stat-card-top">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">check_circle</mat-icon>
+                </div>
+            </div>
+            <div class="stat-card-bottom">
+                <span>Ativos</span>
+                <strong>{{ countAtivos }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card stat-kpi-inativos"
+             [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
+            <div class="stat-card-top">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">person_off</mat-icon>
+                </div>
+            </div>
+            <div class="stat-card-bottom">
+                <span>Inativos</span>
+                <strong>{{ countInativos }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card stat-kpi-novos"
+             [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
+            <div class="stat-card-top">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">person_add</mat-icon>
+                </div>
+            </div>
+            <div class="stat-card-bottom">
+                <span>Novos ({{ mesAtual }})</span>
+                <strong>{{ countNovosMes }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card"
+             [class.stat-kpi-filtrados]="hasActiveFilter"
+             [class.stat-kpi-exibidos]="!hasActiveFilter"
+             [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
+             (click)="hasActiveFilter ? clearFilter(searchInput) : null"
+             [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
+            <div class="stat-card-top">
+                <div class="stat-icon-wrap">
+                    <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+                </div>
+            </div>
+            <div class="stat-card-bottom">
+                <span>{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
+                <strong>{{ filteredCount }}</strong>
+            </div>
+        </div>
+
     </div>
 
-  </div>
+    <!-- ══ 3. ATALHOS RÁPIDOS ═══════════════════════════════════════════════ -->
+    <div class="quick-actions-bar">
+        <button class="quick-action-btn qa-blue" type="button"
+                matTooltip="Ir ao campo de busca"
+                (click)="focusSearch()">
+            <mat-icon>search</mat-icon>
+            <span>Busca inteligente</span>
+        </button>
 
-  <!-- ══ 3. ATALHOS RÁPIDOS ═══════════════════════════════════════════════ -->
-  <div class="quick-actions-bar">
-    <button class="quick-action-btn qa-blue" type="button"
-            matTooltip="Ir ao campo de busca"
-            (click)="focusSearch()">
-      <mat-icon>search</mat-icon>
-      <span>Busca inteligente</span>
-    </button>
+        <div class="qa-divider"></div>
 
-    <div class="qa-divider"></div>
+        <button class="quick-action-btn qa-purple" type="button"
+                matTooltip="Ir ao filtro por perfil"
+                (click)="scrollToFilter()">
+            <mat-icon>manage_accounts</mat-icon>
+            <span>Filtrar por perfil</span>
+        </button>
 
-    <button class="quick-action-btn qa-purple" type="button"
-            matTooltip="Ir ao filtro por perfil"
-            (click)="scrollToFilter()">
-      <mat-icon>manage_accounts</mat-icon>
-      <span>Filtrar por perfil</span>
-    </button>
+        <div class="qa-divider"></div>
 
-    <div class="qa-divider"></div>
-
-    <button class="quick-action-btn qa-green" type="button"
-            matTooltip="Ir à tabela para gerenciar contatos"
-            (click)="scrollToTable()">
-      <mat-icon>phone_iphone</mat-icon>
-      <span>Contatos vinculados</span>
-    </button>
-  </div>
+        <button class="quick-action-btn qa-green" type="button"
+                matTooltip="Ir à tabela para gerenciar contatos"
+                (click)="scrollToTable()">
+            <mat-icon>phone_iphone</mat-icon>
+            <span>Contatos vinculados</span>
+        </button>
+    </div>
 
 
     <section class="content-card">
@@ -270,9 +278,11 @@
                                         <span class="nome-com-status">
                                             {{ nomePrefix(tecnico.nome) }}<!--
                                             --><span class="nome-last-word-badge">
-                                                {{ nomeLastWord(tecnico.nome) }}<span *ngIf="tecnico.ativo !== false" class="status-badge status-ativo">
+                                                {{ nomeLastWord(tecnico.nome) }}<span *ngIf="tecnico.ativo !== false"
+                                                                                      class="status-badge status-ativo">
                                                     <mat-icon>check_circle</mat-icon>Ativo
-                                                </span><span *ngIf="tecnico.ativo === false" class="status-badge status-inativo">
+                                                </span><span *ngIf="tecnico.ativo === false"
+                                                             class="status-badge status-inativo">
                                                     <mat-icon>person_off</mat-icon>Inativo
                                                 </span>
                                             </span>
@@ -324,8 +334,7 @@
                                                 matTooltipShowDelay="400"
                                                 [attr.aria-label]="'Editar técnico ' + tecnico.nome"
                                                 [disabled]="tecnico.ativo === false"
-                                                (click)="openEdit(tecnico.id)"
-                                        >
+                                                (click)="openEdit(tecnico.id)">
                                             <mat-icon>edit</mat-icon>
                                         </button>
 
@@ -335,12 +344,28 @@
                                                 type="button"
                                                 mat-icon-button
                                                 class="action-btn delete-action"
-                                                matTooltip="Inativar técnico"
+                                                [matTooltip]="checkingId === tecnico.id ? 'Verificando chamados...' : 'Inativar técnico'"
                                                 matTooltipShowDelay="400"
                                                 [attr.aria-label]="'Inativar técnico ' + tecnico.nome"
-                                                (click)="delete(tecnico.id)"
+                                                [disabled]="checkingId === tecnico.id"
+                                                (click)="inativarComValidacao(tecnico.id)"
                                         >
-                                            <mat-icon>person_off</mat-icon>
+                                            <mat-icon *ngIf="checkingId !== tecnico.id">person_off</mat-icon>
+                                            <mat-spinner *ngIf="checkingId === tecnico.id" diameter="18"></mat-spinner>
+                                        </button>
+
+                                        <!-- Redistribuir chamados (apenas para técnicos ativos) -->
+                                        <button
+                                                *ngIf="tecnico.ativo !== false"
+                                                type="button"
+                                                mat-icon-button
+                                                class="action-btn transfer-action"
+                                                matTooltip="Redistribuir chamados"
+                                                matTooltipShowDelay="400"
+                                                [attr.aria-label]="'Redistribuir chamados de ' + tecnico.nome"
+                                                (click)="abrirTransferencia(tecnico.id)"
+                                        >
+                                            <mat-icon>swap_horiz</mat-icon>
                                         </button>
 
                                         <!-- Reativar (apenas para técnicos inativos) -->
@@ -405,7 +430,8 @@
                             }}
                         </p>
 
-                        <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(searchInput)">
+                        <button *ngIf="hasActiveFilter" mat-stroked-button color="primary"
+                                (click)="clearFilter(searchInput)">
                             <mat-icon>restart_alt</mat-icon>
                             Limpar filtros
                         </button>

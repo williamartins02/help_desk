@@ -44,7 +44,10 @@
       </div>
     </div>
     <div class="header-text">
-      <div class="header-label"><mat-icon>person_off</mat-icon> Inativar Técnico</div>
+      <div class="header-label">
+        <mat-icon>{{ modoTransferenciaApenas ? 'swap_horiz' : 'person_off' }}</mat-icon>
+        {{ modoTransferenciaApenas ? 'Redistribuir Chamados' : 'Inativar Técnico' }}
+      </div>
       <h2>{{ tecnico.nome }}</h2>
       <span class="header-email">{{ tecnico.email }}</span>
     </div>
@@ -64,22 +67,37 @@
 
   <!-- ══════════ FASE: SEM PENDENTES ══════════ -->
   <div class="dialog-body" *ngIf="!isLoading && fase === 'sem-pendentes'">
-    <div class="status-card status-ok">
-      <div class="status-icon-wrap"><mat-icon>verified</mat-icon></div>
-      <div class="status-info">
-        <strong>Pronto para inativar</strong>
-        <span>Este técnico não possui chamados em aberto ou andamento.</span>
+
+    <!-- Modo transfer-only: nenhum chamado para redistribuir -->
+    <ng-container *ngIf="modoTransferenciaApenas">
+      <div class="status-card status-ok">
+        <div class="status-icon-wrap"><mat-icon>verified</mat-icon></div>
+        <div class="status-info">
+          <strong>Nenhum chamado pendente</strong>
+          <span>{{ tecnico.nome }} não possui chamados em aberto ou andamento para redistribuir.</span>
+        </div>
       </div>
-    </div>
-    <div class="consequence-list">
-      <p class="consequence-title"><mat-icon>info_outline</mat-icon> O que acontece após a inativação:</p>
-      <ul>
-        <li><mat-icon>check_circle</mat-icon> Técnico removido de todas as listas ativas</li>
-        <li><mat-icon>check_circle</mat-icon> Não poderá receber novos chamados</li>
-        <li><mat-icon>check_circle</mat-icon> Acesso ao sistema será bloqueado</li>
-        <li><mat-icon>history</mat-icon> Histórico de chamados encerrados preservado</li>
-      </ul>
-    </div>
+    </ng-container>
+
+    <!-- Modo inativação: pronto para inativar -->
+    <ng-container *ngIf="!modoTransferenciaApenas">
+      <div class="status-card status-ok">
+        <div class="status-icon-wrap"><mat-icon>verified</mat-icon></div>
+        <div class="status-info">
+          <strong>Pronto para inativar</strong>
+          <span>Este técnico não possui chamados em aberto ou andamento.</span>
+        </div>
+      </div>
+      <div class="consequence-list">
+        <p class="consequence-title"><mat-icon>info_outline</mat-icon> O que acontece após a inativação:</p>
+        <ul>
+          <li><mat-icon>check_circle</mat-icon> Técnico removido de todas as listas ativas</li>
+          <li><mat-icon>check_circle</mat-icon> Não poderá receber novos chamados</li>
+          <li><mat-icon>check_circle</mat-icon> Acesso ao sistema será bloqueado</li>
+          <li><mat-icon>history</mat-icon> Histórico de chamados encerrados preservado</li>
+        </ul>
+      </div>
+    </ng-container>
   </div>
 
   <!-- ══════════ FASE: CONFIRMAÇÃO DE INATIVAÇÃO ══════════ -->
@@ -106,8 +124,8 @@
   <!-- ══════════ FASE: TRANSFERÊNCIA ══════════ -->
   <div class="dialog-body" *ngIf="!isLoading && fase === 'transferencia'">
 
-    <!-- ── Indicador de etapas ── -->
-    <div class="steps-bar">
+    <!-- ── Indicador de etapas (somente no modo inativação) ── -->
+    <div class="steps-bar" *ngIf="!modoTransferenciaApenas">
       <div class="step step-active">
         <div class="step-circle"><mat-icon>swap_horiz</mat-icon></div>
         <div class="step-label">
@@ -574,8 +592,8 @@
   <!-- ══════════ FOOTER ══════════ -->
   <div class="dialog-footer" *ngIf="!isLoading">
 
-    <!-- Fase: sem pendentes -->
-    <ng-container *ngIf="fase === 'sem-pendentes'">
+    <!-- Fase: sem pendentes (modo inativação) -->
+    <ng-container *ngIf="fase === 'sem-pendentes' && !modoTransferenciaApenas">
       <button mat-stroked-button class="cancel-btn" (click)="cancel()" [disabled]="isSubmitting">
         <mat-icon>close</mat-icon> Cancelar
       </button>
@@ -586,8 +604,15 @@
       </button>
     </ng-container>
 
-    <!-- Fase: confirmação de inativação -->
-    <ng-container *ngIf="fase === 'confirmacao-inativacao'">
+    <!-- Fase: sem pendentes (modo transfer-only — apenas fechar) -->
+    <ng-container *ngIf="fase === 'sem-pendentes' && modoTransferenciaApenas">
+      <button mat-flat-button color="primary" class="confirm-btn" (click)="cancel()">
+        <mat-icon>check</mat-icon> Fechar
+      </button>
+    </ng-container>
+
+    <!-- Fase: confirmação de inativação (somente em modo inativação) -->
+    <ng-container *ngIf="fase === 'confirmacao-inativacao' && !modoTransferenciaApenas">
       <button mat-stroked-button class="cancel-btn" (click)="cancel()" [disabled]="isSubmitting">
         <mat-icon>close</mat-icon> Não agora
       </button>
@@ -596,6 +621,13 @@
         <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
         <ng-container *ngIf="!isSubmitting"><mat-icon>person_off</mat-icon> Sim, Inativar</ng-container>
         <span *ngIf="isSubmitting">Processando...</span>
+      </button>
+    </ng-container>
+
+    <!-- Fase: confirmação de inativação (modo transfer-only — todos transferidos, só fechar) -->
+    <ng-container *ngIf="fase === 'confirmacao-inativacao' && modoTransferenciaApenas">
+      <button mat-flat-button color="primary" class="confirm-btn confirm-btn-success" (click)="cancel()">
+        <mat-icon>check_circle</mat-icon> Redistribuição concluída — Fechar
       </button>
     </ng-container>
 
