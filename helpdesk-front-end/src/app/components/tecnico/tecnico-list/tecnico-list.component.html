@@ -1,188 +1,150 @@
 <div class="container">
-    <section class="hero-panel">
-        <div class="hero-content">
-            <span class="page-badge">
-                <mat-icon>engineering</mat-icon>
-                Equipe técnica
-            </span>
 
-            <h1>Gestão de Técnicos</h1>
-            <p>
-                Visualize, filtre e administre os profissionais cadastrados de forma rápida,
-                mantendo o padrão visual moderno e organizado do sistema.
-            </p>
+  <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
+  <section class="hero-panel">
+    <div class="hero-left">
+      <div class="hero-icon-ring">
+        <mat-icon>engineering</mat-icon>
+      </div>
+      <div class="hero-content">
+        <span class="page-badge">
+          <mat-icon>engineering</mat-icon>
+          Equipe técnica
+        </span>
+        <h1>Gestão de Técnicos</h1>
+        <p>Visualize, filtre e administre os profissionais cadastrados de forma rápida,
+          mantendo o padrão visual moderno e organizado do sistema.</p>
+      </div>
+    </div>
+  </section>
 
-            <!-- ── Guia rápido — atalhos funcionais ── -->
-            <div class="hero-hints">
-                <div class="hero-hint-item"
-                     role="button" tabindex="0"
-                     matTooltip="Clique para ir ao campo de busca"
-                     (click)="focusSearch()"
-                     (keydown.enter)="focusSearch()">
-                    <div class="hint-icon-wrap hint-blue">
-                        <mat-icon>search</mat-icon>
-                    </div>
-                    <div class="hint-text">
-                        <strong>Busca inteligente</strong>
-                        <span>Pesquise por ID, nome, CPF ou e-mail em tempo real</span>
-                    </div>
-                    <mat-icon class="hint-arrow">chevron_right</mat-icon>
+  <!-- ══ 2. KPI CARDS ════════════════════════════════════════════════════ -->
+  <div class="kpi-section">
+
+    <div class="stat-card stat-kpi-total" matTooltip="Total de técnicos registrados no sistema">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">engineering</mat-icon></div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Total</span>
+        <strong>{{ totalTecnicos }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-kpi-ativos"
+         [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">check_circle</mat-icon></div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Ativos</span>
+        <strong>{{ countAtivos }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-kpi-inativos"
+         [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person_off</mat-icon></div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Inativos</span>
+        <strong>{{ countInativos }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-kpi-novos"
+         [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap"><mat-icon class="stat-icon">person_add</mat-icon></div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>Novos ({{ mesAtual }})</span>
+        <strong>{{ countNovosMes }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card"
+         [class.stat-kpi-filtrados]="hasActiveFilter"
+         [class.stat-kpi-exibidos]="!hasActiveFilter"
+         [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
+         (click)="hasActiveFilter ? clearFilter(searchInput) : null"
+         [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+        </div>
+      </div>
+      <div class="stat-card-bottom">
+        <span>{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
+        <strong>{{ filteredCount }}</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ 3. ATALHOS RÁPIDOS ═══════════════════════════════════════════════ -->
+  <div class="quick-actions-bar">
+    <button class="quick-action-btn qa-blue" type="button"
+            matTooltip="Ir ao campo de busca"
+            (click)="focusSearch()">
+      <mat-icon>search</mat-icon>
+      <span>Busca inteligente</span>
+    </button>
+
+    <div class="qa-divider"></div>
+
+    <button class="quick-action-btn qa-purple" type="button"
+            matTooltip="Ir ao filtro por perfil"
+            (click)="scrollToFilter()">
+      <mat-icon>manage_accounts</mat-icon>
+      <span>Filtrar por perfil</span>
+    </button>
+
+    <div class="qa-divider"></div>
+
+    <button class="quick-action-btn qa-green" type="button"
+            matTooltip="Ir à tabela para gerenciar contatos"
+            (click)="scrollToTable()">
+      <mat-icon>phone_iphone</mat-icon>
+      <span>Contatos vinculados</span>
+    </button>
+  </div>
+
+
+    <section class="content-card">
+
+        <!-- ══ Cabeçalho do card ══ -->
+        <div class="card-header-bar">
+            <div class="card-header-left">
+                <div class="card-header-icon">
+                    <mat-icon>group</mat-icon>
                 </div>
-
-                <div class="hero-hint-item"
-                     role="button" tabindex="0"
-                     matTooltip="Clique para ir aos filtros de perfil"
-                     (click)="scrollToFilter()"
-                     (keydown.enter)="scrollToFilter()">
-                    <div class="hint-icon-wrap hint-purple">
-                        <mat-icon>manage_accounts</mat-icon>
-                    </div>
-                    <div class="hint-text">
-                        <strong>Filtro por perfil</strong>
-                        <span>Segmente rapidamente por Admin, Cliente ou Técnico</span>
-                    </div>
-                    <mat-icon class="hint-arrow">chevron_right</mat-icon>
-                </div>
-
-                <div class="hero-hint-item"
-                     role="button" tabindex="0"
-                     matTooltip="Clique para ir à tabela de técnicos"
-                     (click)="scrollToTable()"
-                     (keydown.enter)="scrollToTable()">
-                    <div class="hint-icon-wrap hint-green">
-                        <mat-icon>phone_iphone</mat-icon>
-                    </div>
-                    <div class="hint-text">
-                        <strong>Contatos vinculados</strong>
-                        <span>Clique no ícone verde de cada linha para gerenciar telefones</span>
-                    </div>
-                    <mat-icon class="hint-arrow">chevron_right</mat-icon>
+                <div>
+                    <h2 class="card-header-title">Lista de Técnicos</h2>
+                    <span class="card-header-sub">Acompanhe registros, atualize cadastros e gerencie contatos</span>
                 </div>
             </div>
-
-            <!-- ── KPI cards ── -->
-            <div class="team-kpi-bar" *ngIf="!isLoading && totalTecnicos > 0">
-
-                <div class="team-kpi-card kpi-ativos"
-                     [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
-                    <div class="kpi-icon-wrap">
-                        <mat-icon>check_circle</mat-icon>
-                    </div>
-                    <div class="kpi-info">
-                        <div class="kpi-top">
-                            <strong>{{ countAtivos }}</strong>
-                            <span class="kpi-pct kpi-pct-green">{{ ativosPct }}%</span>
-                        </div>
-                        <span class="kpi-label">Ativos</span>
-                        <div class="kpi-track">
-                            <div class="kpi-fill kpi-fill-green" [style.width.%]="ativosPct"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-kpi-card kpi-inativos"
-                     [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
-                    <div class="kpi-icon-wrap">
-                        <mat-icon>person_off</mat-icon>
-                    </div>
-                    <div class="kpi-info">
-                        <div class="kpi-top">
-                            <strong>{{ countInativos }}</strong>
-                            <span class="kpi-pct kpi-pct-red">{{ inativosPct }}%</span>
-                        </div>
-                        <span class="kpi-label">Inativos</span>
-                        <div class="kpi-track">
-                            <div class="kpi-fill kpi-fill-red" [style.width.%]="inativosPct"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-kpi-card kpi-novos"
-                     [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
-                    <div class="kpi-icon-wrap">
-                        <mat-icon>person_add</mat-icon>
-                    </div>
-                    <div class="kpi-info">
-                        <div class="kpi-top">
-                            <strong>{{ countNovosMes }}</strong>
-                        </div>
-                        <span class="kpi-label">Novos este mês</span>
-                        <span class="kpi-sublabel">{{ mesAtual }}</span>
-                    </div>
-                </div>
-
+            <div class="card-header-right">
+                <span class="total-badge">
+                    <mat-icon>engineering</mat-icon>
+                    {{ totalTecnicos }} técnico(s)
+                </span>
+                <span *ngIf="hasActiveFilter" class="filter-indicator">
+                    <mat-icon>filter_list</mat-icon>
+                    {{ filteredCount }} filtrado(s)
+                </span>
             </div>
         </div>
 
-        <div class="hero-stats">
-
-            <!-- Card: Total cadastrados -->
-            <div class="stat-card stat-total"
-                 matTooltip="Total de técnicos registrados no sistema">
-                <div class="stat-card-header">
-                    <div class="stat-icon-wrap">
-                        <mat-icon class="stat-icon">engineering</mat-icon>
-                    </div>
-                    <span class="stat-label">Total cadastrados</span>
-                </div>
-                <strong class="stat-value">{{ totalTecnicos }}</strong>
-                <div class="stat-sub-row">
-                    <span class="stat-sub stat-sub-green">
-                        <mat-icon>check_circle</mat-icon>
-                        {{ countAtivos }} ativo(s)
-                    </span>
-                    <span class="stat-sub stat-sub-red" *ngIf="countInativos > 0">
-                        <mat-icon>person_off</mat-icon>
-                        {{ countInativos }} inativo(s)
-                    </span>
-                </div>
-                <div class="stat-track">
-                    <div class="stat-fill" [style.width.%]="ativosPct"
-                         [matTooltip]="ativosPct + '% ativos'"></div>
-                </div>
-            </div>
-
-            <!-- Card: Resultados / Filtro ativo -->
-            <div class="stat-card"
-                 [class.stat-filter-active]="hasActiveFilter"
-                 [class.stat-filter]="!hasActiveFilter"
-                 [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
-                 (click)="hasActiveFilter ? clearFilter(input) : null"
-                 [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
-                <div class="stat-card-header">
-                    <div class="stat-icon-wrap">
-                        <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
-                    </div>
-                    <span class="stat-label">{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
-                </div>
-                <strong class="stat-value">{{ filteredCount }}</strong>
-                <div class="stat-sub-row">
-                    <span class="stat-sub stat-sub-white" *ngIf="hasActiveFilter">
-                        <mat-icon>close</mat-icon>
-                        Limpar filtro
-                    </span>
-                    <span class="stat-sub stat-sub-white" *ngIf="!hasActiveFilter">
-                        <mat-icon>done_all</mat-icon>
-                        Todos visíveis
-                    </span>
-                </div>
-                <div class="stat-track stat-track-white">
-                    <div class="stat-fill stat-fill-white"
-                         [style.width.%]="totalTecnicos > 0 ? (filteredCount / totalTecnicos) * 100 : 0"></div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="content-card mat-elevation-z8">
+        <!-- ══ Toolbar de filtros e ações ══ -->
         <div class="toolbar">
             <div class="search-area">
                 <mat-form-field class="search-field" appearance="outline">
                     <mat-label>Buscar técnico</mat-label>
                     <mat-icon matPrefix>search</mat-icon>
                     <input
-                        #input
+                        #searchInput
                         matInput
                         [value]="searchTerm"
                         (keyup)="applyFilter($event)"
@@ -194,7 +156,7 @@
                             mat-icon-button
                             matSuffix
                             aria-label="Limpar busca"
-                            (click)="clearFilter(input)"
+                            (click)="clearFilter(searchInput)"
                     >
                         <mat-icon>close</mat-icon>
                     </button>
@@ -260,7 +222,7 @@
             </button>
 
             <button *ngIf="hasRoleFilter" type="button" class="role-chip-clear"
-                    (click)="clearFilter(input)"
+                    (click)="clearFilter(searchInput)"
                     matTooltip="Limpar filtro de perfil">
                 <mat-icon>close</mat-icon>
                 Limpar
@@ -268,15 +230,6 @@
         </div>
 
         <div class="table-section">
-            <div class="table-header">
-                <div>
-                    <h2>Lista de técnicos</h2>
-                    <p>Acompanhe os registros, atualize cadastros e acesse os telefones vinculados.</p>
-                </div>
-
-                <span class="table-caption">{{ totalTecnicos }} profissional(is) registrado(s)</span>
-            </div>
-
             <div class="table-wrapper">
                 <div *ngIf="isLoading" class="loading-overlay">
                     <mat-spinner diameter="48"></mat-spinner>
@@ -315,10 +268,8 @@
                                 <td mat-cell *matCellDef="let tecnico">
                                     <div class="main-cell">
                                         <span class="nome-com-status">
-                                            <!-- Prefix: todas as palavras EXCETO a última (podem quebrar normalmente) -->
                                             {{ nomePrefix(tecnico.nome) }}<!--
-                                            --><!-- Última palavra + badge: white-space:nowrap — sempre ficam juntos -->
-                                            <span class="nome-last-word-badge">
+                                            --><span class="nome-last-word-badge">
                                                 {{ nomeLastWord(tecnico.nome) }}<span *ngIf="tecnico.ativo !== false" class="status-badge status-ativo">
                                                     <mat-icon>check_circle</mat-icon>Ativo
                                                 </span><span *ngIf="tecnico.ativo === false" class="status-badge status-inativo">
@@ -454,7 +405,7 @@
                             }}
                         </p>
 
-                        <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(input)">
+                        <button *ngIf="hasActiveFilter" mat-stroked-button color="primary" (click)="clearFilter(searchInput)">
                             <mat-icon>restart_alt</mat-icon>
                             Limpar filtros
                         </button>
@@ -512,3 +463,4 @@
         </div>
     </div>
 </div>
+
