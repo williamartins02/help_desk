@@ -123,74 +123,76 @@
     </div>
   </ng-template>
 
-  <!-- ══ DASHBOARD CARD ════════════════════════════════════════════════ -->
-  <div class="dashboard-card">
+  <!-- ══ MIDDLE ROW — dois cards separados ════════════════════════════ -->
+  <div class="middle-row">
 
-    <!-- LEFT: Recent activities -->
-    <div class="panel-left">
-      <div class="panel-act-header">
+    <!-- CARD: Atividades Recentes -->
+    <div class="panel-card panel-card-left">
+      <div class="panel-card-header panel-card-header-blue">
         <div class="panel-title-wrap">
           <div class="panel-title-icon"><mat-icon>bolt</mat-icon></div>
-          <h3 class="panel-title">Atividades Recentes</h3>
+          <h3 class="panel-title panel-title-white">Atividades Recentes</h3>
         </div>
         <div class="act-header-right">
-          <span class="act-sync-label" *ngIf="isRefreshing">
+          <span class="act-sync-label act-sync-label-white" *ngIf="isRefreshing">
             <mat-icon class="act-sync-icon spin">sync</mat-icon> atualizando…
           </span>
-          <span class="act-sync-label" *ngIf="!isRefreshing && ultimaAtualizacao">
-            <mat-icon class="act-sync-icon">check_circle</mat-icon>
+          <span class="act-sync-label act-sync-label-white" *ngIf="!isRefreshing && ultimaAtualizacao">
+            <mat-icon class="act-sync-icon act-sync-icon-white">check_circle</mat-icon>
             {{ ultimaAtualizacao | date:'HH:mm:ss' }}
           </span>
-          <button class="act-refresh-btn" [class.spinning]="isRefreshing"
+          <button class="act-refresh-btn act-refresh-btn-glass" [class.spinning]="isRefreshing"
                   (click)="loadDados(false)" title="Atualizar agora">
             <mat-icon>refresh</mat-icon>
           </button>
         </div>
       </div>
 
-      <div *ngIf="isLoading" class="act-loading">
-        <mat-spinner diameter="30"></mat-spinner>
-      </div>
+      <div class="panel-card-body">
+        <div *ngIf="isLoading" class="act-loading">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
 
-      <div *ngIf="!isLoading && atividadesRecentes.length === 0" class="act-empty">
-        <mat-icon>inbox</mat-icon>
-        <span>Sem atividades recentes</span>
-      </div>
+        <div *ngIf="!isLoading && atividadesRecentes.length === 0" class="act-empty">
+          <mat-icon>inbox</mat-icon>
+          <span>Sem atividades recentes</span>
+        </div>
 
-      <div class="act-list" *ngIf="!isLoading && atividadesRecentes.length > 0">
-        <div class="act-item" *ngFor="let item of atividadesRecentes">
-          <div class="act-icon-circle" [style.background]="item.iconColor + '20'" [style.color]="item.iconColor">
-            <mat-icon>{{ item.icon }}</mat-icon>
-          </div>
-          <div class="act-body">
-            <span class="act-label">{{ item.acaoLabel }}</span>
-            <span class="act-sub">{{ item.detalhe }}<span *ngIf="item.tempo">&nbsp;·&nbsp;{{ item.tempo }}</span></span>
+        <div class="act-list" *ngIf="!isLoading && atividadesRecentes.length > 0">
+          <div class="act-item" *ngFor="let item of atividadesRecentes">
+            <div class="act-icon-circle" [style.background]="item.iconColor + '20'" [style.color]="item.iconColor">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </div>
+            <div class="act-body">
+              <span class="act-label">{{ item.acaoLabel }}</span>
+              <span class="act-sub">{{ item.detalhe }}<span *ngIf="item.tempo">&nbsp;·&nbsp;{{ item.tempo }}</span></span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- DIVIDER -->
-    <div class="panel-divider"></div>
-
-    <!-- RIGHT: Bar chart -->
-    <div class="panel-right">
-      <div class="chart-header">
+    <!-- CARD: Gráfico de Chamados -->
+    <div class="panel-card panel-card-right">
+      <div class="panel-card-header panel-card-header-purple">
         <div class="panel-title-wrap">
           <div class="panel-title-icon panel-title-icon-purple"><mat-icon>bar_chart</mat-icon></div>
-          <h3 class="panel-title">Gráfico de Chamados</h3>
+          <h3 class="panel-title panel-title-white">Gráfico de Chamados</h3>
         </div>
-        <div class="period-btns">
+        <div class="period-btns period-btns-glass">
           <button class="period-btn" [class.active]="periodo === 7"  (click)="setPeriodo(7)">7 Dias</button>
           <button class="period-btn" [class.active]="periodo === 30" (click)="setPeriodo(30)">30 Dias</button>
         </div>
       </div>
-      <div class="chart-wrap">
-        <canvas baseChart
-                [data]="barChartData"
-                [options]="barChartOptions"
-                [type]="barChartType">
-        </canvas>
+
+      <div class="panel-card-body panel-card-body-chart">
+        <div class="chart-wrap">
+          <canvas baseChart
+                  [data]="barChartData"
+                  [options]="barChartOptions"
+                  [type]="barChartType">
+          </canvas>
+        </div>
       </div>
     </div>
 
