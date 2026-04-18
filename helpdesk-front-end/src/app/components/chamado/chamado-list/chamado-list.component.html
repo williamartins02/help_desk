@@ -2,6 +2,10 @@
 
   <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
   <section class="hero-panel">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+
     <div class="hero-left">
       <div class="hero-icon-ring">
         <mat-icon>receipt_long</mat-icon>
@@ -16,7 +20,7 @@
       </div>
     </div>
 
-    <!-- Quick stats strip — canto superior direito -->
+    <!-- Stats inline glassmorphism — mesmo padrão da tela de técnicos -->
     <div class="hero-stats-strip">
       <div class="hero-stat-item">
         <span class="hero-stat-value">{{ resolucaoPercent }}%</span>
@@ -39,14 +43,21 @@
   <div class="kpi-section">
 
     <div class="stat-card stat-total">
+      <div class="kpi-bg-icon"><mat-icon>dashboard</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">dashboard</mat-icon>
         </div>
+        <span class="kpi-trend-badge kpi-badge-neutral">
+          <mat-icon>receipt_long</mat-icon> Total
+        </span>
       </div>
-      <div class="stat-card-bottom">
-        <span>Total</span>
+      <div class="kpi-num-block">
         <strong>{{ CHAMADO_DATA.length }}</strong>
+      </div>
+      <div class="kpi-card-label">Chamados</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white" style="width:100%"></div>
       </div>
     </div>
 
@@ -54,14 +65,22 @@
          [class.stat-kpi-active]="selectedStatus === '0'"
          (click)="onStatusFilterChange(selectedStatus === '0' ? '' : '0')"
          matTooltip="Filtrar por Abertos">
+      <div class="kpi-bg-icon"><mat-icon>inbox</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">inbox</mat-icon>
         </div>
+        <span class="kpi-trend-badge kpi-badge-neutral">
+          <mat-icon>trending_flat</mat-icon> Na fila
+        </span>
       </div>
-      <div class="stat-card-bottom">
-        <span>Abertos</span>
+      <div class="kpi-num-block">
         <strong>{{ totalAbertos }}</strong>
+      </div>
+      <div class="kpi-card-label">Abertos</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="CHAMADO_DATA.length > 0 ? (totalAbertos / CHAMADO_DATA.length) * 100 : 5"></div>
       </div>
     </div>
 
@@ -69,14 +88,22 @@
          [class.stat-kpi-active]="selectedStatus === '1'"
          (click)="onStatusFilterChange(selectedStatus === '1' ? '' : '1')"
          matTooltip="Filtrar por Em Andamento">
+      <div class="kpi-bg-icon"><mat-icon>pending_actions</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">pending_actions</mat-icon>
         </div>
+        <span class="kpi-trend-badge kpi-badge-neutral">
+          <mat-icon>trending_flat</mat-icon> Em execução
+        </span>
       </div>
-      <div class="stat-card-bottom">
-        <span>Em Andamento</span>
+      <div class="kpi-num-block">
         <strong>{{ totalEmAndamento }}</strong>
+      </div>
+      <div class="kpi-card-label">Em Andamento</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="CHAMADO_DATA.length > 0 ? (totalEmAndamento / CHAMADO_DATA.length) * 100 : 5"></div>
       </div>
     </div>
 
@@ -84,14 +111,22 @@
          [class.stat-kpi-active]="selectedStatus === '2'"
          (click)="onStatusFilterChange(selectedStatus === '2' ? '' : '2')"
          matTooltip="Filtrar por Encerrados">
+      <div class="kpi-bg-icon"><mat-icon>task_alt</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">task_alt</mat-icon>
         </div>
+        <span class="kpi-trend-badge kpi-badge-success">
+          <mat-icon>trending_up</mat-icon> {{ resolucaoPercent }}%
+        </span>
       </div>
-      <div class="stat-card-bottom">
-        <span>Encerrados</span>
+      <div class="kpi-num-block">
         <strong>{{ totalEncerrados }}</strong>
+      </div>
+      <div class="kpi-card-label">Encerrados</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="resolucaoPercent || 5"></div>
       </div>
     </div>
 
@@ -121,83 +156,81 @@
   <div class="info-row" *ngIf="CHAMADO_DATA.length > 0">
 
     <!-- Card: distribuição de prioridade -->
-    <div class="info-card info-card-dist">
-      <div class="info-card-header">
-        <div class="info-card-icon-wrap">
-          <mat-icon>bar_chart</mat-icon>
-        </div>
-        <span class="info-card-title">Distribuição por Prioridade</span>
+    <div class="ic ic-dist">
+      <div class="ic-head ic-head-blue">
+        <div class="ic-head-icon"><mat-icon>bar_chart</mat-icon></div>
+        <span class="ic-head-title">Distribuição por Prioridade</span>
+        <span class="ic-head-pill">{{ totalPendentes }} pendentes</span>
       </div>
-      <ng-container *ngIf="totalPendentes > 0; else semPendentes">
-        <div class="dist-bar">
-          <span class="dist-seg seg-baixa"   [style.width.%]="totalPrioridadeBaixa   / totalPendentes * 100" [matTooltip]="totalPrioridadeBaixa + ' Baixa'"></span>
-          <span class="dist-seg seg-media"   [style.width.%]="totalPrioridadeMedia   / totalPendentes * 100" [matTooltip]="totalPrioridadeMedia + ' Média'"></span>
-          <span class="dist-seg seg-alta"    [style.width.%]="totalPrioridadeAlta    / totalPendentes * 100" [matTooltip]="totalPrioridadeAlta + ' Alta'"></span>
-          <span class="dist-seg seg-critica" [style.width.%]="totalPrioridadeCritica / totalPendentes * 100" [matTooltip]="totalPrioridadeCritica + ' Crítica'"></span>
-        </div>
-        <div class="dist-legend">
-          <span class="legend-item"><i class="dot dot-baixa"></i>Baixa <strong>{{ totalPrioridadeBaixa }}</strong></span>
-          <span class="legend-item"><i class="dot dot-media"></i>Média <strong>{{ totalPrioridadeMedia }}</strong></span>
-          <span class="legend-item"><i class="dot dot-alta"></i>Alta <strong>{{ totalPrioridadeAlta }}</strong></span>
-          <span class="legend-item"><i class="dot dot-critica"></i>Crítica <strong>{{ totalPrioridadeCritica }}</strong></span>
-        </div>
-      </ng-container>
-      <ng-template #semPendentes>
-        <div class="dist-empty">Sem chamados pendentes no momento</div>
-      </ng-template>
+      <div class="ic-body">
+        <ng-container *ngIf="totalPendentes > 0; else semPendentes">
+          <div class="ic-dist-bar">
+            <span [style.width.%]="totalPrioridadeBaixa   / totalPendentes * 100" class="db-seg db-baixa"   [matTooltip]="totalPrioridadeBaixa + ' Baixa'"></span>
+            <span [style.width.%]="totalPrioridadeMedia   / totalPendentes * 100" class="db-seg db-media"   [matTooltip]="totalPrioridadeMedia + ' Média'"></span>
+            <span [style.width.%]="totalPrioridadeAlta    / totalPendentes * 100" class="db-seg db-alta"    [matTooltip]="totalPrioridadeAlta + ' Alta'"></span>
+            <span [style.width.%]="totalPrioridadeCritica / totalPendentes * 100" class="db-seg db-critica" [matTooltip]="totalPrioridadeCritica + ' Crítica'"></span>
+          </div>
+          <div class="ic-dist-grid">
+            <div class="dg-item"><span class="dg-dot dg-baixa"></span><span class="dg-lbl">Baixa</span><strong class="dg-val">{{ totalPrioridadeBaixa }}</strong></div>
+            <div class="dg-item"><span class="dg-dot dg-media"></span><span class="dg-lbl">Média</span><strong class="dg-val">{{ totalPrioridadeMedia }}</strong></div>
+            <div class="dg-item"><span class="dg-dot dg-alta"></span><span class="dg-lbl">Alta</span><strong class="dg-val">{{ totalPrioridadeAlta }}</strong></div>
+            <div class="dg-item"><span class="dg-dot dg-critica"></span><span class="dg-lbl">Crítica</span><strong class="dg-val">{{ totalPrioridadeCritica }}</strong></div>
+          </div>
+        </ng-container>
+        <ng-template #semPendentes>
+          <div class="ic-empty">Sem chamados pendentes</div>
+        </ng-template>
+      </div>
     </div>
 
     <!-- Card: alertas de urgência -->
-    <div class="info-card" [class.info-card-urgency]="hasUrgentItems" [class.info-card-ok]="!hasUrgentItems">
-      <div class="info-card-header">
-        <div class="info-card-icon-wrap" [class.icon-wrap-urgency]="hasUrgentItems" [class.icon-wrap-ok]="!hasUrgentItems">
-          <mat-icon>{{ hasUrgentItems ? 'notifications_active' : 'shield' }}</mat-icon>
+    <div class="ic" [class.ic-urgency]="hasUrgentItems" [class.ic-ok]="!hasUrgentItems">
+      <div class="ic-head" [class.ic-head-red]="hasUrgentItems" [class.ic-head-green]="!hasUrgentItems">
+        <div class="ic-head-icon">
+          <mat-icon>{{ hasUrgentItems ? 'warning_amber' : 'verified' }}</mat-icon>
         </div>
-        <span class="info-card-title">{{ hasUrgentItems ? 'Requer Atenção' : 'Status Geral' }}</span>
+        <span class="ic-head-title">{{ hasUrgentItems ? 'Requer Atenção' : 'Status Geral' }}</span>
+        <span *ngIf="hasUrgentItems" class="ic-alert-badge">{{ totalAltaPrioridade + totalCriticaPrioridade }}</span>
       </div>
-      <ng-container *ngIf="hasUrgentItems; else statusOk">
-        <div class="urgency-chips">
-          <button *ngIf="totalAltaPrioridade > 0"
-                  class="urgency-chip chip-alta"
-                  (click)="onPriorityFilterChange('2')"
-                  matTooltip="Clique para filtrar chamados de ALTA prioridade">
-            <mat-icon>trending_up</mat-icon>
-            {{ totalAltaPrioridade }} de alta prioridade
-          </button>
-          <button *ngIf="totalCriticaPrioridade > 0"
-                  class="urgency-chip chip-critica"
-                  (click)="onPriorityFilterChange('3')"
-                  matTooltip="Clique para filtrar chamados CRÍTICOS">
-            <mat-icon>warning_amber</mat-icon>
-            {{ totalCriticaPrioridade }} crítico(s)
-          </button>
-        </div>
-      </ng-container>
-      <ng-template #statusOk>
-        <div class="all-good">
-          <mat-icon>check_circle</mat-icon>
-          Nenhum chamado crítico em aberto
-        </div>
-      </ng-template>
+      <div class="ic-body">
+        <ng-container *ngIf="hasUrgentItems; else statusOk">
+          <div class="ic-ua-chips">
+            <button *ngIf="totalAltaPrioridade > 0" class="ua-chip ua-alta"
+                    (click)="onPriorityFilterChange('2')" matTooltip="Filtrar alta prioridade">
+              <mat-icon>trending_up</mat-icon>
+              <strong>{{ totalAltaPrioridade }}</strong> Alta Prioridade
+            </button>
+            <button *ngIf="totalCriticaPrioridade > 0" class="ua-chip ua-critica"
+                    (click)="onPriorityFilterChange('3')" matTooltip="Filtrar críticos">
+              <mat-icon>priority_high</mat-icon>
+              <strong>{{ totalCriticaPrioridade }}</strong> Crítico(s)
+            </button>
+          </div>
+        </ng-container>
+        <ng-template #statusOk>
+          <div class="ic-ok-msg">
+            <mat-icon>check_circle</mat-icon>
+            <span>Nenhum chamado crítico em aberto</span>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <!-- Card: resumo KPIs -->
-    <div class="info-card info-card-resumo">
-      <div class="info-card-header">
-        <div class="info-card-icon-wrap">
-          <mat-icon>insights</mat-icon>
-        </div>
-        <span class="info-card-title">Resumo</span>
+    <!-- Card: resumo -->
+    <div class="ic ic-resumo">
+      <div class="ic-head ic-head-teal">
+        <div class="ic-head-icon"><mat-icon>insights</mat-icon></div>
+        <span class="ic-head-title">Resumo</span>
       </div>
-      <div class="summary-pills">
-        <span class="summary-pill pill-resolved" matTooltip="Percentual de chamados encerrados sobre o total">
-          <mat-icon>check_circle_outline</mat-icon>
-          {{ resolucaoPercent }}% resolvidos
-        </span>
-        <span class="summary-pill pill-pending" matTooltip="Chamados abertos + em andamento">
-          <mat-icon>hourglass_bottom</mat-icon>
-          {{ totalPendentes }} pendentes
-        </span>
+      <div class="ic-body ic-body-resumo">
+        <div class="ic-resumo-pct-wrap">
+          <span class="ic-pct">{{ resolucaoPercent }}<span class="ic-pct-sym">%</span></span>
+          <span class="ic-pct-lbl">resolvidos</span>
+        </div>
+        <div class="ic-rs-rows">
+          <div class="rs-row"><span>Encerrados</span><strong class="rs-val-green">{{ totalEncerrados }}</strong></div>
+          <div class="rs-row"><span>Pendentes</span><strong class="rs-val-blue">{{ totalPendentes }}</strong></div>
+        </div>
       </div>
     </div>
 
