@@ -518,7 +518,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openEdit(id: Number): void {
     this.dialog.open(ChamadoUpdateComponent, {
-      width: "720px", maxHeight: "90vh",
+      width: "720px", maxHeight: "90vh", minHeight: "580px",
       panelClass: "custom-dialog-container", data: { id }
     }).afterClosed().subscribe(() => {});
   }

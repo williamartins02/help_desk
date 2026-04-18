@@ -8,11 +8,14 @@
   width: 15rem;
   display: flex !important;
   flex-direction: column !important;
-  background: linear-gradient(180deg, #0d47a1 0%, #1565c0 20%, #0288d1 60%, #00bcd4 100%);
-  box-shadow: 4px 0 28px rgba(15, 23, 42, 0.22);
-  overflow-x: hidden; /* Impede scroll horizontal */
-  overflow-y: visible; /* Permite crescimento vertical sem scroll */
-  height: 100vh; /* Garante altura total da tela */
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px),
+    repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px),
+    linear-gradient(180deg, #0b1535 0%, #0f2260 30%, #1a3fa8 65%, #2979ff 100%);
+  box-shadow: 4px 0 28px rgba(10, 30, 100, 0.45);
+  overflow-x: hidden;
+  overflow-y: visible;
+  height: 100vh;
 }
 
 /* ── Brand header ────────────────────────────────────────── */
@@ -60,6 +63,8 @@
   line-height: 1;
   white-space: nowrap;
 }
+
+.brand-accent { color: #80deea; }
 
 .brand-sub {
   color: rgba(255, 255, 255, 0.62);
@@ -140,10 +145,6 @@
   vertical-align: middle;
 }
 
-.nav-list a.active-link .nav-icon {
-  opacity: 1;
-}
-
 /* Texto dos itens */
 .nav-label {
   font-size: 0.875rem;
@@ -183,41 +184,20 @@
   color: #ffcdd2 !important;
 }
 
-.logout-item:hover .nav-icon {
-  opacity: 1;
+/* ── Área de conteúdo ────────────────────────────────────── */
+.header-wrapper {
+  width: 100%;
+  flex-shrink: 0;
 }
 
-/* ── Área de conteúdo ────────────────────────────────────── */
 .sidenav-content {
   display: flex;
   flex-direction: column;
   background: #f4f7fb;
-  /* sem margin-top: o header sticky já empurra o conteúdo */
 }
 
 @media (max-width: 600px) {
-  .sidenav-content {
-    padding-top: 0.5rem;
-  }
-}
-
-/* ── Menu toggle ─────────────────────────────────────────── */
-.menu-toggle {
-  align-self: flex-start;
-  margin: 0.75rem 0 0 0.75rem;
-  width: 40px;
-  height: 40px;
-  color: #fff !important;
-  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%) !important;
-  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.32) !important;
-  border-radius: 0.75rem !important;
-  transition: box-shadow 0.2s ease, transform 0.18s ease;
-  flex-shrink: 0;
-}
-
-.menu-toggle:hover {
-  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.48) !important;
-  transform: scale(1.06);
+  .sidenav-content { padding-top: 0.5rem; }
 }
 
 /* ── Hambúrguer dentro da toolbar do header ──────────────── */

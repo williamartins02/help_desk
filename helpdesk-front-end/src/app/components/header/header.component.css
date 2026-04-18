@@ -22,7 +22,10 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: linear-gradient(90deg, #0d47a1 0%, #1565c0 25%, #0288d1 65%, #00bcd4 100%);
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px),
+    repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(255,255,255,0.04) 27px, rgba(255,255,255,0.04) 28px),
+    linear-gradient(90deg, #0b1535 0%, #0f2260 20%, #1a3fa8 55%, #1e6fdb 80%, #2979ff 100%);
   color: #fff;
   height: 4rem;
   padding: 0 1.5rem;
@@ -96,6 +99,11 @@
   font-weight: 700;
   letter-spacing: 0.04rem;
   line-height: 1;
+  color: #ffffff;
+}
+
+.brand-title-accent {
+  color: #80deea;
 }
 
 .brand-subtitle {
@@ -338,7 +346,7 @@
 /* Botão de menu flutuante fixo na lateral esquerda */
 .floating-menu-toggle {
   position: fixed;
-  top: 80px; /* ajuste a altura conforme desejar */
+  top: 80px;
   left: 16px;
   z-index: 2000;
   width: 48px;
@@ -361,3 +369,8 @@
 
 /* Remover ocultação antiga do botão flutuante */
 .floating-menu-toggle { display: flex !important; }
+
+/* ── Dark mode ── */
+body.dark-mode .header-toolbar {
+  background: linear-gradient(90deg, #0a1628 0%, #0d1f3c 35%, #0a2540 70%, #062233 100%) !important;
+}

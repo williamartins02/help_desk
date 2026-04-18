@@ -1,10 +1,16 @@
 <div class="dialog-wrapper">
-  <!-- ── Cabeçalho gradiente ── -->
+
+  <!-- ══ HEADER — deep gradient + grid overlay + orbs ══════════════════ -->
   <div class="dialog-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+    <div class="h-orb h-orb-3"></div>
+
     <span class="page-badge">
       <mat-icon>edit_note</mat-icon>
       Editar chamado
     </span>
+
     <div class="header-brand">
       <div class="header-icon-badge">
         <mat-icon class="header-icon">support_agent</mat-icon>
@@ -16,28 +22,33 @@
     </div>
   </div>
 
-  <!-- ── Corpo — card lift sobre o header ── -->
+  <!-- ══ BODY — card lift sobre o header ══════════════════════════════ -->
   <div class="dialog-body">
 
-    <!-- Banner de chamado encerrado -->
+    <!-- Banner chamado encerrado -->
     <div *ngIf="isEncerrado" class="encerrado-banner">
-      <mat-icon class="encerrado-icon">lock</mat-icon>
+      <div class="encerrado-icon-wrap">
+        <mat-icon class="encerrado-icon">lock</mat-icon>
+      </div>
       <div class="encerrado-text">
         <strong>Chamado Encerrado</strong>
-        <span>Este chamado foi finalizado e não pode ser reaberto. Caso precise de novo atendimento, crie um novo chamado.</span>
+        <span>Este chamado foi finalizado e não pode ser reaberto. Para novo atendimento, crie um novo chamado.</span>
       </div>
     </div>
 
     <form class="main-form" (ngSubmit)="update()">
-      <!-- Seção: Dados do chamado -->
+
+      <!-- ── Seção: Dados do chamado ── -->
       <div class="section-header">
-        <mat-icon class="section-icon">assignment</mat-icon>
-        <span>Dados do chamado</span>
+        <div class="section-icon-wrap section-icon-blue">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <span>Dados do Chamado</span>
       </div>
 
       <div class="form-grid">
 
-        <!-- Linha 1: Título (2 colunas) -->
+        <!-- Título (span 2) -->
         <mat-form-field class="field field-wide" appearance="outline">
           <mat-label>Título do chamado</mat-label>
           <input matInput placeholder="Ex.: Trocar teclado"
@@ -46,8 +57,7 @@
                  [readonly]="isEncerrado" />
         </mat-form-field>
 
-        <!-- Linha 2: Status (2 colunas — único campo editável nesta linha) -->
-
+        <!-- Status -->
         <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
           <mat-form-field class="field" appearance="outline">
             <mat-label>Status</mat-label>
@@ -71,7 +81,7 @@
                 [ngStyle]="{ backgroundColor: getStatusColor(chamado.status) }"></span>
         </mat-form-field>
 
-        <!-- Linha 3: Prioridade | Classificação (somente leitura) -->
+        <!-- Prioridade (somente leitura) -->
         <mat-form-field class="field" appearance="outline">
           <mat-label>Prioridade</mat-label>
           <mat-select [(ngModel)]="chamado.prioridade" name="prioridade"
@@ -83,6 +93,7 @@
           </mat-select>
         </mat-form-field>
 
+        <!-- Classificação (somente leitura) -->
         <mat-form-field class="field" appearance="outline">
           <mat-label>Classificação</mat-label>
           <mat-select [(ngModel)]="chamado.classificacao" name="classificacao"
@@ -94,7 +105,7 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- Linha 4: Técnico | Cliente -->
+        <!-- Técnico -->
         <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
           <mat-form-field class="field" appearance="outline">
             <mat-label>{{ chamado.nomeTecnico || 'Técnico' }}</mat-label>
@@ -114,6 +125,7 @@
           </mat-select>
         </mat-form-field>
 
+        <!-- Cliente -->
         <div (click)="showEncerradoMsg()" *ngIf="isEncerrado" class="disabled-field-wrapper">
           <mat-form-field class="field" appearance="outline">
             <mat-label>{{ chamado.nomeCliente || 'Cliente' }}</mat-label>
@@ -135,9 +147,11 @@
 
       </div>
 
-      <!-- Seção: Observações -->
+      <!-- ── Seção: Observações ── -->
       <div class="section-header">
-        <mat-icon class="section-icon">notes</mat-icon>
+        <div class="section-icon-wrap section-icon-indigo">
+          <mat-icon>notes</mat-icon>
+        </div>
         <span>Observações</span>
       </div>
 
@@ -157,14 +171,8 @@
 
       <!-- ── Ações ── -->
       <div class="dialog-actions">
-        <button
-          type="button"
-          mat-stroked-button
-          color="warn"
-          class="btn-cancel"
-          (click)="onNoClick()"
-        >
-          <mat-icon>cancel</mat-icon>
+        <button type="button" mat-stroked-button class="btn-cancel" (click)="onNoClick()">
+          <mat-icon>close</mat-icon>
           Cancelar
         </button>
         <button
@@ -180,6 +188,7 @@
           Salvar Alterações
         </button>
       </div>
+
     </form>
   </div>
 

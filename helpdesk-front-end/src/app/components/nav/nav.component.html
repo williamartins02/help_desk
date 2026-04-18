@@ -7,7 +7,7 @@
         <mat-icon>support_agent</mat-icon>
       </div>
       <div class="brand-info">
-        <span class="brand-name">Help Desk</span>
+        <span class="brand-name">Help<span class="brand-accent">Desk</span></span>
         <span class="brand-sub">Sistema de Chamados</span>
       </div>
     </div>
@@ -17,38 +17,38 @@
 
     <!-- ── Itens de navegação ── -->
     <mat-nav-list class="nav-list">
-      <a mat-list-item routerLink="home" routerLinkActive="active-link" class="link-home"
+      <a mat-list-item routerLink="home" routerLinkActive="active-link" class="nav-item link-home"
          [routerLinkActiveOptions]="{exact: true}">
         <mat-icon class="nav-icon">home</mat-icon>
         <span class="nav-label">Home</span>
       </a>
-      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="link-tecnicos"
+      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="nav-item link-tecnicos"
          *appShowForRoles="['ROLE_ADMIN']">
         <mat-icon class="nav-icon">engineering</mat-icon>
         <span class="nav-label">Equipe Técnica</span>
       </a>
-      <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="link-clientes"
+      <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="nav-item link-clientes"
          *appShowForRoles="['ROLE_ADMIN']">
         <mat-icon class="nav-icon">group</mat-icon>
         <span class="nav-label">Base de Clientes</span>
       </a>
-      <a mat-list-item routerLink="chamados" routerLinkActive="active-link" class="link-chamados">
+      <a mat-list-item routerLink="chamados" routerLinkActive="active-link" class="nav-item link-chamados">
         <mat-icon class="nav-icon">receipt_long</mat-icon>
         <span class="nav-label">Central de Chamados</span>
       </a>
-      <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="link-chart">
+      <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="nav-item link-chart">
         <mat-icon class="nav-icon">dashboard</mat-icon>
         <span class="nav-label">Dashboard</span>
       </a>
-      <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="link-chat">
+      <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="nav-item link-chat">
         <mat-icon class="nav-icon">forum</mat-icon>
         <span class="nav-label">Conversas</span>
       </a>
-      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="link-usuarios">
+      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="nav-item link-usuarios">
         <mat-icon class="nav-icon">manage_accounts</mat-icon>
         <span class="nav-label">Gestão de Usuários</span>
       </a>
-      <a mat-list-item routerLink="agenda" routerLinkActive="active-link" class="link-agenda">
+      <a mat-list-item routerLink="agenda" routerLinkActive="active-link" class="nav-item link-agenda">
         <mat-icon class="nav-icon">event_note</mat-icon>
         <span class="nav-label">Agenda de Tarefas</span>
       </a>
@@ -67,7 +67,7 @@
     </div>
   </mat-drawer>
 
-  <!-- HEADER SEMPRE NO TOPO — hambúrguer projetado dentro da toolbar via ng-content -->
+  <!-- HEADER SEMPRE NO TOPO -->
   <div class="header-wrapper">
     <app-header>
       <button class="nav-hamburger-btn" mat-icon-button
@@ -88,7 +88,7 @@
 
 <!-- Widget flutuante de chat (visível em todas as páginas) -->
 <app-chat-bubble></app-chat-bubble>
-<!-- Janelas de DM flutuantes (abertas via bubble ou notificação) -->
+<!-- Janelas de DM flutuantes -->
 <app-floating-chat></app-floating-chat>
-<!-- Notificações em tempo-real (autônomo — aparece em qualquer tela) -->
+<!-- Notificações em tempo-real -->
 <app-chat-notification></app-chat-notification>

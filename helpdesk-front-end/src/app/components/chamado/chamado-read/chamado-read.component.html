@@ -1,6 +1,11 @@
 <div class="dialog-wrapper">
-  <!-- ── Cabeçalho gradiente ── -->
+
+  <!-- ══ HEADER — deep gradient + grid overlay + orbs ══════════════════ -->
   <div class="dialog-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+    <div class="h-orb h-orb-3"></div>
+
     <span class="page-badge">
       <mat-icon>visibility</mat-icon>
       Visualizar chamado
@@ -19,24 +24,19 @@
     </div>
   </div>
 
-  <!-- ── Corpo — card lift sobre o header ── -->
+  <!-- ══ BODY ══════════════════════════════════════════════════════════ -->
   <div class="dialog-body">
-    <!-- ── Faixa de chips visuais ── -->
+
+    <!-- ── Status / Prioridade / Classificação / SLA chips ── -->
     <div class="status-row">
+
       <div class="status-item">
-        <span class="status-label">
-          <mat-icon class="label-icon">circle</mat-icon>
-          Status
-        </span>
-        <span
-          class="chip"
-          [class.chip-aberto]="chamado.status == '0'"
-          [class.chip-andamento]="chamado.status == '1'"
-          [class.chip-encerrado]="chamado.status == '2'"
-        >
-          <mat-icon>
-            {{ chamado.status == '0' ? 'radio_button_checked' : chamado.status == '1' ? 'autorenew' : 'check_circle' }}
-          </mat-icon>
+        <span class="status-label"><mat-icon class="label-icon">circle</mat-icon>Status</span>
+        <span class="chip"
+              [class.chip-aberto]="chamado.status == '0'"
+              [class.chip-andamento]="chamado.status == '1'"
+              [class.chip-encerrado]="chamado.status == '2'">
+          <mat-icon>{{ chamado.status == '0' ? 'radio_button_checked' : chamado.status == '1' ? 'autorenew' : 'check_circle' }}</mat-icon>
           {{ retornaStatus(chamado.status) }}
         </span>
       </div>
@@ -44,17 +44,12 @@
       <div class="divider-v"></div>
 
       <div class="status-item">
-        <span class="status-label">
-          <mat-icon class="label-icon">flag</mat-icon>
-          Prioridade
-        </span>
-        <span
-          class="chip"
-          [class.chip-baixa]="chamado.prioridade === '0'"
-          [class.chip-media]="chamado.prioridade === '1'"
-          [class.chip-alta]="chamado.prioridade === '2'"
-          [class.chip-critica]="chamado.prioridade === '3'"
-        >
+        <span class="status-label"><mat-icon class="label-icon">flag</mat-icon>Prioridade</span>
+        <span class="chip"
+              [class.chip-baixa]="chamado.prioridade === '0'"
+              [class.chip-media]="chamado.prioridade === '1'"
+              [class.chip-alta]="chamado.prioridade === '2'"
+              [class.chip-critica]="chamado.prioridade === '3'">
           {{ retornaPrioridade(chamado.prioridade) }}
         </span>
       </div>
@@ -62,25 +57,16 @@
       <div class="divider-v"></div>
 
       <div class="status-item">
-        <span class="status-label">
-          <mat-icon class="label-icon">category</mat-icon>
-          Classificação
-        </span>
+        <span class="status-label"><mat-icon class="label-icon">category</mat-icon>Classificação</span>
         <span class="chip chip-classificacao">
-          <mat-icon>
-            {{ chamado.classificacao === '0' ? 'memory' : chamado.classificacao === '1' ? 'code' : chamado.classificacao === '2' ? 'lan' : 'storage' }}
-          </mat-icon>
+          <mat-icon>{{ chamado.classificacao === '0' ? 'memory' : chamado.classificacao === '1' ? 'code' : chamado.classificacao === '2' ? 'lan' : 'storage' }}</mat-icon>
           {{ retornaClassificacao(chamado.classificacao) }}
         </span>
       </div>
 
-      <!-- SLA item in status row -->
       <div class="divider-v" *ngIf="chamado.prazoSla"></div>
       <div class="status-item" *ngIf="chamado.prazoSla">
-        <span class="status-label">
-          <mat-icon class="label-icon">timer</mat-icon>
-          SLA
-        </span>
+        <span class="status-label"><mat-icon class="label-icon">timer</mat-icon>SLA</span>
         <span class="chip"
               [class.chip-sla-ok]="slaStatus === 'DENTRO_PRAZO' || slaStatus === 'ENCERRADO_NO_PRAZO'"
               [class.chip-sla-alerta]="slaStatus === 'ALERTA'"
@@ -92,49 +78,64 @@
     </div>
 
     <form class="main-form">
-      <!-- Seção: Dados do chamado -->
+
+      <!-- ── Seção: Dados do Chamado ── -->
       <div class="section-header">
-        <mat-icon class="section-icon">assignment</mat-icon>
-        <span>Dados do chamado</span>
+        <div class="section-icon-wrap section-icon-blue">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <span>Dados do Chamado</span>
       </div>
 
-      <div class="form-grid">
-        <!-- Título (2 colunas) -->
-        <mat-form-field class="field field-wide" appearance="outline">
-          <mat-label>Título do chamado</mat-label>
-          <input matInput [(ngModel)]="chamado.titulo" name="titulo" [disabled]="true" />
-        </mat-form-field>
-
-        <!-- Técnico -->
-        <mat-form-field class="field" appearance="outline">
-          <mat-label>Técnico responsável</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
-          <input matInput [value]="chamado.nomeTecnico || 'Não atribuído'" name="nomeTecnico" [disabled]="true" />
-        </mat-form-field>
-
-        <!-- Cliente -->
-        <mat-form-field class="field" appearance="outline">
-          <mat-label>Cliente</mat-label>
-          <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
-          <input matInput [value]="chamado.nomeCliente || 'Não especificado'" name="nomeCliente" [disabled]="true" />
-        </mat-form-field>
+      <!-- Título -->
+      <div class="info-card info-card-full">
+        <div class="info-card-label">
+          <mat-icon>title</mat-icon>
+          Título do chamado
+        </div>
+        <div class="info-card-value">{{ chamado.titulo || '—' }}</div>
       </div>
 
-      <!-- Seção: Observações -->
+      <!-- Técnico + Cliente -->
+      <div class="info-duo">
+        <div class="info-card">
+          <div class="info-card-label">
+            <mat-icon>engineering</mat-icon>
+            Técnico responsável
+          </div>
+          <div class="info-card-value" [class.info-card-muted]="!chamado.nomeTecnico">
+            {{ chamado.nomeTecnico || 'Não atribuído' }}
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">
+            <mat-icon>person</mat-icon>
+            Cliente
+          </div>
+          <div class="info-card-value" [class.info-card-muted]="!chamado.nomeCliente">
+            {{ chamado.nomeCliente || 'Não especificado' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Seção: Observações ── -->
       <div class="section-header">
-        <mat-icon class="section-icon">notes</mat-icon>
+        <div class="section-icon-wrap section-icon-indigo">
+          <mat-icon>notes</mat-icon>
+        </div>
         <span>Observações</span>
       </div>
 
-      <mat-form-field class="field-full" appearance="outline">
-        <mat-label>Descrição do problema</mat-label>
-        <textarea [(ngModel)]="chamado.observacoes" name="observacoes" class="observacoes" [disabled]="true" matInput></textarea>
-      </mat-form-field>
+      <div class="obs-card">
+        <p class="obs-text">{{ chamado.observacoes || 'Nenhuma observação registrada.' }}</p>
+      </div>
 
       <!-- ── Seção SLA ── -->
       <ng-container *ngIf="chamado.prazoSla">
         <div class="section-header">
-          <mat-icon class="section-icon">timer</mat-icon>
+          <div class="section-icon-wrap section-icon-amber">
+            <mat-icon>timer</mat-icon>
+          </div>
           <span>Controle de SLA</span>
         </div>
 
@@ -145,26 +146,17 @@
              [class.sla-compact-atrasado]="slaStatus === 'ATRASADO'"
              [class.sla-compact-enc-atrasado]="slaStatus === 'ENCERRADO_ATRASADO'">
 
-          <!-- Ícone + status -->
           <div class="sla-compact-left">
             <mat-icon class="sla-compact-icon">{{ slaIcon }}</mat-icon>
             <div class="sla-compact-texts">
               <span class="sla-compact-label">{{ slaLabel }}</span>
-              <span class="sla-compact-sub" *ngIf="chamado.status == '2'">
-                Tempo restante no encerramento
-              </span>
-              <span class="sla-compact-sub" *ngIf="chamado.status != '2'">
-                Em andamento
-              </span>
+              <span class="sla-compact-sub" *ngIf="chamado.status == '2'">Tempo restante no encerramento</span>
+              <span class="sla-compact-sub" *ngIf="chamado.status != '2'">Em andamento</span>
             </div>
           </div>
 
-          <!-- Countdown centralizado -->
-          <div class="sla-compact-timer">
-            {{ slaCountdown }}
-          </div>
+          <div class="sla-compact-timer">{{ slaCountdown }}</div>
 
-          <!-- Datas -->
           <div class="sla-compact-dates">
             <span class="sla-date-item">
               <mat-icon class="sla-date-icon">event</mat-icon>
@@ -185,6 +177,7 @@
           Retornar
         </button>
       </div>
+
     </form>
   </div>
 

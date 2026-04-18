@@ -133,6 +133,10 @@ table {
   padding: 0 !important;
   overflow: hidden !important;
   border-radius: 1.25rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: inherit !important;
 }
 
 
