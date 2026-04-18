@@ -154,7 +154,17 @@
         <mat-icon>{{ ins.icon }}</mat-icon>
       </div>
       <span class="insight-text">{{ ins.texto }}</span>
-      <button class="insight-action-btn" *ngIf="ins.actionLabel"
+
+      <!-- Botão "Redistribuir": visível SOMENTE para perfil Admin -->
+      <button class="insight-action-btn" *ngIf="ins.actionLabel && ins.tecnicoId && isAdmin"
+              [style.color]="ins.color"
+              (click)="abrirRedistribuicao(ins)"
+              matTooltip="Redistribuir chamados deste técnico">
+        {{ ins.actionLabel }} →
+      </button>
+
+      <!-- Botão genérico para insights SEM tecnicoId (SLA, críticos, etc.) — todos os perfis -->
+      <button class="insight-action-btn" *ngIf="ins.actionLabel && !ins.tecnicoId"
               [style.color]="ins.color"
               (click)="navegarInsight(ins)">
         {{ ins.actionLabel }} →

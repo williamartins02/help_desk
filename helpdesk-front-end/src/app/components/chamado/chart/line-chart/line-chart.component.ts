@@ -11,7 +11,15 @@ import { TecnicoService } from '../../../../services/tecnico.service';
 import { Chamado } from '../../../../models/chamado';
 import { Tecnico } from '../../../../models/tecnico';
 import { ChamadoCreateComponent } from '../../chamado-create/chamado-create.component';
+import { TecnicoDeleteDialogComponent } from '../../../tecnico/tecnico-delete-dialog/tecnico-delete-dialog.component';
 
+/**
+ * Representa um card de insight exibido na faixa de alertas do Dashboard.
+ *
+ * <p>O campo {@code tecnicoId} é preenchido apenas quando o insight se refere
+ * a um técnico sobrecarregado, permitindo que o modal de redistribuição seja
+ * aberto diretamente a partir do dashboard sem navegação para outra tela.</p>
+ */
 export interface DashboardInsight {
   icon: string;
   color: string;
@@ -21,6 +29,11 @@ export interface DashboardInsight {
   action?: string;
   actionLabel?: string;
   queryParams?: any;
+  /**
+   * ID do técnico sobrecarregado associado ao insight.
+   * Presente somente nos insights do tipo "Redistribuir".
+   */
+  tecnicoId?: number;
 }
 
 export interface TecnicoStats {
@@ -401,7 +414,7 @@ export class LineChartComponent implements OnInit, OnDestroy {
     if (criticos.length > 0)
       list.push({ icon: 'local_fire_department', color: '#b71c1c', bgColor: '#fce4ec', texto: `${criticos.length} chamado(s) com prioridade crítica`, urgente: true, actionLabel: 'Atender', queryParams: { prioridade: '3', excluirEncerrados: 'true' } });
     this.tecnicoStats.filter(t => t.sobrecarregado).forEach(t => {
-      list.push({ icon: 'warning_amber', color: '#e65100', bgColor: '#fff3e0', texto: `${t.nome} sobrecarregado — ${t.total} chamados ativos`, urgente: false, actionLabel: 'Redistribuir' });
+      list.push({ icon: 'warning_amber', color: '#e65100', bgColor: '#fff3e0', texto: `${t.nome} sobrecarregado — ${t.total} chamados ativos`, urgente: false, actionLabel: 'Redistribuir', tecnicoId: t.tecnicoId });
     });
     const livres = this.tecnicos.filter(tec => !this.tecnicoStats.find(s => s.nome === tec.nome));
     if (livres.length > 0)
@@ -418,6 +431,79 @@ export class LineChartComponent implements OnInit, OnDestroy {
   get kpiAndamento(): number  { return this.filteredChamados().filter(c => c.status == '1').length; }
   get kpiEncerrados(): number { return this.filteredChamados().filter(c => c.status == '2').length; }
   get kpiAtrasados(): number  { return this.filteredChamados().filter(c => c.statusSla === 'ATRASADO' && c.status != '2').length; }
+
+  // ── Perfil do usuário ─────────────────────────────────────
+
+  /**
+   * Verifica se o usuário autenticado possui o perfil de Administrador.
+   *
+   * <p>As permissões são armazenadas em {@code localStorage} como um array JSON
+   * de strings no formato {@code ["ROLE_ADMIN", "ROLE_TECNICO"]}.
+   * Somente usuários com a role {@code ROLE_ADMIN} podem abrir o modal de
+   * redistribuição de chamados diretamente pelo dashboard.</p>
+   *
+   * @returns {@code true} se o usuário for administrador; {@code false} caso contrário.
+   */
+  get isAdmin(): boolean {
+    try {
+      const raw = localStorage.getItem('permissions');
+      if (!raw) return false;
+      const perms: string[] = JSON.parse(raw);
+      return perms.includes('ROLE_ADMIN');
+    } catch {
+      return false;
+    }
+  }
+
+  // ── Redistribuição pelo dashboard ─────────────────────────
+
+  /**
+   * Abre o modal de redistribuição de chamados reutilizando exatamente o mesmo
+   * componente ({@link TecnicoDeleteDialogComponent}) já utilizado na tela
+   * "Equipe Técnica", mantendo identidade visual, validações e fluxo idênticos.
+   *
+   * <p>O modal é aberto no modo {@code modoApenas: 'transferencia'}, que exibe
+   * apenas o painel de redistribuição (sem fluxo de inativação).
+   * Após o fechamento do modal, os dados do dashboard são recarregados
+   * silenciosamente para refletir as reatribuições realizadas.</p>
+   *
+   * <p>Este método só deve ser chamado quando {@link isAdmin} for {@code true}.
+   * A lógica de exibição/ocultação do botão no template já garante isso.</p>
+   *
+   * @param ins Insight de sobrecarga contendo o {@code tecnicoId} do técnico
+   *            cujos chamados serão redistribuídos.
+   */
+  abrirRedistribuicao(ins: DashboardInsight): void {
+    if (!ins.tecnicoId) {
+      // Fallback: sem ID de técnico, navega normalmente
+      this.navegarInsight(ins);
+      return;
+    }
+
+    // Busca o objeto Tecnico completo na lista já carregada
+    const tecnicoSelecionado = this.tecnicos.find(t => t.id === ins.tecnicoId);
+    if (!tecnicoSelecionado) {
+      // Técnico não encontrado na lista local — navega como fallback
+      this.navegarInsight(ins);
+      return;
+    }
+
+    // Abre o mesmo modal de redistribuição da tela Equipe Técnica
+    this.dialog.open(TecnicoDeleteDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      disableClose: true,
+      panelClass: 'no-padding-dialog',
+      data: {
+        tecnico: tecnicoSelecionado,
+        todosTecnicos: this.tecnicos,
+        modoApenas: 'transferencia'  // apenas redistribuição, sem inativação
+      }
+    }).afterClosed().subscribe(() => {
+      // Recarrega silenciosamente para refletir as reatribuições
+      this.loadDados(false);
+    });
+  }
 
   // ── Chart click handlers ──────────────────────────────────
   onStatusChartClick(elements: any[]): void {
