@@ -2,18 +2,41 @@
 
     <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
     <section class="hero-panel">
+        <!-- Orbs decorativos animados -->
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+
         <div class="hero-left">
             <div class="hero-icon-ring">
                 <mat-icon>engineering</mat-icon>
             </div>
             <div class="hero-content">
-        <span class="page-badge">
-          <mat-icon>engineering</mat-icon>
-          Equipe técnica
-        </span>
+                <span class="page-badge">
+                  <mat-icon>engineering</mat-icon>
+                  Equipe técnica
+                </span>
                 <h1>Gestão de Técnicos</h1>
                 <p>Visualize, filtre e administre os profissionais cadastrados de forma rápida,
                     mantendo o padrão visual moderno e organizado do sistema.</p>
+            </div>
+        </div>
+
+        <!-- Estatísticas rápidas inline no hero -->
+        <div class="hero-stats-inline">
+            <div class="hero-stat-item">
+                <strong>{{ totalTecnicos }}</strong>
+                <span>Total</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat-item hero-stat-green">
+                <strong>{{ countAtivos }}</strong>
+                <span>Ativos</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat-item hero-stat-red">
+                <strong>{{ countInativos }}</strong>
+                <span>Inativos</span>
             </div>
         </div>
     </section>
@@ -22,53 +45,81 @@
     <div class="kpi-section">
 
         <div class="stat-card stat-kpi-total" matTooltip="Total de técnicos registrados no sistema">
+            <div class="kpi-bg-icon"><mat-icon>engineering</mat-icon></div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">engineering</mat-icon>
                 </div>
+                <span class="kpi-trend-badge kpi-badge-neutral">
+                    <mat-icon>groups</mat-icon> Equipe
+                </span>
             </div>
-            <div class="stat-card-bottom">
-                <span>Total</span>
+            <div class="kpi-num-block">
                 <strong>{{ totalTecnicos }}</strong>
+            </div>
+            <div class="kpi-card-label">Total de Técnicos</div>
+            <div class="kpi-progress-track">
+                <div class="kpi-progress-bar kpi-bar-blue" style="width:100%"></div>
             </div>
         </div>
 
         <div class="stat-card stat-kpi-ativos"
              [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
+            <div class="kpi-bg-icon"><mat-icon>check_circle</mat-icon></div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">check_circle</mat-icon>
                 </div>
+                <span class="kpi-trend-badge kpi-badge-success">
+                    <mat-icon>trending_up</mat-icon> {{ ativosPct }}%
+                </span>
             </div>
-            <div class="stat-card-bottom">
-                <span>Ativos</span>
+            <div class="kpi-num-block">
                 <strong>{{ countAtivos }}</strong>
+            </div>
+            <div class="kpi-card-label">Ativos</div>
+            <div class="kpi-progress-track">
+                <div class="kpi-progress-bar kpi-bar-green" [style.width.%]="ativosPct || 5"></div>
             </div>
         </div>
 
         <div class="stat-card stat-kpi-inativos"
              [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
+            <div class="kpi-bg-icon"><mat-icon>person_off</mat-icon></div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">person_off</mat-icon>
                 </div>
+                <span class="kpi-trend-badge kpi-badge-danger">
+                    <mat-icon>trending_down</mat-icon> {{ inativosPct }}%
+                </span>
             </div>
-            <div class="stat-card-bottom">
-                <span>Inativos</span>
+            <div class="kpi-num-block">
                 <strong>{{ countInativos }}</strong>
+            </div>
+            <div class="kpi-card-label">Inativos</div>
+            <div class="kpi-progress-track">
+                <div class="kpi-progress-bar kpi-bar-red" [style.width.%]="inativosPct || 5"></div>
             </div>
         </div>
 
         <div class="stat-card stat-kpi-novos"
              [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
+            <div class="kpi-bg-icon"><mat-icon>person_add</mat-icon></div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">person_add</mat-icon>
                 </div>
+                <span class="kpi-trend-badge kpi-badge-neutral">
+                    <mat-icon>calendar_month</mat-icon> Este mês
+                </span>
             </div>
-            <div class="stat-card-bottom">
-                <span>Novos ({{ mesAtual }})</span>
+            <div class="kpi-num-block">
                 <strong>{{ countNovosMes }}</strong>
+            </div>
+            <div class="kpi-card-label">Novos ({{ mesAtual }})</div>
+            <div class="kpi-progress-track">
+                <div class="kpi-progress-bar kpi-bar-cyan" [style.width.%]="countNovosMes > 0 ? 72 : 5"></div>
             </div>
         </div>
 
@@ -78,14 +129,29 @@
              [matTooltip]="hasActiveFilter ? 'Filtro ativo — clique para limpar' : 'Nenhum filtro aplicado'"
              (click)="hasActiveFilter ? clearFilter(searchInput) : null"
              [style.cursor]="hasActiveFilter ? 'pointer' : 'default'">
+            <div class="kpi-bg-icon">
+                <mat-icon>{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
+            </div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">{{ hasActiveFilter ? 'manage_search' : 'groups' }}</mat-icon>
                 </div>
+                <span class="kpi-trend-badge"
+                      [class.kpi-badge-warning]="hasActiveFilter"
+                      [class.kpi-badge-neutral]="!hasActiveFilter">
+                    <mat-icon>{{ hasActiveFilter ? 'filter_alt' : 'visibility' }}</mat-icon>
+                    {{ hasActiveFilter ? 'Filtrado' : 'Todos' }}
+                </span>
             </div>
-            <div class="stat-card-bottom">
-                <span>{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</span>
+            <div class="kpi-num-block">
                 <strong>{{ filteredCount }}</strong>
+            </div>
+            <div class="kpi-card-label">{{ hasActiveFilter ? 'Filtrados' : 'Exibidos' }}</div>
+            <div class="kpi-progress-track">
+                <div class="kpi-progress-bar"
+                     [class.kpi-bar-orange]="hasActiveFilter"
+                     [class.kpi-bar-indigo]="!hasActiveFilter"
+                     [style.width.%]="totalTecnicos > 0 ? (filteredCount / totalTecnicos) * 100 : 5"></div>
             </div>
         </div>
 
