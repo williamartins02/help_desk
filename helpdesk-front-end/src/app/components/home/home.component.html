@@ -36,43 +36,79 @@
   <!-- ══ KPI CARDS ══════════════════════════════════════════════════════ -->
   <div class="kpi-row" *ngIf="!isLoading; else kpiLoading">
 
+    <!-- Chamados Abertos -->
     <div class="kpi-card kpi-blue">
-      <div class="kpi-deco"></div>
-      <div class="kpi-deco kpi-deco-2"></div>
-      <div class="kpi-icon-wrap"><mat-icon>assignment</mat-icon></div>
-      <div class="kpi-body">
-        <span class="kpi-num">{{ totalAbertos }}</span>
-        <span class="kpi-lbl">Chamados Abertos</span>
+      <div class="kpi-bg-icon"><mat-icon>assignment</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill kpi-icon-pill-blue">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-neutral">
+          <mat-icon>trending_flat</mat-icon> Na fila
+        </span>
+      </div>
+      <div class="kpi-num">{{ totalAbertos }}</div>
+      <div class="kpi-label">Chamados Abertos</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-blue"
+             [style.width.%]="totalAbertos > 0 ? 100 : 5"></div>
       </div>
     </div>
 
+    <!-- Em Andamento -->
     <div class="kpi-card kpi-orange">
-      <div class="kpi-deco"></div>
-      <div class="kpi-deco kpi-deco-2"></div>
-      <div class="kpi-icon-wrap"><mat-icon>pending_actions</mat-icon></div>
-      <div class="kpi-body">
-        <span class="kpi-num">{{ totalEmAndamento }}</span>
-        <span class="kpi-lbl">Em Andamento</span>
+      <div class="kpi-bg-icon"><mat-icon>pending_actions</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill kpi-icon-pill-orange">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-neutral">
+          <mat-icon>trending_flat</mat-icon> Em execução
+        </span>
+      </div>
+      <div class="kpi-num">{{ totalEmAndamento }}</div>
+      <div class="kpi-label">Em Andamento</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-orange"
+             [style.width.%]="totalEmAndamento > 0 ? 65 : 5"></div>
       </div>
     </div>
 
+    <!-- Críticos -->
     <div class="kpi-card kpi-red">
-      <div class="kpi-deco"></div>
-      <div class="kpi-deco kpi-deco-2"></div>
-      <div class="kpi-icon-wrap"><mat-icon>warning_amber</mat-icon></div>
-      <div class="kpi-body">
-        <span class="kpi-num">{{ totalCriticos }}</span>
-        <span class="kpi-lbl">Críticos</span>
+      <div class="kpi-bg-icon"><mat-icon>warning_amber</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill kpi-icon-pill-red">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-danger">
+          <mat-icon>trending_down</mat-icon> Atenção
+        </span>
+      </div>
+      <div class="kpi-num">{{ totalCriticos }}</div>
+      <div class="kpi-label">Críticos</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-red"
+             [style.width.%]="totalCriticos > 0 ? 40 : 5"></div>
       </div>
     </div>
 
+    <!-- Encerrados -->
     <div class="kpi-card kpi-green">
-      <div class="kpi-deco"></div>
-      <div class="kpi-deco kpi-deco-2"></div>
-      <div class="kpi-icon-wrap"><mat-icon>task_alt</mat-icon></div>
-      <div class="kpi-body">
-        <span class="kpi-num">{{ totalEncerrados }}</span>
-        <span class="kpi-lbl">Encerrados</span>
+      <div class="kpi-bg-icon"><mat-icon>task_alt</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill kpi-icon-pill-green">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-success">
+          <mat-icon>trending_up</mat-icon> {{ resolucaoPercent }}% resolvidos
+        </span>
+      </div>
+      <div class="kpi-num">{{ totalEncerrados }}</div>
+      <div class="kpi-label">Encerrados</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-green"
+             [style.width.%]="resolucaoPercent || 5"></div>
       </div>
     </div>
 
@@ -80,10 +116,10 @@
 
   <ng-template #kpiLoading>
     <div class="kpi-row">
-      <div class="kpi-card kpi-blue  kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
-      <div class="kpi-card kpi-orange kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
-      <div class="kpi-card kpi-red   kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
-      <div class="kpi-card kpi-green kpi-skeleton"><mat-spinner diameter="28" color="accent"></mat-spinner></div>
+      <div class="kpi-card kpi-blue  kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="kpi-card kpi-orange kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="kpi-card kpi-red   kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="kpi-card kpi-green kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
     </div>
   </ng-template>
 

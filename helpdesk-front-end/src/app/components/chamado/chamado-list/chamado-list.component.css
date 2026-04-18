@@ -527,6 +527,12 @@
 }
 .filter-indicator mat-icon { font-size: .85rem; width: .85rem; height: .85rem; }
 
+.filter-indicator-sla-danger {
+  background: rgba(244,67,54,.18);
+  border-color: rgba(244,67,54,.4);
+  color: #ef9a9a;
+}
+
 /* ── Toolbar ── */
 .toolbar {
   display: flex;
@@ -555,7 +561,7 @@
   min-width: 0;
 }
 
-.search-field, .status-field, .priority-field { width: 100%; }
+.search-field, .status-field, .priority-field, .sla-field { width: 100%; }
 
 /* Suprime padding de erro dos form-fields na toolbar */
 .toolbar .mat-form-field-wrapper { padding-bottom: 0 !important; }

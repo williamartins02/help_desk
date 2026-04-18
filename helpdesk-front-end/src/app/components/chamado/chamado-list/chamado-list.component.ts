@@ -36,6 +36,8 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedStatus: string = '';
   selectedPrioridade: string = '';
+  selectedSla: string = '';
+  excluirEncerrados: boolean = false;
   searchValue: string = '';
 
   formGroup: FormGroup;
@@ -161,19 +163,36 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }, 1000);
 
-    // Lê query params para aplicar filtros vindos de navegação externa (ex: alerta de críticos)
+    // ── Lê filtros iniciais do snapshot (síncrono, 100% garantido) ───────────
+    // Cobre o caso: navegação externa para /chamados?prioridade=3&sla=ATRASADO
+    const snap = this.route.snapshot.queryParamMap;
+    if (snap.get('prioridade')) { this.selectedPrioridade = snap.get('prioridade')!; }
+    if (snap.get('sla'))        { this.selectedSla        = snap.get('sla')!; }
+    if (snap.get('search'))     { this.searchValue        = snap.get('search')!; }
+    if (snap.get('excluirEncerrados') === 'true') { this.excluirEncerrados = true; }
+    this.highlightId = snap.get('highlightId');
+    this.isNew       = snap.get('new') === 'true';
+    if (this.isNew) {
+      this.hideNewBadge = false;
+      setTimeout(() => this.hideNewBadge = true, 300000);
+    }
+
+    // ── Subscribe reativo: aplica filtros quando os params mudam com dados já carregados ──
+    // Cobre o caso: usuário já estava na tela /chamados e clicou em atalho externo
     this.route.queryParamMap.subscribe(params => {
       this.highlightId = params.get('highlightId');
-      this.isNew = params.get('new') === 'true';
+      this.isNew       = params.get('new') === 'true';
       if (this.isNew) {
         this.hideNewBadge = false;
-        setTimeout(() => this.hideNewBadge = true, 300000); // 5 minutos
+        setTimeout(() => this.hideNewBadge = true, 300000);
       }
-      if (params.get('prioridade')) {
-        this.selectedPrioridade = params.get('prioridade')!;
-      }
-      if (params.get('search')) {
-        this.searchValue = params.get('search')!;
+      if (params.get('prioridade') !== null) { this.selectedPrioridade = params.get('prioridade')!; }
+      if (params.get('sla')        !== null) { this.selectedSla        = params.get('sla')!; }
+      if (params.get('search')     !== null) { this.searchValue        = params.get('search')!; }
+      if (params.get('excluirEncerrados') !== null) { this.excluirEncerrados = params.get('excluirEncerrados') === 'true'; }
+
+      if (this.CHAMADO_DATA.length > 0) {
+        this.applyAllFilters();
       }
     });
 
@@ -260,7 +279,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get hasActiveFilters() {
-    return this.selectedStatus !== '' || this.selectedPrioridade !== '' || this.searchValue.trim() !== '';
+    return this.selectedStatus !== '' || this.selectedPrioridade !== '' || this.selectedSla !== '' || this.excluirEncerrados || this.searchValue.trim() !== '';
   }
 
   // ── Carregamento de dados ─────────────────────────────────────────────────
@@ -425,14 +444,23 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ── Filtros combinados (status + prioridade + texto) ──────────────────────
+  // ── Filtros combinados (status + prioridade + sla + texto) ──────────────────
   applyAllFilters(): void {
     let filtered = [...this.CHAMADO_DATA];
+    if (this.excluirEncerrados) {
+      filtered = filtered.filter(c => c.status != '2');
+    }
     if (this.selectedStatus !== '') {
       filtered = filtered.filter(c => c.status == this.selectedStatus);
     }
     if (this.selectedPrioridade !== '') {
       filtered = filtered.filter(c => c.prioridade == this.selectedPrioridade);
+    }
+    if (this.selectedSla !== '') {
+      filtered = filtered.filter(c => {
+        const slaStatus = c.statusSla || this.computeSlaStatus(c);
+        return slaStatus === this.selectedSla;
+      });
     }
     this.dataSource = new MatTableDataSource<Chamado>(filtered);
     this.dataSource.paginator = this.paginator;
@@ -465,6 +493,8 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
   clearFilters(): void {
     this.selectedStatus = '';
     this.selectedPrioridade = '';
+    this.selectedSla = '';
+    this.excluirEncerrados = false;
     this.searchValue = '';
     this.applyAllFilters();
   }

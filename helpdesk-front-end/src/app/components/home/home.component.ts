@@ -137,6 +137,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+
   ngOnDestroy(): void {
     if (this.refreshSub)     { this.refreshSub.unsubscribe(); }
     if (this.timerInterval)  { clearInterval(this.timerInterval); }

@@ -5,10 +5,12 @@ import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { MatDialog } from '@angular/material/dialog';
 import { ChamadoService } from '../../../../services/chamado.service';
 import { TecnicoService } from '../../../../services/tecnico.service';
 import { Chamado } from '../../../../models/chamado';
 import { Tecnico } from '../../../../models/tecnico';
+import { ChamadoCreateComponent } from '../../chamado-create/chamado-create.component';
 
 export interface DashboardInsight {
   icon: string;
@@ -18,6 +20,7 @@ export interface DashboardInsight {
   urgente: boolean;
   action?: string;
   actionLabel?: string;
+  queryParams?: any;
 }
 
 export interface TecnicoStats {
@@ -40,6 +43,7 @@ export interface KpiCard {
   queryParam: any;
   trend?: 'up' | 'down' | 'neutral';
   trendLabel?: string;
+  progressPct?: number;
 }
 
 @Component({
@@ -186,7 +190,8 @@ export class LineChartComponent implements OnInit, OnDestroy {
   constructor(
     private chamadoService: ChamadoService,
     private tecnicoService: TecnicoService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -266,11 +271,13 @@ export class LineChartComponent implements OnInit, OnDestroy {
     const andamento = fc.filter(c => c.status == '1').length;
     const encerrados= fc.filter(c => c.status == '2').length;
     const atrasados = fc.filter(c => c.statusSla === 'ATRASADO' && c.status != '2').length;
+    const total = fc.length || 1;
+    const pct = (v: number) => Math.max(5, Math.round((v / total) * 100));
     this.kpiCards = [
-      { label: 'Chamados Abertos',  value: abertos,    icon: 'assignment',   colorClass: 'blue',   queryParam: { status: '0' }, trend: 'neutral', trendLabel: 'na fila' },
-      { label: 'Em Andamento',      value: andamento,  icon: 'autorenew',    colorClass: 'orange', queryParam: { status: '1' }, trend: 'neutral', trendLabel: 'em execução' },
-      { label: 'Encerrados',        value: encerrados, icon: 'check_circle', colorClass: 'green',  queryParam: { status: '2' }, trend: encerrados > 0 ? 'up' : 'neutral', trendLabel: `${this.resolucaoPercent}% do total` },
-      { label: 'SLA Atrasado',      value: atrasados,  icon: atrasados > 0 ? 'alarm_off' : 'alarm_on', colorClass: atrasados > 0 ? 'red' : 'green', queryParam: { sla: 'ATRASADO' }, trend: atrasados > 0 ? 'down' : 'up', trendLabel: atrasados > 0 ? 'atenção necessária' : 'dentro do prazo' },
+      { label: 'Chamados Abertos', value: abertos,    icon: 'assignment',   colorClass: 'blue',   queryParam: { status: '0' }, trend: 'neutral', trendLabel: 'na fila',          progressPct: pct(abertos) },
+      { label: 'Em Andamento',     value: andamento,  icon: 'autorenew',    colorClass: 'orange', queryParam: { status: '1' }, trend: 'neutral', trendLabel: 'em execução',      progressPct: pct(andamento) },
+      { label: 'Encerrados',       value: encerrados, icon: 'check_circle', colorClass: 'green',  queryParam: { status: '2' }, trend: encerrados > 0 ? 'up' : 'neutral', trendLabel: `${this.resolucaoPercent}% do total`, progressPct: pct(encerrados) },
+      { label: 'SLA Atrasado',     value: atrasados,  icon: atrasados > 0 ? 'alarm_off' : 'alarm_on', colorClass: atrasados > 0 ? 'red' : 'green', queryParam: { sla: 'ATRASADO' }, trend: atrasados > 0 ? 'down' : 'up', trendLabel: atrasados > 0 ? 'atenção necessária' : 'dentro do prazo', progressPct: pct(atrasados) },
     ];
   }
 
@@ -392,7 +399,7 @@ export class LineChartComponent implements OnInit, OnDestroy {
     if (emAlerta.length > 0)
       list.push({ icon: 'timer', color: '#e65100', bgColor: '#fff3e0', texto: `${emAlerta.length} chamado(s) próximos de vencer`, urgente: false, action: 'ALERTA', actionLabel: 'Ver chamados' });
     if (criticos.length > 0)
-      list.push({ icon: 'local_fire_department', color: '#b71c1c', bgColor: '#fce4ec', texto: `${criticos.length} chamado(s) com prioridade crítica`, urgente: true, actionLabel: 'Atender' });
+      list.push({ icon: 'local_fire_department', color: '#b71c1c', bgColor: '#fce4ec', texto: `${criticos.length} chamado(s) com prioridade crítica`, urgente: true, actionLabel: 'Atender', queryParams: { prioridade: '3', excluirEncerrados: 'true' } });
     this.tecnicoStats.filter(t => t.sobrecarregado).forEach(t => {
       list.push({ icon: 'warning_amber', color: '#e65100', bgColor: '#fff3e0', texto: `${t.nome} sobrecarregado — ${t.total} chamados ativos`, urgente: false, actionLabel: 'Redistribuir' });
     });
@@ -433,11 +440,19 @@ export class LineChartComponent implements OnInit, OnDestroy {
   }
 
   navegarInsight(ins: DashboardInsight): void {
-    if (ins.action) this.router.navigate(['/chamados'], { queryParams: { sla: ins.action } });
-    else this.router.navigate(['/chamados']);
+    if (ins.queryParams) {
+      this.router.navigate(['/chamados'], { queryParams: ins.queryParams });
+    } else if (ins.action) {
+      this.router.navigate(['/chamados'], { queryParams: { sla: ins.action } });
+    } else {
+      this.router.navigate(['/chamados']);
+    }
   }
   navegarChamados(queryParams: any = {}): void { this.router.navigate(['/chamados'], { queryParams }); }
-  navegarNovoChamado(): void { this.router.navigate(['/chamados']); }
+  navegarNovoChamado(): void {
+    this.dialog.open(ChamadoCreateComponent, { width: '720px' })
+      .afterClosed().subscribe(() => {});
+  }
 
   private getIniciais(nome: string): string {
     const parts = nome.trim().split(' ').filter(p => p.length > 0);

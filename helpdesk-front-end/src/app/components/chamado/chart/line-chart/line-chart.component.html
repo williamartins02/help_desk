@@ -2,13 +2,21 @@
 
   <!-- ══════════════ HERO HEADER ══════════════ -->
   <div class="db-hero">
+    <!-- Decorative orbs -->
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
     <div class="hero-left">
       <div class="hero-icon-ring">
         <mat-icon>dashboard</mat-icon>
       </div>
-      <div>
-        <h1 class="hero-title">Dashboard</h1>
-        <p class="hero-sub">Central de inteligência operacional</p>
+      <div class="hero-text-block">
+        <span class="hero-badge">
+          <mat-icon>analytics</mat-icon>
+          Intelligence Board
+        </span>
+        <h1 class="hero-title">Dashboard <span class="hero-title-accent">Operacional</span></h1>
+        <p class="hero-sub">Central de inteligência e monitoramento em tempo real</p>
       </div>
     </div>
 
@@ -34,8 +42,9 @@
         <mat-icon>{{ isRefreshing ? 'sync' : 'wifi' }}</mat-icon>
         <span>{{ isRefreshing ? 'Atualizando…' : (ultimaAtualizacao | date:'HH:mm:ss') }}</span>
       </div>
-      <button class="icon-btn" (click)="loadDados(false)" matTooltip="Atualizar dados" [disabled]="isRefreshing">
+      <button class="hero-action-btn" (click)="loadDados(false)" matTooltip="Atualizar dados" [disabled]="isRefreshing">
         <mat-icon [class.spinning]="isRefreshing">refresh</mat-icon>
+        <span>Atualizar</span>
       </button>
     </div>
   </div>
@@ -97,24 +106,40 @@
     <div class="kpi-card kpi-{{ card.colorClass }}"
          *ngFor="let card of kpiCards"
          (click)="navegarChamados(card.queryParam)"
-         matTooltip="Clique para filtrar chamados"
+         matTooltip="Ver chamados: {{ card.label }}"
          matTooltipPosition="above">
-      <div class="kpi-header">
-        <span class="kpi-label">{{ card.label }}</span>
-        <div class="kpi-icon-box">
+
+      <!-- Watermark -->
+      <div class="kpi-bg-icon"><mat-icon>{{ card.icon }}</mat-icon></div>
+
+      <!-- Topo: pill de ícone + badge de tendência -->
+      <div class="kpi-top">
+        <div class="kpi-icon-pill kpi-pill-{{ card.colorClass }}">
           <mat-icon>{{ card.icon }}</mat-icon>
         </div>
+        <span class="kpi-trend-badge"
+              [class.kpi-badge-success]="card.trend === 'up'"
+              [class.kpi-badge-danger]="card.trend === 'down'"
+              [class.kpi-badge-neutral]="!card.trend || card.trend === 'neutral'">
+          <mat-icon>{{
+            card.trend === 'up'   ? 'trending_up'   :
+            card.trend === 'down' ? 'trending_down' : 'trending_flat'
+          }}</mat-icon>
+          {{ card.trendLabel }}
+        </span>
       </div>
+
+      <!-- Número principal -->
       <div class="kpi-value">{{ card.value }}</div>
-      <div class="kpi-footer">
-        <mat-icon class="trend-icon"
-          [class.trend-up]="card.trend === 'up'"
-          [class.trend-down]="card.trend === 'down'">
-          {{ card.trend === 'up' ? 'trending_up' : card.trend === 'down' ? 'trending_down' : 'trending_flat' }}
-        </mat-icon>
-        <span class="kpi-trend-label">{{ card.trendLabel }}</span>
+
+      <!-- Rótulo -->
+      <div class="kpi-label">{{ card.label }}</div>
+
+      <!-- Barra de progresso -->
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-{{ card.colorClass }}"
+             [style.width.%]="card.progressPct || 5"></div>
       </div>
-      <div class="kpi-shine"></div>
     </div>
   </div>
 
@@ -142,42 +167,46 @@
 
     <!-- 1. STATUS -->
     <div class="chart-card">
-      <div class="chart-card-top">
+      <div class="chart-card-header">
         <div class="chart-label-group">
           <span class="chart-category">Distribuição</span>
           <h3 class="chart-title">Status dos Chamados</h3>
         </div>
-        <div class="chart-top-badge badge-blue">{{ filteredChamados().length }} total</div>
+        <div class="chart-top-badge badge-glass">{{ filteredChamados().length }} total</div>
       </div>
-      <div class="donut-wrap">
-        <canvas baseChart [data]="statusChartData" [options]="statusChartOptions" [type]="statusChartType"></canvas>
-        <div class="donut-center">
-          <span class="donut-num">{{ filteredChamados().length }}</span>
-          <span class="donut-lbl">chamados</span>
+      <div class="chart-card-body">
+        <div class="donut-wrap">
+          <canvas baseChart [data]="statusChartData" [options]="statusChartOptions" [type]="statusChartType"></canvas>
+          <div class="donut-center">
+            <span class="donut-num">{{ filteredChamados().length }}</span>
+            <span class="donut-lbl">chamados</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 2. PRIORIDADE -->
     <div class="chart-card">
-      <div class="chart-card-top">
+      <div class="chart-card-header">
         <div class="chart-label-group">
           <span class="chart-category">Análise</span>
           <h3 class="chart-title">Chamados por Prioridade</h3>
         </div>
-        <div class="chart-top-badge badge-orange" *ngIf="kpiAtrasados > 0">
+        <div class="chart-top-badge badge-glass-warn" *ngIf="kpiAtrasados > 0">
           <mat-icon style="font-size:13px;width:13px;height:13px">warning</mat-icon>
           {{ kpiAtrasados }} críticos
         </div>
       </div>
-      <div class="chart-body">
-        <canvas baseChart [data]="prioridadeChartData" [options]="prioridadeChartOptions" [type]="prioridadeChartType"></canvas>
+      <div class="chart-card-body">
+        <div class="chart-body">
+          <canvas baseChart [data]="prioridadeChartData" [options]="prioridadeChartOptions" [type]="prioridadeChartType"></canvas>
+        </div>
       </div>
     </div>
 
     <!-- 3. SLA ⭐ -->
     <div class="chart-card chart-card-sla" [class.sla-danger]="kpiAtrasados > 0">
-      <div class="chart-card-top">
+      <div class="chart-card-header chart-header-sla" [class.chart-header-sla-danger]="kpiAtrasados > 0">
         <div class="chart-label-group">
           <span class="chart-category">⭐ Mais Importante</span>
           <h3 class="chart-title">Monitoramento SLA</h3>
@@ -186,36 +215,40 @@
           {{ slaOkPercent }}% em dia
         </div>
       </div>
-      <div class="donut-wrap">
-        <canvas baseChart [data]="slaChartData" [options]="slaChartOptions" [type]="slaChartType"></canvas>
-        <div class="donut-center">
-          <span class="donut-num" [class.donut-danger]="kpiAtrasados > 0">{{ kpiAtrasados }}</span>
-          <span class="donut-lbl">atrasados</span>
+      <div class="chart-card-body">
+        <div class="donut-wrap">
+          <canvas baseChart [data]="slaChartData" [options]="slaChartOptions" [type]="slaChartType"></canvas>
+          <div class="donut-center">
+            <span class="donut-num" [class.donut-danger]="kpiAtrasados > 0">{{ kpiAtrasados }}</span>
+            <span class="donut-lbl">atrasados</span>
+          </div>
         </div>
-      </div>
-      <!-- SLA progress bar -->
-      <div class="sla-bar-wrap">
-        <div class="sla-bar-track">
-          <div class="sla-bar-fill" [style.width.%]="slaOkPercent"
-               [class.sla-bar-good]="slaOkPercent >= 80"
-               [class.sla-bar-warn]="slaOkPercent >= 50 && slaOkPercent < 80"
-               [class.sla-bar-bad]="slaOkPercent < 50"></div>
+        <!-- SLA progress bar -->
+        <div class="sla-bar-wrap">
+          <div class="sla-bar-track">
+            <div class="sla-bar-fill" [style.width.%]="slaOkPercent"
+                 [class.sla-bar-good]="slaOkPercent >= 80"
+                 [class.sla-bar-warn]="slaOkPercent >= 50 && slaOkPercent < 80"
+                 [class.sla-bar-bad]="slaOkPercent < 50"></div>
+          </div>
+          <span class="sla-bar-label">{{ slaOkPercent }}% dentro do prazo</span>
         </div>
-        <span class="sla-bar-label">{{ slaOkPercent }}% dentro do prazo</span>
       </div>
     </div>
 
     <!-- 4. TÉCNICOS -->
     <div class="chart-card">
-      <div class="chart-card-top">
+      <div class="chart-card-header">
         <div class="chart-label-group">
           <span class="chart-category">Equipe</span>
           <h3 class="chart-title">Carga por Técnico</h3>
         </div>
-        <div class="chart-top-badge badge-purple">{{ tecnicoStats.length }} ativos</div>
+        <div class="chart-top-badge badge-glass">{{ tecnicoStats.length }} ativos</div>
       </div>
-      <div class="chart-body-tall">
-        <canvas baseChart [data]="tecnicoChartData" [options]="tecnicoChartOptions" [type]="tecnicoChartType"></canvas>
+      <div class="chart-card-body">
+        <div class="chart-body-tall">
+          <canvas baseChart [data]="tecnicoChartData" [options]="tecnicoChartOptions" [type]="tecnicoChartType"></canvas>
+        </div>
       </div>
     </div>
 
@@ -223,7 +256,7 @@
 
   <!-- ══════════════ EVOLUÇÃO ══════════════ -->
   <div class="wide-card" *ngIf="!isLoading">
-    <div class="chart-card-top">
+    <div class="chart-card-header">
       <div class="chart-label-group">
         <span class="chart-category">Tendência</span>
         <h3 class="chart-title">Evolução de Chamados no Tempo</h3>
@@ -232,21 +265,24 @@
         {{ periodo === 'hoje' ? 'Hoje' : periodo === '7' ? 'Últimos 7 dias' : periodo === '30' ? 'Últimos 30 dias' : 'Personalizado' }}
       </div>
     </div>
-    <div class="evolucao-body">
-      <canvas baseChart [data]="evolucaoChartData" [options]="evolucaoChartOptions" [type]="evolucaoChartType"></canvas>
+    <div class="chart-card-body">
+      <div class="evolucao-body">
+        <canvas baseChart [data]="evolucaoChartData" [options]="evolucaoChartOptions" [type]="evolucaoChartType"></canvas>
+      </div>
     </div>
   </div>
 
   <!-- ══════════════ EQUIPE TABLE ══════════════ -->
   <div class="wide-card team-card" *ngIf="!isLoading && tecnicoStats.length > 0">
-    <div class="chart-card-top">
+    <div class="chart-card-header">
       <div class="chart-label-group">
         <span class="chart-category">Gestão</span>
         <h3 class="chart-title">Situação da Equipe Técnica</h3>
       </div>
-      <span class="team-total-badge">{{ tecnicos.length }} técnicos cadastrados</span>
+      <span class="chart-top-badge badge-glass">{{ tecnicos.length }} técnicos cadastrados</span>
     </div>
 
+    <div class="chart-card-body">
     <div class="team-list">
       <div class="team-row" *ngFor="let t of tecnicoStats; let i = index"
            [class.team-row-overload]="t.sobrecarregado">
@@ -291,8 +327,9 @@
           <mat-icon>open_in_new</mat-icon>
         </button>
       </div>
-    </div>
-  </div>
+      </div>
+    </div><!-- chart-card-body -->
+  </div><!-- wide-card team-card -->
 
   <!-- Footer watermark -->
   <div class="db-footer" *ngIf="!isLoading">

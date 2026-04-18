@@ -226,6 +226,14 @@
           <mat-icon>filter_list</mat-icon>
           {{ dataSource.filteredData.length }} filtrado(s)
         </span>
+        <span *ngIf="selectedSla === 'ATRASADO'" class="filter-indicator filter-indicator-sla-danger">
+          <mat-icon>alarm_off</mat-icon>
+          SLA Atrasado
+        </span>
+        <span *ngIf="excluirEncerrados" class="filter-indicator filter-indicator-sla-danger">
+          <mat-icon>local_fire_department</mat-icon>
+          Só críticos em aberto
+        </span>
       </div>
     </div>
 
