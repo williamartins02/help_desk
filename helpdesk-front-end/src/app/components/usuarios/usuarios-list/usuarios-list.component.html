@@ -2,6 +2,10 @@
 
   <!-- ══ 1. HERO HEADER ══════════════════════════════════════════════════ -->
   <section class="hero-panel">
+    <!-- Decorative orbs -->
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
     <div class="hero-left">
       <div class="hero-icon-ring">
         <mat-icon>manage_accounts</mat-icon>
@@ -11,7 +15,7 @@
           <mat-icon>people</mat-icon>
           Administração do Sistema
         </span>
-        <h1>Gestão de Usuários</h1>
+        <h1>Gestão de <span class="hero-title-accent">Usuários</span></h1>
         <p>Visualize, filtre e acompanhe todos os usuários cadastrados — técnicos, clientes e administradores.</p>
       </div>
     </div>
@@ -39,50 +43,70 @@
   <div class="kpi-section">
 
     <div class="stat-card stat-total">
+      <div class="stat-watermark"><mat-icon>groups</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">groups</mat-icon>
         </div>
+        <span class="stat-trend-badge">
+          <mat-icon>trending_flat</mat-icon> Sistema
+        </span>
       </div>
       <div class="stat-card-bottom">
-        <span>Total Cadastrados</span>
         <strong>{{ USUARIO_DATA.length }}</strong>
+        <span>Total Cadastrados</span>
+        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:100%"></div></div>
       </div>
     </div>
 
     <div class="stat-card stat-admin">
+      <div class="stat-watermark"><mat-icon>admin_panel_settings</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">admin_panel_settings</mat-icon>
         </div>
+        <span class="stat-trend-badge">
+          <mat-icon>shield</mat-icon> Admin
+        </span>
       </div>
       <div class="stat-card-bottom">
-        <span>Administradores</span>
         <strong>{{ totalAdmin }}</strong>
+        <span>Administradores</span>
+        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:70%"></div></div>
       </div>
     </div>
 
     <div class="stat-card stat-tecnico">
+      <div class="stat-watermark"><mat-icon>engineering</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">engineering</mat-icon>
         </div>
+        <span class="stat-trend-badge">
+          <mat-icon>trending_up</mat-icon> Equipe
+        </span>
       </div>
       <div class="stat-card-bottom">
-        <span>Técnicos</span>
         <strong>{{ totalTecnico }}</strong>
+        <span>Técnicos</span>
+        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:80%"></div></div>
       </div>
     </div>
 
     <div class="stat-card stat-cliente">
+      <div class="stat-watermark"><mat-icon>person</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">person</mat-icon>
         </div>
+        <span class="stat-trend-badge">
+          <mat-icon>trending_up</mat-icon> Base
+        </span>
       </div>
       <div class="stat-card-bottom">
-        <span>Clientes</span>
         <strong>{{ totalCliente }}</strong>
+        <span>Clientes</span>
+        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:90%"></div></div>
       </div>
     </div>
 

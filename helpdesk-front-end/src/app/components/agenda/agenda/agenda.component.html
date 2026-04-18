@@ -3,8 +3,11 @@
      ═══════════════════════════════════════════════════════════════ -->
 <div class="agenda-container">
 
-  <!-- ── Hero Header (padrão Dashboard) ───────────────────────── -->
+  <!-- ── Hero Header (padrão Dashboard premium) ───────────────── -->
   <div class="agenda-hero">
+    <!-- Decorative orbs -->
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
 
     <!-- Esquerda: ícone + título -->
     <div class="hero-left">
@@ -12,7 +15,11 @@
         <mat-icon>event_note</mat-icon>
       </div>
       <div>
-        <h1 class="hero-title">Agenda de Tarefas</h1>
+        <span class="hero-badge">
+          <mat-icon>calendar_month</mat-icon>
+          Produtividade
+        </span>
+        <h1 class="hero-title">Agenda de <span class="hero-title-accent">Tarefas</span></h1>
         <p class="hero-sub" *ngIf="isAdmin">
           <mat-icon class="hero-sub-icon">admin_panel_settings</mat-icon>
           Visão Admin
@@ -24,7 +31,6 @@
         </p>
       </div>
     </div>
-
 
     <!-- Direita: navegação de data + ações -->
     <div class="hero-actions">
@@ -56,74 +62,62 @@
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════
-       Cards de resumo (KPIs) — aparecem ANTES dos filtros
+       Cards de resumo (KPIs) — premium solid gradient
        ══════════════════════════════════════════════════════════════ -->
   <div class="resumo-cards">
 
-    <mat-card class="card-resumo card-pendente">
-      <mat-card-content>
-        <div class="kpi-inner">
-          <div class="kpi-icon-wrap">
-            <mat-icon>pending_actions</mat-icon>
-          </div>
-          <div class="kpi-info">
-            <span class="kpi-num">{{ pendentes.length }}</span>
-            <span class="kpi-label">Pendentes</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="kpi-card kpi-pendente">
+      <div class="kpi-watermark"><mat-icon>pending_actions</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill"><mat-icon>pending_actions</mat-icon></div>
+        <span class="kpi-trend-badge"><mat-icon>schedule</mat-icon> Aguardando</span>
+      </div>
+      <div class="kpi-value">{{ pendentes.length }}</div>
+      <div class="kpi-label">Pendentes</div>
+      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:80%"></div></div>
+    </div>
 
-    <mat-card class="card-resumo card-execucao">
-      <mat-card-content>
-        <div class="kpi-inner">
-          <div class="kpi-icon-wrap">
-            <mat-icon>play_circle</mat-icon>
-          </div>
-          <div class="kpi-info">
-            <span class="kpi-num">{{ emExecucao.length }}</span>
-            <span class="kpi-label">Em Execução</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="kpi-card kpi-execucao">
+      <div class="kpi-watermark"><mat-icon>play_circle</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill"><mat-icon>play_circle</mat-icon></div>
+        <span class="kpi-trend-badge"><mat-icon>trending_up</mat-icon> Ativo</span>
+      </div>
+      <div class="kpi-value">{{ emExecucao.length }}</div>
+      <div class="kpi-label">Em Execução</div>
+      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:65%"></div></div>
+    </div>
 
-    <mat-card class="card-resumo card-concluido">
-      <mat-card-content>
-        <div class="kpi-inner">
-          <div class="kpi-icon-wrap">
-            <mat-icon>task_alt</mat-icon>
-          </div>
-          <div class="kpi-info">
-            <span class="kpi-num">{{ concluidas.length }}</span>
-            <span class="kpi-label">Concluídas</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="kpi-card kpi-concluido">
+      <div class="kpi-watermark"><mat-icon>task_alt</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill"><mat-icon>task_alt</mat-icon></div>
+        <span class="kpi-trend-badge"><mat-icon>check_circle</mat-icon> Feito</span>
+      </div>
+      <div class="kpi-value">{{ concluidas.length }}</div>
+      <div class="kpi-label">Concluídas</div>
+      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:90%"></div></div>
+    </div>
 
-    <mat-card class="card-resumo card-total">
-      <mat-card-content>
-        <div class="kpi-inner">
-          <div class="kpi-icon-wrap">
-            <mat-icon>list_alt</mat-icon>
-          </div>
-          <div class="kpi-info">
-            <span class="kpi-num">{{ tarefasFiltradas.length }}</span>
-            <span class="kpi-label">Total filtrado</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="kpi-card kpi-total">
+      <div class="kpi-watermark"><mat-icon>list_alt</mat-icon></div>
+      <div class="kpi-top">
+        <div class="kpi-icon-pill"><mat-icon>list_alt</mat-icon></div>
+        <span class="kpi-trend-badge"><mat-icon>filter_list</mat-icon> Filtrado</span>
+      </div>
+      <div class="kpi-value">{{ tarefasFiltradas.length }}</div>
+      <div class="kpi-label">Total filtrado</div>
+      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:100%"></div></div>
+    </div>
 
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════
-       BARRA DE FILTROS — acima da lista, abaixo dos KPIs
+       BARRA DE FILTROS
        ══════════════════════════════════════════════════════════════ -->
   <div class="filtros-card">
 
-    <!-- Cabeçalho da seção de filtros -->
+    <!-- Cabeçalho da seção de filtros — gradiente premium -->
     <div class="filtros-header">
       <div class="filtros-header-left">
         <div class="filtros-header-icon">
