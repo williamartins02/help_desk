@@ -170,6 +170,16 @@ export class UsuariosListComponent implements OnInit, AfterViewInit {
   get totalCliente(): number { return this.USUARIO_DATA.filter(u => u.tipo === 'CLIENTE').length; }
   get hasFilters():   boolean { return this.selectedTipo !== '' || this.searchValue.trim() !== ''; }
 
+  /** Usuários cadastrados no mês/ano corrente */
+  get cadastrosNoMes(): number {
+    const now = new Date();
+    return this.USUARIO_DATA.filter(u => {
+      if (!u.dataCriacao) return false;
+      const d = new Date(u.dataCriacao);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+  }
+
   // ── UI helpers ────────────────────────────────────────────────────────────
   getInitials(nome: string): string {
     if (!nome) return '?';

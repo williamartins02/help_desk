@@ -42,71 +42,97 @@
   <!-- ══ 2. KPI CARDS ════════════════════════════════════════════════════ -->
   <div class="kpi-section">
 
+    <!-- Total Cadastrados -->
     <div class="stat-card stat-total">
-      <div class="stat-watermark"><mat-icon>groups</mat-icon></div>
+      <div class="kpi-bg-icon"><mat-icon>groups</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">groups</mat-icon>
         </div>
-        <span class="stat-trend-badge">
+        <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>trending_flat</mat-icon> Sistema
         </span>
       </div>
-      <div class="stat-card-bottom">
-        <strong>{{ USUARIO_DATA.length }}</strong>
-        <span>Total Cadastrados</span>
-        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:100%"></div></div>
+      <div class="kpi-num-block"><strong>{{ USUARIO_DATA.length }}</strong></div>
+      <div class="kpi-card-label">Total Cadastrados</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white" [style.width.%]="100"></div>
       </div>
     </div>
 
+    <!-- Administradores -->
     <div class="stat-card stat-admin">
-      <div class="stat-watermark"><mat-icon>admin_panel_settings</mat-icon></div>
+      <div class="kpi-bg-icon"><mat-icon>admin_panel_settings</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">admin_panel_settings</mat-icon>
         </div>
-        <span class="stat-trend-badge">
+        <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>shield</mat-icon> Admin
         </span>
       </div>
-      <div class="stat-card-bottom">
-        <strong>{{ totalAdmin }}</strong>
-        <span>Administradores</span>
-        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:70%"></div></div>
+      <div class="kpi-num-block"><strong>{{ totalAdmin }}</strong></div>
+      <div class="kpi-card-label">Administradores</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="USUARIO_DATA.length > 0 ? (totalAdmin / USUARIO_DATA.length * 100) : 5"></div>
       </div>
     </div>
 
+    <!-- Técnicos -->
     <div class="stat-card stat-tecnico">
-      <div class="stat-watermark"><mat-icon>engineering</mat-icon></div>
+      <div class="kpi-bg-icon"><mat-icon>engineering</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">engineering</mat-icon>
         </div>
-        <span class="stat-trend-badge">
+        <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>trending_up</mat-icon> Equipe
         </span>
       </div>
-      <div class="stat-card-bottom">
-        <strong>{{ totalTecnico }}</strong>
-        <span>Técnicos</span>
-        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:80%"></div></div>
+      <div class="kpi-num-block"><strong>{{ totalTecnico }}</strong></div>
+      <div class="kpi-card-label">Técnicos</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="USUARIO_DATA.length > 0 ? (totalTecnico / USUARIO_DATA.length * 100) : 5"></div>
       </div>
     </div>
 
+    <!-- Clientes -->
     <div class="stat-card stat-cliente">
-      <div class="stat-watermark"><mat-icon>person</mat-icon></div>
+      <div class="kpi-bg-icon"><mat-icon>person</mat-icon></div>
       <div class="stat-card-top">
         <div class="stat-icon-wrap">
           <mat-icon class="stat-icon">person</mat-icon>
         </div>
-        <span class="stat-trend-badge">
+        <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>trending_up</mat-icon> Base
         </span>
       </div>
-      <div class="stat-card-bottom">
-        <strong>{{ totalCliente }}</strong>
-        <span>Clientes</span>
-        <div class="stat-progress-track"><div class="stat-progress-bar" style="width:90%"></div></div>
+      <div class="kpi-num-block"><strong>{{ totalCliente }}</strong></div>
+      <div class="kpi-card-label">Clientes</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="USUARIO_DATA.length > 0 ? (totalCliente / USUARIO_DATA.length * 100) : 5"></div>
+      </div>
+    </div>
+
+    <!-- Cadastros no Mês (novo KPI) -->
+    <div class="stat-card stat-mes">
+      <div class="kpi-bg-icon"><mat-icon>calendar_month</mat-icon></div>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">calendar_month</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-success">
+          <mat-icon>fiber_new</mat-icon> Novo
+        </span>
+      </div>
+      <div class="kpi-num-block"><strong>{{ cadastrosNoMes }}</strong></div>
+      <div class="kpi-card-label">Cadastros no Mês</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="USUARIO_DATA.length > 0 ? (cadastrosNoMes / USUARIO_DATA.length * 100) : 5"></div>
       </div>
     </div>
 
