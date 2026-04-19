@@ -73,7 +73,7 @@
 
     <div class="kf-divider-v"></div>
 
-    <!-- ── Admin: select de técnico ── -->
+    <!-- ── Admin: select de técnico + busca ── -->
     <ng-container *ngIf="isAdmin">
       <div class="kf-group">
         <span class="kf-group-label"><mat-icon>engineering</mat-icon> Técnico</span>
@@ -83,7 +83,7 @@
                     (ngModelChange)="onTecnicoFilterChange()"
                     panelClass="kf-tecnico-panel"
                     disableOptionCentering
-                    disableRipple>
+                    [disableRipple]="true">
 
           <!-- Trigger customizado -->
           <mat-select-trigger>
@@ -137,9 +137,23 @@
         </div>
       </div>
       <div class="kf-divider-v"></div>
+
+      <!-- Busca textual para Admin (mesma do Técnico) -->
+      <div class="kf-search-wrap" [class.kf-search-wrap--active]="searchQuery">
+        <mat-icon class="kf-search-icon">search</mat-icon>
+        <input class="kf-search-input"
+               [(ngModel)]="searchQuery"
+               placeholder="Buscar por título, cliente ou #ID…"
+               autocomplete="off" />
+        <span class="kf-search-count" *ngIf="searchQuery">{{ totalFiltered }}</span>
+        <button class="kf-search-clear" *ngIf="searchQuery" (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="kf-divider-v"></div>
     </ng-container>
 
-    <!-- ── Técnico: busca ── -->
+    <!-- ── Técnico: apenas busca (sem dropdown de técnico) ── -->
     <ng-container *ngIf="isTecnico">
       <div class="kf-search-wrap" [class.kf-search-wrap--active]="searchQuery">
         <mat-icon class="kf-search-icon">search</mat-icon>
@@ -397,7 +411,7 @@
             <span class="col-name">Finalizado</span>
             <span class="col-desc">Chamados concluídos</span>
           </div>
-          <div class="col-badge col-badge-green">{{ colEncerrado.length }}</div>
+          <div class="col-badge col-badge-green">{{ filteredEncerrado.length }}</div>
         </div>
       </div>
 
@@ -408,7 +422,7 @@
            [cdkDropListConnectedTo]="['list-aberto','list-andamento']"
            (cdkDropListDropped)="onDrop($event, '2')">
 
-        <ng-container *ngFor="let chamado of colEncerrado">
+        <ng-container *ngFor="let chamado of filteredEncerrado">
           <div class="k-card k-card-green k-card-done" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
             <div class="k-card-placeholder" *cdkDragPlaceholder></div>
             <div class="k-card-accent accent-green"></div>

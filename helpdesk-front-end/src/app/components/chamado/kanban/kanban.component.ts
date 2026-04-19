@@ -20,36 +20,38 @@ import { ChamadoCreateComponent } from '../chamado-create/chamado-create.compone
 })
 export class KanbanComponent implements OnInit, OnDestroy {
 
-  usuarioLogado: any;
+  // ── Perfil do usuário logado (resolvido via server authorities) ───────────
+  /** true → ROLE_ADMIN: vê dropdown de técnico + todos os chamados            */
+  isAdmin   = false;
+  /** true → ROLE_TECNICO sem ROLE_ADMIN: vê só busca + apenas próprios chamados */
+  isTecnico = false;
+  /** ID do usuário logado — usado para filtrar chamados do técnico             */
+  usuarioId: number | null = null;
 
-  colAberto: Chamado[]      = [];
-  colAndamento: Chamado[]   = [];
-  colEncerrado: Chamado[]   = [];
+  colAberto: Chamado[]    = [];
+  colAndamento: Chamado[] = [];
+  colEncerrado: Chamado[] = [];
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  tecnicos: Tecnico[] = [];
+  tecnicos: Tecnico[]              = [];
   selectedTecnicoId: number | null = null;
-  searchQuery = '';
+  searchQuery                      = '';
 
-  // ── Computed getters for filtered board columns ───────────────────────────
+  // ── Computed getters para as colunas filtradas ───────────────────────────
   get filteredAberto(): Chamado[]    { return this.applySearch(this.colAberto); }
   get filteredAndamento(): Chamado[] { return this.applySearch(this.colAndamento); }
   get filteredEncerrado(): Chamado[] { return this.applySearch(this.colEncerrado); }
-
-  // isAdmin: any logged-in non-tecnico user (admin, superadmin, etc.)
-  get isAdmin(): boolean   { return !!this.usuarioLogado && this.usuarioLogado.tipo !== 'TECNICO'; }
-  get isTecnico(): boolean { return this.usuarioLogado?.tipo === 'TECNICO'; }
 
   get totalFiltered(): number {
     return this.filteredAberto.length + this.filteredAndamento.length + this.filteredEncerrado.length;
   }
 
-  isLoading = false;
+  isLoading  = false;
+  profileReady = false;   // true após resolver o perfil do usuário
   lastUpdated: Date = new Date();
 
-  /** IDs de chamados recém-criados ou redistribuídos — exibe badge NEW e coloca no topo */
+  /** IDs de chamados recém-criados/redistribuídos — badge NEW */
   newChamadoIds = new Set<number>();
-  /** Timers para auto-expirar cada badge após 5 minutos */
   private newBadgeTimers = new Map<number, any>();
 
   private refreshSub!: Subscription;
@@ -60,7 +62,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   get lastUpdatedLabel(): string {
     const diff = Math.floor((Date.now() - this.lastUpdated.getTime()) / 1000);
-    if (diff < 60) return `Atualizado há ${diff}s`;
+    if (diff < 60)   return `Atualizado há ${diff}s`;
     if (diff < 3600) return `Atualizado há ${Math.floor(diff / 60)}min`;
     return `Atualizado há ${Math.floor(diff / 3600)}h`;
   }
@@ -76,39 +78,56 @@ export class KanbanComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Decode logged user
+    // ── 1. Resolver perfil via server (mesma abordagem do report-param) ───
     const token = localStorage.getItem('token');
     if (token) {
       const decoded = this.authService.jwtService.decodeToken(token);
-      this.usuarioLogado = {
-        id: decoded.id,
-        tipo: decoded.tipo,
-        email: decoded.sub,
-        perfis: decoded.authorities || []
-      };
+      const email: string = decoded?.sub ?? '';
+
+      if (email) {
+        this.authService.getUserInfo(email).subscribe({
+          next: (info: any) => {
+            this.usuarioId = info.id ?? null;
+
+            const authorities: string[] = (info.authorities || [])
+              .map((a: any) => typeof a === 'string' ? a : (a?.authority ?? ''));
+
+            // 👑 Admin (com ou sem ROLE_TECNICO) → filtro por técnico
+            this.isAdmin   = authorities.includes('ROLE_ADMIN');
+            // 🧑‍💻 Técnico puro (sem ROLE_ADMIN) → apenas busca + próprios chamados
+            this.isTecnico = authorities.includes('ROLE_TECNICO') && !this.isAdmin;
+
+            this.profileReady = true;
+
+            // Admin: carrega lista de técnicos para o dropdown de filtro
+            if (this.isAdmin) {
+              this.tecnicoService.findAllAtivos().subscribe(
+                ts => { this.tecnicos = ts; },
+                ()  => {}
+              );
+            }
+
+            this.loadChamados();
+          },
+          error: () => {
+            // Fallback: tenta carregar mesmo sem resolver perfil
+            this.profileReady = true;
+            this.loadChamados();
+          }
+        });
+      }
     }
 
-    this.loadChamados();
-
-    // Load technicians list for admin filter dropdown
-    if (this.isAdmin) {
-      this.tecnicoService.findAllAtivos().subscribe(
-        (ts) => { this.tecnicos = ts; },
-        () => {}
-      );
-    }
-
-    // Subscribe to refresh$ (triggered after any create/update in ChamadoService)
+    // ── 2. Subscrever refresh$ (criação/atualização em outros componentes) ─
     this.refreshSub = this.chamadoService.refresh$.subscribe(() => {
       this.loadChamados();
     });
 
-    // Subscribe to WebSocket events (chamado criado ou atualizado em qualquer tela)
+    // ── 3. WebSocket — sincronização em tempo real ─────────────────────────
     this.agendaWs.connect();
     this.wsSub = this.agendaWs.chamadoAtualizado$.subscribe(evento => {
       this.zone.run(() => {
         if (evento.tipo === 'CHAMADO_CRIADO') {
-          // Marca como novo ANTES de recarregar — assim loadChamados já o posiciona no topo
           this.markAsNew(evento.entityId);
           this.loadChamados();
           this.toast.success(
@@ -117,8 +136,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
             { timeOut: 2500, positionClass: 'toast-bottom-right' }
           );
         } else if (evento.tipo === 'CHAMADO_REDISTRIBUIDO') {
-          // Marca o chamado redistribuído como novo para o técnico de destino
-          const meuId = this.usuarioLogado?.id;
+          const meuId = this.usuarioId;
           if (meuId && String(meuId) === String(evento.tecnicoId)) {
             this.markAsNew(evento.entityId);
           }
@@ -154,41 +172,37 @@ export class KanbanComponent implements OnInit, OnDestroy {
       });
     });
 
-    // SLA countdown timer
+    // ── 4. Contador SLA a cada segundo ────────────────────────────────────
     this.slaTimerInterval = setInterval(() => {
-      const allChamados = [...this.colAberto, ...this.colAndamento, ...this.colEncerrado];
-      allChamados.forEach(c => {
-        if (c.prazoSla) {
-          this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
-        }
+      const all = [...this.colAberto, ...this.colAndamento, ...this.colEncerrado];
+      all.forEach(c => {
+        if (c.prazoSla) this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
       });
     }, 1000);
   }
 
+  // ── Carregamento de chamados por perfil ─────────────────────────────────
   loadChamados(): void {
     this.isLoading = true;
 
     let obs;
     if (this.isTecnico) {
-      // Técnico: sempre vê apenas seus próprios chamados
+      // 🧑‍💻 Técnico puro: somente os próprios chamados
       obs = this.chamadoService.findMyChamados();
     } else if (this.selectedTecnicoId) {
-      // Admin com técnico selecionado: filtra por técnico
+      // 👑 Admin com técnico selecionado no filtro
       obs = this.chamadoService.findByTecnico(this.selectedTecnicoId);
     } else {
-      // Admin sem filtro: vê todos os chamados
+      // 👑 Admin sem filtro: todos os chamados
       obs = this.chamadoService.findAll();
     }
 
     obs.subscribe(
       (chamados: Chamado[]) => {
-        this.lastUpdated = new Date();
-
-        // Separar por status e colocar os "new" no topo de cada coluna
+        this.lastUpdated  = new Date();
         this.colAberto    = this.sortNewFirst(chamados.filter(c => String(c.status) === '0'));
         this.colAndamento = this.sortNewFirst(chamados.filter(c => String(c.status) === '1'));
         this.colEncerrado = this.sortNewFirst(chamados.filter(c => String(c.status) === '2'));
-
         this.initSlaCountdowns(chamados);
         this.isLoading = false;
       },
@@ -199,36 +213,30 @@ export class KanbanComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Move os chamados marcados como "new" para o topo da lista, mantendo a ordem dos demais */
   private sortNewFirst(list: Chamado[]): Chamado[] {
     if (this.newChamadoIds.size === 0) return list;
-    const news  = list.filter(c => this.newChamadoIds.has(Number(c.id)));
+    const news = list.filter(c =>  this.newChamadoIds.has(Number(c.id)));
     const rest  = list.filter(c => !this.newChamadoIds.has(Number(c.id)));
     return [...news, ...rest];
   }
 
-  /** Registra um chamado como "novo", agenda auto-expiração do badge em 5 minutos */
   private markAsNew(chamadoId: number): void {
     this.newChamadoIds.add(chamadoId);
-    // Cancela timer anterior caso o mesmo ID apareça novamente
-    if (this.newBadgeTimers.has(chamadoId)) {
-      clearTimeout(this.newBadgeTimers.get(chamadoId));
-    }
+    if (this.newBadgeTimers.has(chamadoId)) clearTimeout(this.newBadgeTimers.get(chamadoId));
     const timer = setTimeout(() => {
       this.newChamadoIds.delete(chamadoId);
       this.newBadgeTimers.delete(chamadoId);
-    }, 300_000); // 5 minutos
+    }, 300_000);
     this.newBadgeTimers.set(chamadoId, timer);
   }
 
   private initSlaCountdowns(chamados: Chamado[]): void {
     chamados.forEach(c => {
-      if (c.prazoSla) {
-        this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
-      }
+      if (c.prazoSla) this.slaCountdowns[c.id] = this.computeSlaCountdown(c.prazoSla, c);
     });
   }
 
+  // ── Drag & Drop ─────────────────────────────────────────────────────────
   onDrop(event: CdkDragDrop<Chamado[]>, newStatus: string): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -237,19 +245,18 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     const chamado: Chamado = event.previousContainer.data[event.previousIndex];
 
-    // Block moving encerrado (2) chamados unless admin
-    if (String(chamado.status) === '2' && this.usuarioLogado?.tipo !== 'ADMIN') {
+    // Somente Admin pode mover chamados encerrados
+    if (String(chamado.status) === '2' && !this.isAdmin) {
       this.toast.warning('Chamados encerrados não podem ser movidos.', 'Kanban');
       return;
     }
 
-    // Permission: TECNICO can only move their own chamados
-    if (this.usuarioLogado?.tipo === 'TECNICO' && chamado.tecnico !== this.usuarioLogado.id) {
+    // Técnico puro: pode mover apenas seus próprios chamados
+    if (this.isTecnico && String(chamado.tecnico) !== String(this.usuarioId)) {
       this.toast.warning('Você só pode mover seus próprios chamados.', 'Permissão negada');
       return;
     }
 
-    // Optimistic UI update
     transferArrayItem(
       event.previousContainer.data,
       event.container.data,
@@ -270,7 +277,6 @@ export class KanbanComponent implements OnInit, OnDestroy {
         );
       },
       () => {
-        // Rollback on error
         chamado.status = previousStatus;
         transferArrayItem(
           event.container.data,
@@ -283,14 +289,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
     );
   }
 
+  // ── Dialogs ─────────────────────────────────────────────────────────────
   openCreate(): void {
     this.dialog.open(ChamadoCreateComponent, { width: '720px' })
-      .afterClosed().subscribe(() => {
-        // Após criar via dialog, recarregue imediatamente.
-        // O ID exato chegará via WS (CHAMADO_CRIADO) que já chama markAsNew + loadChamados.
-        // Aqui apenas forçamos reload caso o WS esteja lento.
-        this.loadChamados();
-      });
+      .afterClosed().subscribe(() => this.loadChamados());
   }
 
   openEdit(chamado: Chamado): void {
@@ -311,25 +313,17 @@ export class KanbanComponent implements OnInit, OnDestroy {
     });
   }
 
-  manualRefresh(): void {
-    this.loadChamados();
-  }
+  manualRefresh(): void { this.loadChamados(); }
 
-  // ── Filter methods ────────────────────────────────────────────────────────
-  onTecnicoFilterChange(): void {
-    this.loadChamados();
-  }
+  // ── Filtros ──────────────────────────────────────────────────────────────
+  onTecnicoFilterChange(): void { this.loadChamados(); }
 
   clearTecnicoFilter(): void {
     this.selectedTecnicoId = null;
     this.loadChamados();
   }
 
-  onSearchChange(): void { /* reactive via ngModel getter */ }
-
-  clearSearch(): void {
-    this.searchQuery = '';
-  }
+  clearSearch(): void { this.searchQuery = ''; }
 
   getTecnicoNome(id: number | null): string {
     if (!id) return '';
@@ -337,18 +331,22 @@ export class KanbanComponent implements OnInit, OnDestroy {
     return t ? t.nome : String(id);
   }
 
+  /**
+   * Aplica busca textual sobre qualquer coluna.
+   * — Admin: busca dentro dos chamados já filtrados pelo dropdown de técnico.
+   * — Técnico: busca dentro dos próprios chamados.
+   */
   private applySearch(list: Chamado[]): Chamado[] {
-    // Busca textual só se aplica ao perfil TÉCNICO
-    if (!this.isTecnico || !this.searchQuery.trim()) return list;
+    if (!this.searchQuery.trim()) return list;
     const q = this.searchQuery.toLowerCase().trim();
     return list.filter(c =>
       String(c.id).includes(q) ||
-      (c.titulo || '').toLowerCase().includes(q) ||
+      (c.titulo      || '').toLowerCase().includes(q) ||
       (c.nomeCliente || '').toLowerCase().includes(q)
     );
   }
 
-  // ── Label helpers ─────────────────────────────────────────────────────────
+  // ── Helpers de label ────────────────────────────────────────────────────
   returnPrioridade(p: any): string {
     if (p == '0') return 'BAIXA';
     if (p == '1') return 'MÉDIA';
@@ -370,7 +368,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     return 'priority_high';
   }
 
-  // ── SLA helpers ───────────────────────────────────────────────────────────
+  // ── Helpers de SLA ──────────────────────────────────────────────────────
   computeSlaCountdown(prazoSla: string, chamado?: Chamado): string {
     if (!prazoSla) return '--:--:--';
     const prazo = this.parseDatetime(prazoSla);
@@ -384,11 +382,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   private formatCountdown(ms: number): string {
     const sign = ms < 0 ? '-' : '';
-    const abs = Math.abs(ms);
-    const hh = Math.floor(abs / 3600000);
-    const mm = Math.floor((abs % 3600000) / 60000);
-    const ss = Math.floor((abs % 60000) / 1000);
-    return `${sign}${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+    const abs  = Math.abs(ms);
+    const hh   = Math.floor(abs / 3600000);
+    const mm   = Math.floor((abs % 3600000) / 60000);
+    const ss   = Math.floor((abs % 60000) / 1000);
+    return `${sign}${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
   }
 
   computeSlaStatus(chamado: Chamado): string {
@@ -402,29 +400,21 @@ export class KanbanComponent implements OnInit, OnDestroy {
       }
       return 'ENCERRADO_NO_PRAZO';
     }
-    const now = Date.now();
+    const now      = Date.now();
     if (now > prazo.getTime()) return 'ATRASADO';
     const abertura = chamado.dataAbertura ? this.parseDatetime(chamado.dataAbertura) : null;
     if (abertura) {
-      const total = prazo.getTime() - abertura.getTime();
+      const total     = prazo.getTime() - abertura.getTime();
       const remaining = prazo.getTime() - now;
       if (total > 0 && remaining < total / 2) return 'ALERTA';
     }
     return 'DENTRO_PRAZO';
   }
 
-  getSlaColor(chamado: Chamado): string {
-    const s = chamado.statusSla || this.computeSlaStatus(chamado);
-    if (s === 'ATRASADO' || s === 'ENCERRADO_ATRASADO') return '#f44336';
-    if (s === 'ALERTA') return '#ff9800';
-    if (s === 'ENCERRADO_NO_PRAZO') return '#43a047';
-    return '#4caf50';
-  }
-
   getSlaIcon(chamado: Chamado): string {
     const s = chamado.statusSla || this.computeSlaStatus(chamado);
-    if (s === 'ATRASADO') return 'timer_off';
-    if (s === 'ALERTA') return 'timer';
+    if (s === 'ATRASADO')          return 'timer_off';
+    if (s === 'ALERTA')            return 'timer';
     if (s === 'ENCERRADO_NO_PRAZO') return 'verified';
     if (s === 'ENCERRADO_ATRASADO') return 'running_with_errors';
     return 'schedule';
@@ -432,11 +422,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   getSlaLabel(chamado: Chamado): string {
     const s = chamado.statusSla || this.computeSlaStatus(chamado);
-    if (s === 'ATRASADO') return 'ATRASADO';
-    if (s === 'ALERTA') return 'ALERTA';
+    if (s === 'ATRASADO')          return 'ATRASADO';
+    if (s === 'ALERTA')            return 'ALERTA';
     if (s === 'ENCERRADO_NO_PRAZO') return 'NO PRAZO';
     if (s === 'ENCERRADO_ATRASADO') return 'ATRASADO';
-    if (s === 'N/A') return 'SEM SLA';
+    if (s === 'N/A')               return 'SEM SLA';
     return 'NO PRAZO';
   }
 
@@ -453,12 +443,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
     if (!d) return dateStr;
     const diff = Date.now() - d.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'agora';
+    if (mins < 1)  return 'agora';
     if (mins < 60) return `há ${mins}min`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `há ${hrs}h`;
-    const days = Math.floor(hrs / 24);
-    return `há ${days}d`;
+    if (hrs < 24)  return `há ${hrs}h`;
+    return `há ${Math.floor(hrs / 24)}d`;
   }
 
   private parseDatetime(str: string): Date | null {
@@ -470,13 +459,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.refreshSub) this.refreshSub.unsubscribe();
-    if (this.wsSub) this.wsSub.unsubscribe();
+    if (this.wsSub)      this.wsSub.unsubscribe();
     if (this.slaTimerInterval) clearInterval(this.slaTimerInterval);
-    // Limpa todos os timers de badge NEW
     this.newBadgeTimers.forEach(t => clearTimeout(t));
     this.newBadgeTimers.clear();
-    // Note: agendaWs is a singleton — do NOT call disconnect() here
-    // to avoid breaking other components that share the same connection.
   }
 }
 
