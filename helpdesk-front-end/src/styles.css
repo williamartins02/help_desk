@@ -119,6 +119,43 @@ table {
   box-sizing: border-box;
 }
 
+/* ── CDK Overlay Pane — fix global de overflow e width fixo ──────────────── */
+
+/* Permite que painéis (select, autocomplete, menu, datepicker) extrapolem
+   a largura do trigger sem serem cortados */
+.cdk-overlay-pane {
+  max-width: 100vw !important;
+  overflow: visible !important;   /* o scroll fica no painel interno */
+}
+
+/* O próprio painel scrollável interno mantém overflow:auto */
+.mat-mdc-select-panel,
+.mat-select-panel,
+.mat-autocomplete-panel,
+.mat-mdc-autocomplete-panel,
+.mat-menu-panel,
+.mat-mdc-menu-panel,
+.mat-datepicker-content {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 256px;               /* padrão razoável; pode ser sobrescrito */
+  min-width: fit-content !important;
+}
+
+/* Options não devem truncar texto desnecessariamente */
+.mat-option .mat-option-text,
+.mat-mdc-option .mdc-list-item__primary-text {
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+/* Para overlays que contêm diálogos o overflow do pane pode continuar hidden
+   (o border-radius do dialog é aplicado no .mat-mdc-dialog-surface abaixo) */
+.cdk-overlay-pane:has(.mat-mdc-dialog-surface),
+.cdk-overlay-pane:has(.mat-dialog-container) {
+  overflow: hidden !important;
+}
+
 /* Remove padding do container para todos os dialogs que usam .dialog-wrapper */
 .mat-dialog-container,
 .mat-mdc-dialog-surface {

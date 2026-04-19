@@ -60,59 +60,120 @@
     </div>
   </section>
 
-  <!-- ══ FILTER BAR ═══════════════════════════════════════════════════════════ -->
-  <section class="filter-bar">
+  <!-- ══ FILTER TOOLBAR — Premium ══════════════════════════════════════════ -->
+  <div class="kf-bar">
 
-    <!-- Admin: dropdown de técnicos -->
+    <!-- Ícone + label esquerdo -->
+    <div class="kf-brand">
+      <div class="kf-brand-icon">
+        <mat-icon>tune</mat-icon>
+      </div>
+      <span class="kf-brand-label">Filtros</span>
+    </div>
+
+    <div class="kf-divider-v"></div>
+
+    <!-- ── Admin: select de técnico ── -->
     <ng-container *ngIf="isAdmin">
-      <div class="filter-group">
-        <span class="filter-label"><mat-icon>manage_accounts</mat-icon> Filtrar por técnico</span>
-        <div class="filter-select-wrap">
-          <mat-icon class="select-prefix">person_search</mat-icon>
-          <select class="filter-native-select" [(ngModel)]="selectedTecnicoId" (change)="onTecnicoFilterChange()">
-            <option [ngValue]="null">Todos os técnicos</option>
-            <option *ngFor="let t of tecnicos" [ngValue]="t.id">{{ t.nome }}</option>
-          </select>
-          <mat-icon class="select-suffix">expand_more</mat-icon>
+      <div class="kf-group">
+        <span class="kf-group-label"><mat-icon>engineering</mat-icon> Técnico</span>
+
+        <mat-select class="kf-tecnico-select"
+                    [(ngModel)]="selectedTecnicoId"
+                    (ngModelChange)="onTecnicoFilterChange()"
+                    panelClass="kf-tecnico-panel"
+                    disableOptionCentering
+                    disableRipple>
+
+          <!-- Trigger customizado -->
+          <mat-select-trigger>
+            <div class="kf-trigger-inner">
+              <div class="kf-sel-avatar" *ngIf="selectedTecnicoId; else triggerIcon">
+                {{ getTecnicoNome(selectedTecnicoId) | slice:0:2 | uppercase }}
+              </div>
+              <ng-template #triggerIcon>
+                <mat-icon class="kf-sel-icon">person_search</mat-icon>
+              </ng-template>
+              <span class="kf-sel-text">
+                {{ selectedTecnicoId ? getTecnicoNome(selectedTecnicoId) : 'Todos os técnicos' }}
+              </span>
+              <mat-icon class="kf-sel-caret">expand_more</mat-icon>
+            </div>
+          </mat-select-trigger>
+
+          <!-- Opção "Todos" -->
+          <mat-option [value]="null">
+            <div class="kf-opt-todos">
+              <div class="kf-opt-icon-wrap">
+                <mat-icon>group</mat-icon>
+              </div>
+              <div class="kf-opt-info">
+                <span class="kf-opt-name">Todos os técnicos</span>
+                <span class="kf-opt-sub">Exibir chamados de todos</span>
+              </div>
+            </div>
+          </mat-option>
+
+          <!-- Opções dos técnicos -->
+          <mat-option *ngFor="let t of tecnicos" [value]="t.id">
+            <div class="kf-opt-item">
+              <div class="kf-opt-avatar">{{ t.nome | slice:0:2 | uppercase }}</div>
+              <div class="kf-opt-info">
+                <span class="kf-opt-name">{{ t.nome }}</span>
+                <span class="kf-opt-sub">Técnico de suporte</span>
+              </div>
+            </div>
+          </mat-option>
+
+        </mat-select>
+
+        <!-- Chip quando filtrado -->
+        <div class="kf-active-chip" *ngIf="selectedTecnicoId">
+          <mat-icon>person_pin</mat-icon>
+          <span>{{ getTecnicoNome(selectedTecnicoId) }}</span>
+          <button class="kf-chip-clear" (click)="clearTecnicoFilter()" matTooltip="Remover filtro">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
       </div>
-      <div class="filter-active-chip" *ngIf="selectedTecnicoId">
-        <mat-icon>filter_alt</mat-icon>
-        <span>Técnico: <strong>{{ getTecnicoNome(selectedTecnicoId) }}</strong></span>
-        <button class="chip-close-btn" (click)="clearTecnicoFilter()" matTooltip="Limpar filtro">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      <div class="kf-divider-v"></div>
     </ng-container>
 
-    <!-- Técnico: busca textual -->
+    <!-- ── Técnico: busca ── -->
     <ng-container *ngIf="isTecnico">
-      <div class="filter-search-wrap">
-        <mat-icon class="search-prefix">search</mat-icon>
-        <input
-          class="filter-search-input"
-          type="text"
-          [(ngModel)]="searchQuery"
-          placeholder="Buscar por título, cliente ou #ID…"
-          autocomplete="off"
-        />
-        <button class="search-clear-btn" *ngIf="searchQuery" (click)="clearSearch()" matTooltip="Limpar busca">
+      <div class="kf-search-wrap" [class.kf-search-wrap--active]="searchQuery">
+        <mat-icon class="kf-search-icon">search</mat-icon>
+        <input class="kf-search-input"
+               [(ngModel)]="searchQuery"
+               placeholder="Buscar por título, cliente ou #ID…"
+               autocomplete="off" />
+        <span class="kf-search-count" *ngIf="searchQuery">{{ totalFiltered }}</span>
+        <button class="kf-search-clear" *ngIf="searchQuery" (click)="clearSearch()">
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      <div class="filter-results-chip" *ngIf="searchQuery">
-        <mat-icon>filter_list</mat-icon>
-        <span>{{ totalFiltered }} resultado(s)</span>
-      </div>
+      <div class="kf-divider-v"></div>
     </ng-container>
 
-    <div class="filter-spacer"></div>
+    <div class="kf-spacer"></div>
 
-    <div class="filter-total-chip">
-      <mat-icon>assignment</mat-icon>
-      <span>{{ colAberto.length + colAndamento.length + colEncerrado.length }} chamados</span>
+    <!-- Indicador filtro ativo -->
+    <div class="kf-status-badge" *ngIf="selectedTecnicoId || searchQuery">
+      <span class="kf-status-dot"></span>
+      <span>Filtro ativo</span>
+      <button class="kf-clear-all" (click)="clearTecnicoFilter(); clearSearch()" matTooltip="Limpar todos os filtros">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
     </div>
-  </section>
+
+    <!-- Totalizador -->
+    <div class="kf-total">
+      <mat-icon>grid_view</mat-icon>
+      <strong>{{ colAberto.length + colAndamento.length + colEncerrado.length }}</strong>
+      <span>chamados</span>
+    </div>
+
+  </div>
 
   <!-- ══ LOADING BAR ════════════════════════════════════════════════════════ -->
   <div class="loading-bar-wrap" *ngIf="isLoading">

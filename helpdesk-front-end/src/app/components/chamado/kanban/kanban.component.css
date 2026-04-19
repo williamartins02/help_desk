@@ -211,225 +211,470 @@
 .last-update-chip mat-icon { font-size: 13px; width: 13px; height: 13px; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FILTER BAR — Premium Redesign
+   FILTER TOOLBAR — Premium inline
    ═══════════════════════════════════════════════════════════════════ */
-.filter-bar {
+.kf-bar {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0;
   background: #fff;
   border-radius: var(--radius-lg);
   border: 1px solid #dde5f0;
-  box-shadow: 0 2px 8px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
-  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15,23,42,.07), 0 1px 2px rgba(15,23,42,.04);
+  min-height: 54px;
+  /* Não usar overflow:hidden aqui para não criar stacking context que
+     interfere no posicionamento do CDK Overlay do mat-select.
+     A barra superior animada usa ::before com border-radius próprio. */
+  overflow: visible;
   position: relative;
-  min-height: 58px;
+  /* Clip apenas o topo para o ::before (gradiente animado) não vazar */
+  clip-path: inset(0 round var(--radius-lg));
 }
-
-/* Linha colorida no topo */
-.filter-bar::before {
+/* Barra azul animada no topo */
+.kf-bar::before {
   content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #0d47a1 0%, #1976d2 30%, #42a5f5 60%, #1976d2 80%, #0d47a1 100%);
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #0d47a1, #1976d2, #42a5f5, #1976d2, #0d47a1);
   background-size: 300% 100%;
-  animation: filterShimmer 4s linear infinite;
-  z-index: 2;
+  animation: kfShimmer 4s linear infinite;
 }
-@keyframes filterShimmer {
-  0%   { background-position: 0% 0; }
+@keyframes kfShimmer {
+  0%   { background-position: 0 0; }
   100% { background-position: 300% 0; }
 }
 
-/* Cada "célula" do filtro */
-.filter-cell {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  padding: 0 20px;
-  height: 58px;
-  position: relative;
+/* ── Brand (ícone + label "Filtros") ── */
+.kf-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 18px;
+  height: 54px;
   flex-shrink: 0;
 }
-/* Divisor vertical entre células */
-.filter-cell + .filter-cell::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 14px; bottom: 14px;
-  width: 1px;
-  background: #e8eef6;
+.kf-brand-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(21,101,192,.3);
+  flex-shrink: 0;
 }
-
-/* Label dentro da célula */
-.filter-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: .65rem;
-  font-weight: 700;
-  color: var(--text-4);
-  text-transform: uppercase;
-  letter-spacing: .6px;
+.kf-brand-icon mat-icon {
+  font-size: 15px !important; width: 15px !important; height: 15px !important; color: #fff;
+}
+.kf-brand-label {
+  font-size: .72rem; font-weight: 800;
+  color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .6px;
   white-space: nowrap;
-  line-height: 1;
+}
+
+/* ── Divisor vertical ── */
+.kf-divider-v {
+  width: 1px; height: 28px;
+  background: linear-gradient(to bottom, transparent, #e2e8f0, transparent);
   flex-shrink: 0;
 }
-.filter-label mat-icon {
+
+/* ── Grupo de campo ── */
+.kf-group {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px;
+  height: 54px;
+}
+.kf-group-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .65rem; font-weight: 700; color: var(--text-4);
+  text-transform: uppercase; letter-spacing: .5px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.kf-group-label mat-icon {
   font-size: 13px !important; width: 13px !important; height: 13px !important;
-  color: var(--blue);
 }
 
-/* Wrapper do select nativo */
-.filter-group { display: flex; align-items: center; gap: .65rem; }
-
-.filter-select-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
+/* ── Mat-select (técnico) — trigger customizado ── */
+.kf-tecnico-select {
+  height: 36px;
+  min-width: 240px;
+  max-width: 320px;
+  width: auto;
   background: #f4f7fc;
   border: 1.5px solid #dde5f0;
   border-radius: 9px;
-  padding: 0 34px 0 34px;
-  height: 36px;
-  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  padding: 0 10px;
   cursor: pointer;
+  transition: all var(--transition);
+  --mat-select-trigger-text-size: .82rem;
+  /* garante que o dropdown sobreponha o resto da toolbar */
+  position: relative;
+  z-index: 10;
 }
-.filter-select-wrap:hover { background: #eef3fb; border-color: #c5d5ea; }
-.filter-select-wrap:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(21,101,192,.1);
-  background: #fff;
+.kf-tecnico-select:hover {
+  background: #eef3fb;
+  border-color: #b8d0ec;
 }
-.select-prefix {
-  position: absolute; left: 9px;
-  font-size: 15px !important; width: 15px !important; height: 15px !important;
-  color: var(--text-3); pointer-events: none;
+/* Wrapper do trigger com altura fixa */
+::ng-deep .kf-tecnico-select .mat-mdc-select-trigger {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+/* Remove seta padrão do Angular Material (usamos nosso trigger customizado) */
+::ng-deep .kf-tecnico-select .mat-mdc-select-arrow-wrapper { display: none !important; }
+/* Permite que o valor não seja cortado */
+::ng-deep .kf-tecnico-select .mat-mdc-select-value {
+  overflow: visible !important;
+  max-width: none !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+/* Estado aberto: destaque de foco */
+::ng-deep .kf-tecnico-select.mat-mdc-select-panel-open {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(21,101,192,.12) !important;
+  background: #fff !important;
+}
+
+/* Trigger inner */
+.kf-trigger-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* Avatar no trigger quando um técnico está selecionado */
+.kf-sel-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  color: #fff;
+  font-size: .58rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(21,101,192,.38);
+  letter-spacing: .2px;
+}
+/* Ícone quando não há técnico selecionado */
+.kf-sel-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--text-3);
+  flex-shrink: 0;
   transition: color var(--transition);
 }
-.filter-select-wrap:focus-within .select-prefix { color: var(--primary); }
-.select-suffix {
-  position: absolute; right: 7px;
-  font-size: 15px !important; width: 15px !important; height: 15px !important;
-  color: var(--text-4); pointer-events: none;
-  transition: transform .2s var(--ease), color var(--transition);
-}
-.filter-select-wrap:focus-within .select-suffix { transform: rotate(180deg); color: var(--primary); }
-.filter-native-select {
-  -webkit-appearance: none; appearance: none;
-  background: transparent; border: none; outline: none;
-  font-size: .82rem; font-weight: 600; color: var(--text-1);
-  min-width: 170px; max-width: 260px;
-  cursor: pointer; height: 100%; padding: 0; font-family: inherit;
-}
-
-/* Chip de filtro ativo (admin) */
-.filter-active-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: linear-gradient(135deg, #dbeafe, #e0ecff);
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-  padding: 5px 8px 5px 11px;
-  font-size: .74rem; font-weight: 700; color: #1d4ed8;
-  animation: chipPop .22s var(--spring);
-  box-shadow: 0 2px 8px rgba(29,78,216,.12);
+/* Seta de expansão no final do trigger — centralizada verticalmente */
+.kf-sel-caret {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  color: var(--text-4);
   flex-shrink: 0;
+  margin-left: auto;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center;
+  transition: transform .2s var(--ease), color .2s;
 }
-@keyframes chipPop {
-  from { opacity: 0; transform: scale(.75) translateY(6px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+::ng-deep .kf-tecnico-select.mat-mdc-select-panel-open .kf-sel-caret {
+  transform: rotate(180deg);
+  color: var(--primary);
 }
-.filter-active-chip mat-icon { font-size: 13px !important; width: 13px !important; height: 13px !important; }
-.chip-close-btn {
-  background: rgba(29,78,216,.1); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 6px; width: 20px; height: 20px; padding: 0; color: #1d4ed8;
-  transition: background .15s, transform .15s;
+/* Texto do trigger */
+.kf-sel-text {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
-.chip-close-btn:hover { background: rgba(29,78,216,.2); transform: scale(1.1); }
-.chip-close-btn mat-icon { font-size: 12px !important; width: 12px !important; height: 12px !important; }
 
-/* Search input (técnico) */
-.filter-search-wrap {
-  position: relative;
-  display: inline-flex; align-items: center;
-  background: #f4f7fc;
-  border: 1.5px solid #dde5f0;
-  border-radius: 9px;
-  height: 36px; padding: 0 10px 0 34px;
-  min-width: 280px; max-width: 440px;
-  flex: 1 1 280px;
-  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+/* ══════════════════════════════════════════════════════
+   PAINEL DO DROPDOWN — kf-tecnico-panel
+   (renderizado via CDK Overlay, fora do componente)
+   ══════════════════════════════════════════════════════ */
+::ng-deep .kf-tecnico-panel {
+  border-radius: 14px !important;
+  box-shadow:
+    0 4px 6px -1px rgba(15,23,42,.08),
+    0 12px 40px rgba(15,23,42,.16),
+    0 0 0 1px rgba(15,23,42,.05) !important;
+  border: 1px solid #e2e8f0 !important;
+  /* Scroll interno com borda arredondada — não usar overflow:hidden (quebra scroll) */
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 6px !important;
+  min-width: 290px !important;
+  max-width: 420px !important;
+  max-height: 300px !important;   /* limita altura e habilita scroll */
+  width: auto !important;
+  background: #fff !important;
+  /* Espaço entre trigger e painel */
+  margin-top: 4px !important;
+  /* Scrollbar discreta */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
-.filter-search-wrap:hover { background: #eef3fb; border-color: #c5d5ea; }
-.filter-search-wrap:focus-within {
+::ng-deep .kf-tecnico-panel::-webkit-scrollbar {
+  width: 4px;
+}
+::ng-deep .kf-tecnico-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+::ng-deep .kf-tecnico-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+::ng-deep .kf-tecnico-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Opção base ── */
+::ng-deep .kf-tecnico-panel .mat-mdc-option {
+  border-radius: 9px !important;
+  margin: 2px 0 !important;
+  padding: 8px 10px !important;
+  min-height: 54px !important;
+  height: auto !important;
+  transition: background .14s ease !important;
+  overflow: hidden !important;
+  /* Fix: alinha o conteúdo interno corretamente */
+  display: flex !important;
+  align-items: center !important;
+}
+::ng-deep .kf-tecnico-panel .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: #eff6ff !important;
+}
+::ng-deep .kf-tecnico-panel .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background: #dbeafe !important;
+}
+/* Garante que o span interno ocupe largura total sem cortar */
+::ng-deep .kf-tecnico-panel .mat-mdc-option .mdc-list-item__primary-text {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  display: flex !important;
+  align-items: center !important;
+}
+/* Remove ícone de check sobreposto ao avatar */
+::ng-deep .kf-tecnico-panel .mat-mdc-option .mat-pseudo-checkbox {
+  display: none !important;
+}
+
+/* ── Opção "Todos os técnicos" ── */
+.kf-opt-todos {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-width: 0;
+}
+.kf-opt-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(21,101,192,.12);
+}
+.kf-opt-icon-wrap mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #1565c0;
+}
+
+/* ── Opção individual de técnico ── */
+.kf-opt-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-width: 0;
+}
+/* Avatar circular com iniciais */
+.kf-opt-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  color: #fff;
+  font-size: .62rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(21,101,192,.28);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+/* Info textual (nome + cargo) */
+.kf-opt-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.kf-opt-name {
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+::ng-deep .kf-tecnico-panel .mdc-list-item--selected .kf-opt-name {
+  color: #1d4ed8;
+}
+.kf-opt-sub {
+  font-size: .68rem;
+  color: var(--text-4);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* ── Chip de técnico ativo ── */
+.kf-active-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #dbeafe; border: 1px solid #93c5fd;
+  border-radius: 7px; padding: 4px 6px 4px 9px;
+  font-size: .73rem; font-weight: 700; color: #1d4ed8;
+  animation: kfChipIn .22s var(--spring);
+  white-space: nowrap; flex-shrink: 0;
+}
+@keyframes kfChipIn {
+  from { opacity: 0; transform: scale(.78) translateX(-6px); }
+  to   { opacity: 1; transform: scale(1) translateX(0); }
+}
+.kf-active-chip mat-icon {
+  font-size: 13px !important; width: 13px !important; height: 13px !important;
+}
+.kf-chip-clear {
+  background: rgba(29,78,216,.12); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 5px; width: 18px; height: 18px; padding: 0;
+  color: #1d4ed8; transition: background .14s, transform .14s;
+}
+.kf-chip-clear:hover { background: rgba(29,78,216,.25); transform: scale(1.1); }
+.kf-chip-clear mat-icon {
+  font-size: 11px !important; width: 11px !important; height: 11px !important;
+}
+
+/* ── Search (técnico) ── */
+.kf-search-wrap {
+  position: relative; display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 8px 0 34px;
+  background: #f4f7fc; border: 1.5px solid #dde5f0;
+  border-radius: 9px; min-width: 280px; max-width: 460px; flex: 1 1 280px;
+  transition: all var(--transition); margin: 0 16px;
+}
+.kf-search-wrap:hover { background: #eef3fb; border-color: #b8d0ec; }
+.kf-search-wrap:focus-within {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(21,101,192,.1);
   background: #fff;
 }
-.search-prefix {
+.kf-search-wrap--active {
+  background: #fff; border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(21,101,192,.08);
+}
+.kf-search-icon {
   position: absolute; left: 9px;
   font-size: 16px !important; width: 16px !important; height: 16px !important;
-  color: var(--text-4); pointer-events: none;
-  transition: color var(--transition);
+  color: var(--text-4); pointer-events: none; transition: color var(--transition);
 }
-.filter-search-wrap:focus-within .search-prefix { color: var(--primary); }
-.filter-search-input {
+.kf-search-wrap:focus-within .kf-search-icon,
+.kf-search-wrap--active .kf-search-icon { color: var(--primary); }
+.kf-search-input {
   border: none; outline: none; background: transparent;
   font-size: .84rem; font-weight: 500; color: var(--text-1);
-  width: 100%; font-family: inherit;
+  flex: 1; font-family: inherit; min-width: 0;
 }
-.filter-search-input::placeholder { color: var(--text-4); font-weight: 400; }
-.search-clear-btn {
+.kf-search-input::placeholder { color: var(--text-4); font-weight: 400; }
+.kf-search-count {
+  background: #dbeafe; border: 1px solid #93c5fd;
+  border-radius: 5px; padding: 1px 7px;
+  font-size: .68rem; font-weight: 800; color: #1d4ed8;
+  white-space: nowrap; flex-shrink: 0;
+  animation: kfChipIn .2s var(--spring);
+}
+.kf-search-clear {
   background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 6px; width: 22px; height: 22px; flex-shrink: 0;
-  color: var(--text-4);
-  transition: background .15s, color .15s, transform .15s; padding: 0;
+  border-radius: 6px; width: 20px; height: 20px; flex-shrink: 0;
+  color: var(--text-4); transition: background .14s, color .14s, transform .14s; padding: 0;
 }
-.search-clear-btn:hover { background: #fce7e7; color: #b91c1c; transform: scale(1.1); }
-.search-clear-btn mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; }
+.kf-search-clear:hover { background: #fee2e2; color: #b91c1c; transform: scale(1.1); }
+.kf-search-clear mat-icon {
+  font-size: 14px !important; width: 14px !important; height: 14px !important;
+}
 
-/* Results chip (search) */
-.filter-results-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: #ecfdf5; border: 1px solid #6ee7b7;
-  border-radius: 7px; padding: 4px 10px;
-  font-size: .71rem; font-weight: 700; color: #065f46;
-  animation: chipPop .22s var(--spring);
-  flex-shrink: 0;
-}
-.filter-results-chip mat-icon { font-size: 12px !important; width: 12px !important; height: 12px !important; }
+/* ── Spacer ── */
+.kf-spacer { flex: 1; }
 
-/* Spacer e célula total */
-.filter-spacer { flex: 1; min-width: 8px; }
-
-.filter-cell-total {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  padding: 0 20px;
-  height: 58px;
-  flex-shrink: 0;
-  position: relative;
-}
-.filter-cell-total::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 14px; bottom: 14px;
-  width: 1px;
-  background: #e8eef6;
-}
-.filter-total-chip {
+/* ── Badge filtro ativo ── */
+.kf-status-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: #f4f7fc; border: 1px solid #dde5f0;
-  border-radius: 8px; padding: 5px 12px;
-  font-size: .71rem; font-weight: 700; color: var(--text-3); white-space: nowrap;
-  transition: background var(--transition), border-color var(--transition);
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: 8px; padding: 5px 8px 5px 11px;
+  font-size: .72rem; font-weight: 700; color: #1d4ed8;
+  animation: kfChipIn .22s var(--spring); flex-shrink: 0; margin-right: 8px;
 }
-.filter-total-chip:hover { background: #eaf0f8; border-color: #c5d5ea; }
-.filter-total-chip mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; color: var(--blue); }
+.kf-status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #3b82f6; flex-shrink: 0;
+  animation: kfDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes kfDotPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,.4); }
+  50%      { box-shadow: 0 0 0 4px rgba(59,130,246,.0); }
+}
+.kf-clear-all {
+  background: rgba(29,78,216,.1); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; width: 22px; height: 22px; padding: 0;
+  color: #1d4ed8; transition: background .14s, transform .14s;
+}
+.kf-clear-all:hover { background: rgba(29,78,216,.22); transform: scale(1.08); }
+.kf-clear-all mat-icon {
+  font-size: 13px !important; width: 13px !important; height: 13px !important;
+}
+
+/* ── Total ── */
+.kf-total {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0 18px; height: 54px;
+  border-left: 1px solid #eef2f7;
+  font-size: .82rem; color: var(--text-2); flex-shrink: 0;
+  transition: background var(--transition);
+}
+.kf-total:hover { background: #f8fafc; }
+.kf-total mat-icon {
+  font-size: 15px !important; width: 15px !important; height: 15px !important;
+  color: var(--blue);
+}
+.kf-total strong { font-weight: 900; font-size: .95rem; color: var(--text-1); }
+.kf-total span { font-size: .72rem; color: var(--text-4); font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════════════════════
    LOADING BAR
@@ -672,7 +917,7 @@
 .chip-name {
   font-size: .73rem; color: var(--text-2); font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 165px; line-height: 1.45;
+  width: 100%; line-height: 1.45;
 }
 
 /* ── Card: footer ── */

@@ -168,10 +168,6 @@ mat-icon { opacity: 0.85 !important; }
 
 /* ===== Autocomplete de chamado ===== */
 
-/* Força o painel do autocomplete a ocupar pelo menos a largura do campo */
-::ng-deep .cdk-overlay-pane {
-  min-width: fit-content !important;
-}
 
 /* Garante que as mat-option dentro do autocomplete não cortam o conteúdo */
 ::ng-deep mat-option .mdc-list-item__primary-text,
