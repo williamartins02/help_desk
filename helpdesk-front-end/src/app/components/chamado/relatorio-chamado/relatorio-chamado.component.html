@@ -39,7 +39,7 @@
             <span class="rpt-info-value">{{ today }}</span>
           </div>
         </div>
-        <button *ngIf="generatedBlobUrl && !isLoading" type="button" class="rpt-export-btn"
+        <button *ngIf="pdfSrc && !isLoading" type="button" class="rpt-export-btn"
                 (click)="downloadPdf()" matTooltip="Baixar PDF">
           <mat-icon>download</mat-icon>
           <span class="rpt-export-btn-text">
@@ -200,7 +200,7 @@
         </div>
         <div class="rpt-pdf-right">
           <span class="rpt-pdf-badge">PDF</span>
-          <button *ngIf="generatedBlobUrl" type="button" class="rpt-pdf-dl-btn"
+          <button *ngIf="pdfSrc && !isLoading" type="button" class="rpt-pdf-dl-btn"
                   (click)="downloadPdf()" matTooltip="Baixar PDF">
             <mat-icon>download</mat-icon>
           </button>
@@ -218,7 +218,7 @@
 
     <!-- ── Actions ── -->
     <div class="rpt-actions">
-      <button *ngIf="generatedBlobUrl" type="button" class="rpt-btn-secondary"
+      <button *ngIf="pdfSrc && !isLoading" type="button" class="rpt-btn-secondary"
               (click)="downloadPdf()">
         <mat-icon>download</mat-icon>
         Baixar PDF

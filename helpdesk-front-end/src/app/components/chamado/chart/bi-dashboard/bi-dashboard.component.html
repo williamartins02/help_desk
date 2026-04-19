@@ -245,8 +245,8 @@
             </div>
           </div>
 
-          <!-- Técnico (custom dropdown) -->
-          <div class="ff-wrap">
+          <!-- Técnico (custom dropdown) — visível apenas para Admin -->
+          <div class="ff-wrap" *ngIf="isAdmin">
             <label class="ff-label">Técnico</label>
             <div class="ff-input-box ff-custom-select"
                  [class.ff-open]="openDropdown === 'tecnico'"

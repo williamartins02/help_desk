@@ -75,7 +75,7 @@ export class ReportParamComponent implements OnInit {
 
   carregarTecnicos(): void {
     this.loadingTecnicos = true;
-    this.tecnicoService.findAll().subscribe({
+    this.tecnicoService.findAllAtivos().subscribe({
       next:  (list) => { this.tecnicos = list; this.loadingTecnicos = false; },
       error: ()     => { this.loadingTecnicos = false; }
     });

@@ -60,6 +60,7 @@ export class RelatorioChamadoComponent implements OnInit, OnDestroy {
 
         if (value.startsWith('http') || value.startsWith('data:application/pdf') || value.startsWith('blob:')) {
           this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(value);
+          this.generatedBlobUrl = value; // permite o botão de download funcionar para URLs diretas
         } else {
           try {
             const base64Payload = value.includes(',') ? value.split(',')[1] : value;
@@ -97,11 +98,29 @@ export class RelatorioChamadoComponent implements OnInit, OnDestroy {
 
   downloadPdf(): void {
     if (!this.generatedBlobUrl) { return; }
-    const a = document.createElement('a');
     const start = this.data.dataInicio.replace(/\//g, '-');
     const end   = this.data.dataFim.replace(/\//g, '-');
+    const filename = `relatorio-chamados_${start}_${end}.pdf`;
+
+    // Para URLs http externas, busca o conteúdo e força o download via blob
+    if (this.generatedBlobUrl.startsWith('http')) {
+      fetch(this.generatedBlobUrl)
+        .then(res => res.blob())
+        .then(blob => {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(blobUrl);
+        })
+        .catch(() => this.toast.error('Não foi possível baixar o relatório.', 'Erro'));
+      return;
+    }
+
+    const a = document.createElement('a');
     a.href = this.generatedBlobUrl;
-    a.download = `relatorio-chamados_${start}_${end}.pdf`;
+    a.download = filename;
     a.click();
   }
 
