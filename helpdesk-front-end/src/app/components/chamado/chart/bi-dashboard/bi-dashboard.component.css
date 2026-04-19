@@ -141,76 +141,443 @@
 .hero-btn-pdf { background: rgba(153,27,27,.35);  border-color: rgba(220,38,38,.45); }
 
 /* ══════════════════════════════════════════════════════════
-   FILTER CARD
+   FILTER CARD — Glassmorphism Premium
 ══════════════════════════════════════════════════════════ */
 .filter-card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.9) inset,
+    0 1px 3px rgba(15,23,42,.04),
+    0 6px 24px rgba(15,23,42,.08),
+    0 24px 48px rgba(37,99,235,.06);
+  /* SEM overflow:hidden — o dropdown precisa escapar do card */
 }
 
-/* Header do filtro */
+/* Linha de destaque no topo do card */
+.filter-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #1d4ed8, #6366f1 50%, #38bdf8);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  opacity: .85;
+  z-index: 0;          /* fica abaixo do conteúdo */
+  pointer-events: none;
+}
+
+/* ── Header do filtro ── */
 .filter-card-header {
-  display: flex; align-items: center; gap: .85rem;
-  padding: .9rem 1.4rem;
-  border-bottom: 1px solid #f1f5f9;
-  background:
-    linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px),
-    linear-gradient(135deg, #0d2d6e 0%, #1e3a8a 45%, #1d4ed8 100%);
-  background-size: 16px 16px, 16px 16px, auto;
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.1rem 1.6rem .95rem;
+  border-bottom: 1px solid rgba(226,232,240,.7);
+  background: transparent;
 }
 
 .filter-card-icon {
-  width: 34px; height: 34px; border-radius: var(--radius-sm);
-  background: rgba(255,255,255,.20); border: 1px solid rgba(255,255,255,.28);
+  width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,0,0,.22); backdrop-filter: blur(4px);
+  box-shadow: 0 4px 14px rgba(37,99,235,.35), 0 1px 0 rgba(255,255,255,.2) inset;
 }
-.filter-card-icon mat-icon { font-size: 1rem; width: 1rem; height: 1rem; color: #fff !important; opacity: 1 !important; }
+.filter-card-icon mat-icon {
+  font-size: 1.05rem; width: 1.05rem; height: 1.05rem;
+  color: #fff !important; opacity: 1 !important;
+}
 
-.filter-card-text { flex: 1; }
-.filter-card-title { display: block; font-size: .84rem; font-weight: 800; color: #fff; letter-spacing: -.01em; text-shadow: 0 1px 4px rgba(0,0,0,.18); }
-.filter-card-sub   { display: block; font-size: .7rem; color: rgba(255,255,255,.58); margin-top: 1px; }
+.filter-card-text { flex: 1; display: flex; flex-direction: column; gap: .06rem; }
+.filter-card-title {
+  display: block; font-size: .9rem; font-weight: 800;
+  color: var(--text-1); letter-spacing: -.02em;
+}
+.filter-card-sub {
+  display: block; font-size: .7rem;
+  color: var(--text-4); margin-top: 1px;
+}
 
-/* Shortcuts (período rápido) */
-.filter-shortcuts { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+/* ── Atalhos de período ── */
+.filter-shortcuts { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
 .filter-shortcuts-label {
-  display: flex; align-items: center; gap: .15rem;
-  font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-  color: rgba(255,255,255,.55);
+  display: flex; align-items: center; gap: .2rem;
+  font-size: .62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text-4);
 }
-.filter-shortcuts-label mat-icon { font-size: .85rem; width: .85rem; height: .85rem; color: #fbbf24 !important; opacity: 1 !important; }
-.filter-shortcuts-btns { display: flex; border: 1px solid rgba(255,255,255,.25); border-radius: 9px; overflow: hidden; }
+.filter-shortcuts-label mat-icon {
+  font-size: .82rem; width: .82rem; height: .82rem;
+  color: #f59e0b !important; opacity: 1 !important;
+}
+.filter-shortcuts-btns {
+  display: flex; gap: .32rem;
+}
 .shortcut-btn {
-  padding: .26rem .78rem; font-size: .72rem; font-weight: 600;
-  background: rgba(255,255,255,.10); border: none; cursor: pointer;
-  color: rgba(255,255,255,.82); font-family: inherit;
-  transition: background var(--transition), color var(--transition);
+  padding: .28rem .82rem; font-size: .72rem; font-weight: 700;
+  background: rgba(37,99,235,.07);
+  border: 1px solid rgba(37,99,235,.18);
+  border-radius: 999px; cursor: pointer;
+  color: var(--primary); font-family: inherit;
+  letter-spacing: .02em;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 150ms var(--spring);
 }
-.shortcut-btn + .shortcut-btn { border-left: 1px solid rgba(255,255,255,.18); }
-.shortcut-btn:hover { background: rgba(255,255,255,.24); color: #fff; }
+.shortcut-btn:hover {
+  background: rgba(37,99,235,.14);
+  border-color: rgba(37,99,235,.38);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+  transform: translateY(-1px);
+}
+.shortcut-btn:active { transform: translateY(0); }
 
-/* Linha de campos */
+/* ── Linha de campos ── */
 .filter-fields-row {
-  display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
-  padding: 1rem 1.4rem 1.1rem;
+  display: flex;
+  align-items: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+  padding: 1.1rem 1.6rem 1.3rem;
 }
-.filter-field { min-width: 145px; flex: 1 1 145px; }
-.filter-prefix-icon { opacity: .38; margin-right: .2rem; font-size: .95rem; width: .95rem; height: .95rem; }
 
-.apply-btn {
-  display: inline-flex; align-items: center; gap: .4rem;
-  padding: 0 1.4rem; height: 56px; border-radius: var(--radius-sm);
-  border: none; background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-  color: #fff; font-size: .85rem; font-weight: 700;
-  cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(29,78,216,.42); transition: all var(--transition);
+/* ── Wrapper de cada campo ── */
+.ff-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .28rem;
+  flex: 1 1 148px;
+  min-width: 140px;
 }
-.apply-btn:hover { box-shadow: 0 8px 22px rgba(29,78,216,.55); transform: translateY(-1px); }
-.apply-btn mat-icon { font-size: 1rem; width: 1rem; height: 1rem; color: #fff !important; opacity: 1 !important; }
+
+/* Label acima do campo */
+.ff-label {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding-left: 2px;
+  white-space: nowrap;
+}
+
+/* Box que envolve ícone + input/select */
+.ff-input-box {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 .75rem;
+  gap: .5rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.ff-input-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* Ícone — sempre centralizado, tamanho fixo */
+.ff-icon {
+  font-size: 17px !important;
+  width: 17px !important;
+  height: 17px !important;
+  line-height: 17px !important;
+  color: var(--text-4) !important;
+  flex-shrink: 0;
+  opacity: 1 !important;
+  transition: color 180ms ease;
+}
+.ff-input-box:focus-within .ff-icon {
+  color: var(--primary) !important;
+}
+
+/* Input nativo (date e text) */
+.ff-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: .84rem;
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 44px;
+  padding: 0;
+  min-width: 0;
+}
+.ff-input::placeholder { color: var(--text-4); }
+
+/* Select nativo */
+.ff-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .5rem center;
+  padding-right: 1.4rem;
+}
+
+/* ── Custom dropdown ──────────────────────────────────────── */
+.ff-custom-select {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;          /* garante que o wrapper crie stacking context */
+}
+.ff-custom-select.ff-open {
+  z-index: 1000;        /* sobe quando aberto */
+}
+
+.ff-select-val {
+  flex: 1;
+  font-size: .84rem;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Valor padrão ("Todos/Todas") levemente esmaecido */
+.ff-custom-select:not(.ff-has-value) .ff-select-val {
+  color: var(--text-4);
+}
+
+/* Chevron animado */
+.ff-chevron {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--text-4) !important;
+  flex-shrink: 0;
+  transition: transform 200ms ease, color 180ms ease;
+  opacity: 1 !important;
+}
+.ff-custom-select.ff-open .ff-chevron {
+  transform: rotate(180deg);
+  color: var(--primary) !important;
+}
+.ff-custom-select.ff-open {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.ff-custom-select.ff-has-value .ff-icon {
+  color: var(--primary) !important;
+  opacity: 1 !important;
+}
+
+/* Painel dropdown */
+.ff-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 9999;        /* acima de tudo, incluindo outros cards */
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 4px 6px rgba(15,23,42,.04),
+    0 10px 30px rgba(15,23,42,.14),
+    0 1px 0 rgba(255,255,255,.9) inset;
+  overflow: hidden;
+  animation: dropdownIn 160ms cubic-bezier(.4,0,.2,1);
+  max-height: 220px;
+  overflow-y: auto;
+}
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scaleY(.96); }
+  to   { opacity: 1; transform: translateY(0)    scaleY(1);   }
+}
+
+/* Scrollbar do dropdown */
+.ff-dropdown::-webkit-scrollbar { width: 4px; }
+.ff-dropdown::-webkit-scrollbar-track { background: transparent; }
+.ff-dropdown::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+
+/* Item de opção */
+.ff-option {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .62rem .9rem;
+  font-size: .83rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+.ff-option:last-child { border-bottom: none; }
+.ff-option:hover {
+  background: #f0f5ff;
+  color: var(--primary);
+}
+
+/* Opção selecionada */
+.ff-option.ff-option-active {
+  background: linear-gradient(90deg, #eff6ff, #f0f5ff);
+  color: var(--primary);
+  font-weight: 700;
+}
+.ff-option.ff-option-active::after {
+  content: '✓';
+  margin-left: auto;
+  font-size: .78rem;
+  color: var(--primary);
+}
+
+/* Ícone dentro da opção */
+.ff-opt-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  color: inherit !important;
+  opacity: .6 !important;
+  flex-shrink: 0;
+}
+
+/* Remove MDC overrides — não precisamos mais deles */
+:host ::ng-deep .filter-field .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+:host ::ng-deep .filter-field .mat-mdc-text-field-wrapper { height: 56px !important; padding-bottom: 0 !important; }
+:host ::ng-deep .filter-field .mat-mdc-form-field-flex { height: 56px !important; align-items: center !important; }
+:host ::ng-deep .filter-field .mat-mdc-form-field-infix { height: 56px !important; min-height: 56px !important; padding-top: 16px !important; padding-bottom: 0 !important; display: flex !important; align-items: center !important; width: 0 !important; }
+:host ::ng-deep .filter-field input.mat-mdc-input-element { margin-top: 0 !important; height: auto !important; line-height: normal !important; }
+:host ::ng-deep .filter-field .mat-mdc-select { display: flex !important; align-items: center !important; height: auto !important; }
+:host ::ng-deep .filter-field .mat-mdc-form-field-text-prefix { display: flex !important; align-self: flex-end !important; align-items: center !important; padding-bottom: 6px !important; padding-right: 4px !important; }
+:host ::ng-deep .filter-field .mat-mdc-form-field-text-prefix .mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; line-height: 18px !important; }
+:host ::ng-deep .filter-field .mdc-floating-label { top: 50% !important; transform: translateY(-50%) !important; pointer-events: none; }
+:host ::ng-deep .filter-field .mdc-text-field--focused .mdc-floating-label--float-above, :host ::ng-deep .filter-field .mdc-text-field--label-floating .mdc-floating-label--float-above { top: 8px !important; transform: scale(0.75) translateY(0) !important; }
+:host ::ng-deep .filter-field .mdc-notched-outline__notch { border-top: none !important; }
+
+/* Ícone prefix consistente em todos os campos */
+.filter-prefix-icon {
+  opacity: .52;
+  margin-right: .3rem;
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: var(--primary) !important;
+  transition: opacity 180ms ease, color 180ms ease;
+  flex-shrink: 0;
+}
+.filter-field:focus-within .filter-prefix-icon {
+  opacity: 1;
+  color: var(--primary-dark) !important;
+}
+
+/* ── Grupo de botões de ação (Aplicar + Limpar) ── */
+.ff-action-group {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+/* ── Botão Aplicar — CTA premium ── */
+.apply-btn {
+  display: inline-flex; align-items: center; gap: .42rem;
+  padding: 0 1.25rem;
+  height: 44px;         /* igual à altura dos campos */
+  flex-shrink: 0;
+  align-self: stretch;
+  border-radius: var(--radius-md); border: none;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #3b82f6 100%);
+  color: #fff; font-size: .82rem; font-weight: 800;
+  cursor: pointer; white-space: nowrap;
+  font-family: inherit; letter-spacing: .01em;
+  position: relative; overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 4px 14px rgba(29,78,216,.40),
+    0 1px 3px rgba(29,78,216,.25);
+  transition:
+    transform 180ms var(--spring),
+    box-shadow 200ms ease,
+    filter 200ms ease;
+}
+/* Brilho animado no hover */
+.apply-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  transition: left 380ms ease;
+}
+.apply-btn:hover::after { left: 140%; }
+.apply-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 10px 28px rgba(29,78,216,.52),
+    0 2px 6px rgba(29,78,216,.30);
+  filter: brightness(1.06);
+}
+.apply-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(29,78,216,.38);
+  filter: brightness(.97);
+}
+.apply-btn mat-icon {
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: #fff !important; opacity: 1 !important;
+}
+
+/* ── Botão Limpar ── */
+.clear-btn {
+  display: inline-flex; align-items: center; gap: .38rem;
+  padding: 0 1.1rem;
+  height: 44px;
+  align-self: stretch;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--text-3); font-size: .78rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  font-family: inherit; letter-spacing: .01em;
+  transition: border-color 180ms ease, color 180ms ease,
+              background 180ms ease, transform 150ms var(--spring);
+}
+.clear-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
+  transform: translateY(-1px);
+}
+.clear-btn:active { transform: translateY(0); }
+.clear-btn mat-icon {
+  font-size: .95rem; width: .95rem; height: .95rem;
+  color: inherit !important; opacity: 1 !important;
+}
+/* Brilho animado no hover */
+.apply-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  transition: left 380ms ease;
+}
+.apply-btn:hover::after { left: 140%; }
+.apply-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 10px 28px rgba(29,78,216,.52),
+    0 2px 6px rgba(29,78,216,.30);
+  filter: brightness(1.06);
+}
+.apply-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(29,78,216,.38);
+  filter: brightness(.97);
+}
+.apply-btn mat-icon {
+  font-size: 1.05rem; width: 1.05rem; height: 1.05rem;
+  color: #fff !important; opacity: 1 !important;
+}
 
 /* ══════════════════════════════════════════════════════════
    SECTION HEADER  (replaces section-divider — more informative)
@@ -622,8 +989,10 @@
   .bi-page { padding: 1rem 1rem 1.5rem; gap: 1rem; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: .7rem; }
   .filter-shortcuts { display: none; }
-  .filter-card-header { padding: .75rem 1rem; }
-  .filter-fields-row { padding: .85rem 1rem .95rem; }
+  .filter-card-header { padding: .85rem 1.2rem; }
+  .filter-fields-row { padding: .9rem 1.2rem 1.1rem; gap: .65rem; }
+  .ff-wrap { min-width: 100%; flex: 1 1 100%; }
+  .apply-btn { width: 100%; justify-content: center; align-self: stretch; height: 44px; }
 }
 @media (max-width: 560px) {
   .bi-hero { flex-direction: column; align-items: flex-start; }

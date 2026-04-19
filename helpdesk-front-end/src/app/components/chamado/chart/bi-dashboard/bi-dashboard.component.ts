@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, HostListener } from '@angular/core';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { Client } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
@@ -24,6 +24,58 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   filtroTecnico: number | null = null;
   filtroStatus:  number | null = null;
   filtroPrioridade: number | null = null;
+
+  // ── Dropdown custom state ───────────────────────────────────
+  openDropdown: 'tecnico' | 'status' | 'prioridade' | null = null;
+
+  @HostListener('document:click')
+  fecharDropdowns() { this.openDropdown = null; }
+
+  toggleDropdown(name: 'tecnico' | 'status' | 'prioridade', e: Event) {
+    e.stopPropagation();
+    this.openDropdown = this.openDropdown === name ? null : name;
+  }
+
+  selectTecnico(id: number | null, e: Event) {
+    e.stopPropagation();
+    this.filtroTecnico = id;
+    this.openDropdown = null;
+  }
+
+  selectStatus(val: number | null, e: Event) {
+    e.stopPropagation();
+    this.filtroStatus = val;
+    this.openDropdown = null;
+  }
+
+  selectPrioridade(val: number | null, e: Event) {
+    e.stopPropagation();
+    this.filtroPrioridade = val;
+    this.openDropdown = null;
+  }
+
+  get selectedTecnicoLabel(): string {
+    if (this.filtroTecnico === null) return 'Todos';
+    const t = this.tecnicos.find(t => t.id === this.filtroTecnico);
+    return t ? t.nome : 'Todos';
+  }
+  get selectedStatusLabel(): string {
+    const s = this.statusOpcoes.find(s => s.value === this.filtroStatus);
+    return s ? s.label : 'Todos';
+  }
+  get selectedPrioridadeLabel(): string {
+    const p = this.prioridadeOpcoes.find(p => p.value === this.filtroPrioridade);
+    return p ? p.label : 'Todas';
+  }
+
+  /** Retorna true quando há pelo menos um filtro diferente do padrão */
+  get temFiltroAtivo(): boolean {
+    return this.filtroTecnico   !== null ||
+           this.filtroStatus    !== null ||
+           this.filtroPrioridade !== null ||
+           this.filtroInicio    !== this.defaultInicio() ||
+           this.filtroFim       !== this.today();
+  }
 
   tecnicos: Tecnico[] = [];
   statusOpcoes = [
@@ -102,6 +154,15 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
 
   // ── Filtros ────────────────────────────────────────────────
   aplicarFiltros(): void { this.carregarDados(); }
+
+  limparFiltros(): void {
+    this.filtroInicio    = this.defaultInicio();
+    this.filtroFim       = this.today();
+    this.filtroTecnico   = null;
+    this.filtroStatus    = null;
+    this.filtroPrioridade = null;
+    this.carregarDados();
+  }
 
   setPeriodoPredefinido(dias: number): void {
     const hoje = new Date();
