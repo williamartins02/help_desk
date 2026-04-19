@@ -20,8 +20,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Broker simples em memória para os tópicos /chat/..., /sla/... e /agenda/...
-        registry.enableSimpleBroker("/chat", "/sla", "/agenda");
+        // Broker simples em memória para os tópicos /chat/..., /sla/..., /agenda/... e /bi/...
+        registry.enableSimpleBroker("/chat", "/sla", "/agenda", "/bi");
         // Prefixo para métodos @MessageMapping no controller
         registry.setApplicationDestinationPrefixes("/app");
     }

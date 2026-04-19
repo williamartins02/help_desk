@@ -2,15 +2,19 @@
 
   <!-- ── Cabeçalho ── -->
   <div class="dialog-header">
-    <div class="dh-circle dh-circle-1"></div>
-    <div class="dh-circle dh-circle-2"></div>
+    <div class="dh-orb dh-orb-1"></div>
+    <div class="dh-orb dh-orb-2"></div>
+    <div class="dh-orb dh-orb-3"></div>
 
     <div class="dh-top">
       <span class="page-badge">
         <mat-icon>assessment</mat-icon>
         Relatório de Chamados
       </span>
-      <span class="dh-step">Exportação PDF</span>
+      <span class="dh-step">
+        <mat-icon style="font-size:0.85rem;width:0.85rem;height:0.85rem;vertical-align:middle">picture_as_pdf</mat-icon>
+        Exportação PDF
+      </span>
     </div>
 
     <div class="header-brand">
@@ -35,7 +39,9 @@
 
     <!-- Carregando perfil -->
     <div class="loading-user" *ngIf="loadingUserInfo">
-      <mat-spinner diameter="22"></mat-spinner>
+      <div class="loading-pulse">
+        <mat-spinner diameter="22"></mat-spinner>
+      </div>
       <span>Carregando informações do usuário...</span>
     </div>
 
@@ -51,6 +57,15 @@
             <span class="section-title">Período do Relatório</span>
             <span class="section-sub">Informe o intervalo de datas desejado</span>
           </div>
+        </div>
+
+        <!-- ── Atalhos rápidos de datas ── -->
+        <div class="quick-dates">
+          <span class="quick-dates-label"><mat-icon>bolt</mat-icon> Atalhos:</span>
+          <button type="button" class="quick-btn" (click)="setToday()">Hoje</button>
+          <button type="button" class="quick-btn" (click)="setDays(7)">7 dias</button>
+          <button type="button" class="quick-btn" (click)="setDays(30)">30 dias</button>
+          <button type="button" class="quick-btn" (click)="setCurrentMonth()">Este mês</button>
         </div>
 
         <div class="form-grid">
@@ -125,6 +140,47 @@
         <div>
           <strong>Relatório restrito</strong>
           <span>O relatório exibirá apenas os chamados atribuídos a você.</span>
+        </div>
+      </div>
+
+      <!-- ══ Preview do relatório (aparece quando os campos são válidos) ══ -->
+      <div class="report-preview" *ngIf="validaCampos()">
+        <div class="preview-header">
+          <mat-icon class="preview-header-icon">preview</mat-icon>
+          <span>Prévia do Relatório</span>
+          <span class="preview-ready-badge">
+            <mat-icon style="font-size:0.7rem;width:0.7rem;height:0.7rem">check</mat-icon>
+            Pronto
+          </span>
+        </div>
+        <div class="preview-body">
+          <div class="preview-item">
+            <mat-icon class="preview-item-icon">event_available</mat-icon>
+            <div class="preview-item-content">
+              <span class="preview-item-label">Período</span>
+              <span class="preview-item-value">{{ dataInicio.value }} → {{ dataFim.value }}</span>
+            </div>
+          </div>
+          <div class="preview-divider"></div>
+          <div class="preview-item">
+            <mat-icon class="preview-item-icon">engineering</mat-icon>
+            <div class="preview-item-content">
+              <span class="preview-item-label">Técnico</span>
+              <span class="preview-item-value" *ngIf="isTecnicoOnly">{{ usuarioNome }}</span>
+              <span class="preview-item-value" *ngIf="isAdmin && tecnicoSelecionado">
+                {{ getTecnicoNome(tecnicoSelecionado) }}
+              </span>
+              <span class="preview-item-value preview-muted" *ngIf="isAdmin && !tecnicoSelecionado">Todos os técnicos</span>
+            </div>
+          </div>
+          <div class="preview-divider"></div>
+          <div class="preview-item">
+            <mat-icon class="preview-item-icon">picture_as_pdf</mat-icon>
+            <div class="preview-item-content">
+              <span class="preview-item-label">Formato</span>
+              <span class="preview-item-value">PDF · Visualização inline</span>
+            </div>
+          </div>
         </div>
       </div>
 

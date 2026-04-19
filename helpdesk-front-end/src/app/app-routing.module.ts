@@ -17,6 +17,7 @@ import { UsuariosListComponent } from './components/usuarios/usuarios-list/usuar
 import {RelatorioChamadoComponent} from "./components/chamado/relatorio-chamado/relatorio-chamado.component";
 import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
 import { KanbanComponent } from './components/chamado/kanban/kanban.component';
+import { BiDashboardComponent } from './components/chamado/chart/bi-dashboard/bi-dashboard.component';
 
 //Fica toda roda do projeto para ser renderizado.
 const routes: Routes = [
@@ -47,6 +48,7 @@ const routes: Routes = [
       { path: 'usuarios', component: UsuariosListComponent },
       { path: 'agenda', component: AgendaComponent },
       { path: 'kanban', component: KanbanComponent },
+      { path: 'bi-dashboard', component: BiDashboardComponent },
     ]
   }
 ];

@@ -97,4 +97,15 @@ public class AgendaEventPublisher {
                            tecnicoOrigemId + " para " + tecnicoDestinoId);
         messagingTemplate.convertAndSend("/agenda/chamado-atualizado", evento);
     }
+
+    /**
+     * Publica evento de refresh no tópico /bi/refresh para que o dashboard de BI
+     * atualize seus dados em tempo real sempre que um chamado for criado ou atualizado.
+     */
+    public void publicarBiRefresh() {
+        AgendaEventoDTO evento = new AgendaEventoDTO();
+        evento.setTipo("BI_REFRESH");
+        evento.setMensagem("Dados de chamados atualizados — recarregue o dashboard BI");
+        messagingTemplate.convertAndSend("/bi/refresh", evento);
+    }
 }

@@ -96,6 +96,7 @@ import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
 import {TarefaFormDialogComponent} from "./components/agenda/tarefa-form-dialog/tarefa-form-dialog.component";
 import {AgendaWsService} from "./services/agenda-ws.service";
 import { KanbanComponent } from './components/chamado/kanban/kanban.component';
+import { BiDashboardComponent } from './components/chamado/chart/bi-dashboard/bi-dashboard.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
@@ -157,6 +158,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ResetPasswordComponent,
     NewBadgeComponent,
     KanbanComponent,
+    BiDashboardComponent,
 
 
   ],

@@ -1,122 +1,229 @@
-<div class="dialog-wrapper">
+<div class="rpt-wrapper">
 
-  <!-- ── Cabeçalho gradiente ── -->
-  <div class="dialog-header">
-    <span class="page-badge">
-      <mat-icon>assessment</mat-icon>
-      Central de Chamados
-    </span>
+  <!-- ══ HERO HEADER ══ -->
+  <div class="rpt-hero">
+    <div class="rpt-hero-grid"></div>
+    <div class="rpt-orb rpt-orb-1"></div>
+    <div class="rpt-orb rpt-orb-2"></div>
+    <div class="rpt-orb rpt-orb-3"></div>
 
-    <div class="header-brand">
-      <div class="header-icon-badge">
-        <mat-icon class="header-icon">picture_as_pdf</mat-icon>
+    <div class="rpt-hero-content">
+      <div class="rpt-hero-left">
+
+        <div class="rpt-hero-icon-badge">
+          <mat-icon class="rpt-hero-icon">picture_as_pdf</mat-icon>
+          <div class="rpt-hero-icon-ring"></div>
+        </div>
+
+        <div class="rpt-hero-text">
+          <div class="rpt-hero-eyebrow">
+            <span class="rpt-hero-pill">
+              <mat-icon>assessment</mat-icon>
+              Central de Chamados
+            </span>
+            <span class="rpt-hero-live">
+              <span class="rpt-live-dot"></span>
+              RELATÓRIO
+            </span>
+          </div>
+          <h1 class="rpt-hero-title">Relatório de Chamados</h1>
+          <p class="rpt-hero-subtitle">Visualização e exportação do documento gerado com base no período selecionado</p>
+        </div>
       </div>
-      <div class="header-text">
-        <h2>Relatório de Chamados</h2>
-        <p class="header-subtitle">Visualização do documento gerado com base no período selecionado</p>
+
+      <div class="rpt-hero-right">
+        <div class="rpt-info-card">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <span class="rpt-info-label">Gerado em</span>
+            <span class="rpt-info-value">{{ today }}</span>
+          </div>
+        </div>
+        <button *ngIf="generatedBlobUrl && !isLoading" type="button" class="rpt-export-btn"
+                (click)="downloadPdf()" matTooltip="Baixar PDF">
+          <mat-icon>download</mat-icon>
+          <span class="rpt-export-btn-text">
+            <span class="rpt-export-btn-label">PDF</span>
+            <span class="rpt-export-btn-sub">Baixar Relatório</span>
+          </span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ── Corpo — card lift sobre o header ── -->
-  <div class="dialog-body">
+  <!-- ══ BODY ══ -->
+  <div class="rpt-body">
 
-    <!-- ── Faixa de metadados do relatório ── -->
-    <div class="report-meta-bar">
-      <div class="meta-item">
-        <span class="meta-label">
-          <mat-icon class="meta-icon">event_available</mat-icon>
-          Data Início
-        </span>
-        <span class="meta-value">{{ data.dataInicio }}</span>
+    <!-- ── Section divider ── -->
+    <div class="rpt-section-divider">
+      <div class="rpt-divider-line"></div>
+      <div class="rpt-divider-label">
+        <mat-icon>tune</mat-icon>
+        <span>Parâmetros do Relatório</span>
+      </div>
+      <div class="rpt-divider-line"></div>
+    </div>
+
+    <!-- ── Meta cards ── -->
+    <div class="rpt-meta-grid">
+
+      <div class="rpt-meta-card rpt-meta-blue" style="animation-delay:.05s">
+        <div class="rpt-meta-accent"></div>
+        <div class="rpt-meta-inner">
+          <div class="rpt-meta-icon-badge">
+            <mat-icon>event_available</mat-icon>
+          </div>
+          <div class="rpt-meta-body">
+            <span class="rpt-meta-label">Data Início</span>
+            <span class="rpt-meta-value">{{ data.dataInicio }}</span>
+          </div>
+        </div>
+        <div class="rpt-meta-shine"></div>
       </div>
 
-      <div class="meta-divider"></div>
-
-      <div class="meta-item">
-        <span class="meta-label">
-          <mat-icon class="meta-icon">event_busy</mat-icon>
-          Data Fim
-        </span>
-        <span class="meta-value">{{ data.dataFim }}</span>
+      <div class="rpt-meta-card rpt-meta-orange" style="animation-delay:.10s">
+        <div class="rpt-meta-accent"></div>
+        <div class="rpt-meta-inner">
+          <div class="rpt-meta-icon-badge">
+            <mat-icon>event_busy</mat-icon>
+          </div>
+          <div class="rpt-meta-body">
+            <span class="rpt-meta-label">Data Fim</span>
+            <span class="rpt-meta-value">{{ data.dataFim }}</span>
+          </div>
+        </div>
+        <div class="rpt-meta-shine"></div>
       </div>
 
-      <div class="meta-divider"></div>
-
-      <!-- Técnico filtrado (somente quando há filtro por técnico) -->
       <ng-container *ngIf="data.tecnicoNome">
-        <div class="meta-item">
-          <span class="meta-label">
-            <mat-icon class="meta-icon">engineering</mat-icon>
-            Técnico
-          </span>
-          <span class="meta-value">{{ data.tecnicoNome }}</span>
+        <div class="rpt-meta-card rpt-meta-green" style="animation-delay:.15s">
+          <div class="rpt-meta-accent"></div>
+          <div class="rpt-meta-inner">
+            <div class="rpt-meta-icon-badge">
+              <mat-icon>engineering</mat-icon>
+            </div>
+            <div class="rpt-meta-body">
+              <span class="rpt-meta-label">Técnico</span>
+              <span class="rpt-meta-value">{{ data.tecnicoNome }}</span>
+            </div>
+          </div>
+          <div class="rpt-meta-shine"></div>
         </div>
-        <div class="meta-divider"></div>
       </ng-container>
 
-      <!-- Todos os técnicos -->
       <ng-container *ngIf="!data.tecnicoNome">
-        <div class="meta-item">
-          <span class="meta-label">
-            <mat-icon class="meta-icon">groups</mat-icon>
-            Técnico
-          </span>
-          <span class="meta-value meta-value-muted">Todos</span>
+        <div class="rpt-meta-card rpt-meta-teal" style="animation-delay:.15s">
+          <div class="rpt-meta-accent"></div>
+          <div class="rpt-meta-inner">
+            <div class="rpt-meta-icon-badge">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <div class="rpt-meta-body">
+              <span class="rpt-meta-label">Técnico</span>
+              <span class="rpt-meta-value rpt-meta-muted">Todos</span>
+            </div>
+          </div>
+          <div class="rpt-meta-shine"></div>
         </div>
-        <div class="meta-divider"></div>
       </ng-container>
 
-      <div class="meta-item">
-        <span class="meta-label">
-          <mat-icon class="meta-icon">schedule</mat-icon>
-          Gerado em
+      <div class="rpt-meta-card rpt-meta-purple" style="animation-delay:.20s">
+        <div class="rpt-meta-accent"></div>
+        <div class="rpt-meta-inner">
+          <div class="rpt-meta-icon-badge">
+            <mat-icon>insert_drive_file</mat-icon>
+          </div>
+          <div class="rpt-meta-body">
+            <span class="rpt-meta-label">Formato</span>
+            <span class="rpt-meta-value">PDF / Jasper</span>
+          </div>
+        </div>
+        <div class="rpt-meta-shine"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Section divider ── -->
+    <div class="rpt-section-divider">
+      <div class="rpt-divider-line"></div>
+      <div class="rpt-divider-label">
+        <mat-icon>insert_drive_file</mat-icon>
+        <span>Documento PDF</span>
+        <span class="rpt-divider-badge" *ngIf="pdfSrc && !isLoading">
+          <mat-icon>check_circle</mat-icon>
+          Carregado
         </span>
-        <span class="meta-value">{{ today }}</span>
       </div>
+      <div class="rpt-divider-line"></div>
     </div>
 
-    <!-- ── Cabeçalho de seção ── -->
-    <div class="section-header">
-      <mat-icon class="section-icon">insert_drive_file</mat-icon>
-      <span>Documento PDF</span>
-    </div>
-
-    <!-- ── Estado de carregamento ── -->
-    <div class="loading-state" *ngIf="isLoading">
-      <div class="loading-ring">
-        <mat-spinner diameter="52"></mat-spinner>
+    <!-- ── Loading state ── -->
+    <div class="rpt-loading" *ngIf="isLoading">
+      <div class="rpt-loading-graphic">
+        <div class="rpt-loading-ring">
+          <div class="rpt-loading-inner">
+            <mat-icon class="rpt-loading-icon">picture_as_pdf</mat-icon>
+          </div>
+        </div>
+        <div class="rpt-loading-dots">
+          <span class="rld rld-1"></span>
+          <span class="rld rld-2"></span>
+          <span class="rld rld-3"></span>
+        </div>
       </div>
-      <span class="loading-title">Gerando relatório</span>
-      <p class="loading-sub">Aguarde enquanto o documento é preparado...</p>
-    </div>
-
-    <!-- ── Container do PDF ── -->
-    <div class="pdf-container" *ngIf="pdfSrc && !isLoading">
-      <div class="pdf-toolbar">
-        <span class="pdf-filename">
-          <mat-icon>insert_drive_file</mat-icon>
-          relatorio-chamados.pdf
+      <span class="rpt-loading-title">Gerando relatório</span>
+      <p class="rpt-loading-sub">Processando dados e montando o documento PDF...</p>
+      <div class="rpt-loading-steps">
+        <span class="rpt-step rpt-step-done">
+          <mat-icon>check_circle</mat-icon> Filtros aplicados
         </span>
-        <span class="pdf-badge">PDF</span>
+        <span class="rpt-step rpt-step-active">
+          <mat-icon>autorenew</mat-icon> Compilando dados
+        </span>
+        <span class="rpt-step rpt-step-pending">
+          <mat-icon>hourglass_empty</mat-icon> Exportando PDF
+        </span>
       </div>
+    </div>
+
+    <!-- ── PDF Container ── -->
+    <div class="rpt-pdf-container" *ngIf="pdfSrc && !isLoading">
+      <div class="rpt-pdf-toolbar">
+        <div class="rpt-pdf-left">
+          <div class="rpt-pdf-file-icon">
+            <mat-icon>picture_as_pdf</mat-icon>
+          </div>
+          <div class="rpt-pdf-filename-block">
+            <span class="rpt-pdf-filename">relatorio-chamados.pdf</span>
+            <span class="rpt-pdf-meta">{{ data.dataInicio }} &ndash; {{ data.dataFim }}</span>
+          </div>
+        </div>
+        <div class="rpt-pdf-right">
+          <span class="rpt-pdf-badge">PDF</span>
+          <button *ngIf="generatedBlobUrl" type="button" class="rpt-pdf-dl-btn"
+                  (click)="downloadPdf()" matTooltip="Baixar PDF">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+      </div>
+
       <iframe
         id="pdf"
         [src]="pdfSrc"
-        class="pdf-frame"
+        class="rpt-pdf-frame"
         frameborder="0"
         allowtransparency="true">
       </iframe>
     </div>
 
-    <!-- ── Ações ── -->
-    <div class="dialog-actions">
-      <button *ngIf="generatedBlobUrl" type="button" mat-stroked-button color="primary"
-              class="btn-download" (click)="downloadPdf()">
+    <!-- ── Actions ── -->
+    <div class="rpt-actions">
+      <button *ngIf="generatedBlobUrl" type="button" class="rpt-btn-secondary"
+              (click)="downloadPdf()">
         <mat-icon>download</mat-icon>
         Baixar PDF
       </button>
-      <button type="button" mat-flat-button color="primary" class="btn-close" (click)="onNoClick()">
+      <button type="button" class="rpt-btn-primary" (click)="onNoClick()">
         <mat-icon>keyboard_return</mat-icon>
         Fechar
       </button>
@@ -124,10 +231,11 @@
 
   </div>
 
-  <footer class="dialog-footer">
-    <mat-icon class="footer-icon">support_agent</mat-icon>
-    <span>Help Desk · By Gonçalves M William</span>
-  </footer>
+  <!-- ══ FOOTER ══ -->
+  <div class="rpt-footer">
+    <mat-icon class="rpt-footer-icon">support_agent</mat-icon>
+    <span>Help Desk &middot; By Gonçalves M William &middot; Relatórios</span>
+  </div>
 
 </div>
 

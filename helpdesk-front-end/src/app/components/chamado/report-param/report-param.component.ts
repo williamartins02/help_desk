@@ -81,6 +81,39 @@ export class ReportParamComponent implements OnInit {
     });
   }
 
+  // ── Quick date shortcuts ─────────────────────────────────────────────────
+  private setDateRange(start: Date, end: Date): void {
+    const fmt = (d: Date) => d.toLocaleDateString('pt-BR');
+    this.dataInicio.setValue(fmt(start));
+    this.dataFim.setValue(fmt(end));
+    this.userReport.dataInicio = fmt(start);
+    this.userReport.dataFim    = fmt(end);
+  }
+
+  setToday(): void {
+    const today = new Date();
+    this.setDateRange(today, today);
+  }
+
+  setDays(days: number): void {
+    const end   = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - days + 1);
+    this.setDateRange(start, end);
+  }
+
+  setCurrentMonth(): void {
+    const now   = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    this.setDateRange(start, end);
+  }
+
+  getTecnicoNome(id: number | null): string {
+    if (!id) return 'Todos';
+    return this.tecnicos.find(t => t.id === id)?.nome ?? String(id);
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────────────
   private parseDate(value: string): Date | null {
     if (!value || !this.datePattern.test(value)) return null;

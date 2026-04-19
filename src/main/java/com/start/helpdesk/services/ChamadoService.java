@@ -84,6 +84,7 @@ public class ChamadoService {
 				chamado.getStatus().getCodigo(),
 				chamado.getTecnico().getId()
 			);
+			agendaEventPublisher.publicarBiRefresh();
 		} catch (Exception ignored) { /* WebSocket não deve bloquear a criação */ }
 
 		return chamado;
@@ -123,6 +124,7 @@ public class ChamadoService {
 				salvo.getStatus().getCodigo(),
 				salvo.getTecnico().getId()
 			);
+			agendaEventPublisher.publicarBiRefresh();
 		} catch (Exception ignored) { /* WebSocket não deve bloquear a operação */ }
 
 		return salvo;

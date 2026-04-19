@@ -24,6 +24,8 @@
     "@stomp/stompjs": "^5.2.0",
     "chart.js": "^3.7.0",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "moment": "^2.29.1",
     "ng2-charts": "^3.0.8",
     "ngx-mask": "^13.1.1",
