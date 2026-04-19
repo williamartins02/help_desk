@@ -200,6 +200,48 @@
   .sidenav-content { padding-top: 0.5rem; }
 }
 
+/* ── Grupo de navegação com submenu ─────────────────────── */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chevron de expand dentro do item pai */
+.nav-group-toggle {
+  position: relative;
+}
+
+.nav-chevron {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  font-size: 1.1rem !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  opacity: 0.75;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.nav-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* Submenu colapsável */
+.nav-submenu {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-submenu.open {
+  max-height: 200px;
+}
+
+/* Subitem: indentado */
+.nav-subitem {
+  padding-left: 2.1rem !important;
+}
+
 /* ── Hambúrguer dentro da toolbar do header ──────────────── */
 .nav-hamburger-btn {
   color: rgba(255, 255, 255, 0.90) !important;

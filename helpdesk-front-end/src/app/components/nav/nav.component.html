@@ -36,10 +36,22 @@
         <mat-icon class="nav-icon">receipt_long</mat-icon>
         <span class="nav-label">Central de Chamados</span>
       </a>
-      <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="nav-item link-chart">
-        <mat-icon class="nav-icon">dashboard</mat-icon>
-        <span class="nav-label">Dashboard</span>
-      </a>
+      <!-- ── Dashboard (com submenu) ── -->
+      <div class="nav-group">
+        <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="nav-item link-chart nav-group-toggle"
+           [routerLinkActiveOptions]="{exact: true}"
+           (click)="isDashboardOpen = !isDashboardOpen">
+          <mat-icon class="nav-icon">dashboard</mat-icon>
+          <span class="nav-label">Dashboard</span>
+          <mat-icon class="nav-chevron" [class.rotated]="isDashboardOpen">expand_more</mat-icon>
+        </a>
+        <div class="nav-submenu" [class.open]="isDashboardOpen">
+          <a mat-list-item routerLink="bi-dashboard" routerLinkActive="active-link" class="nav-item nav-subitem link-bi">
+            <mat-icon class="nav-icon">insights</mat-icon>
+            <span class="nav-label">BI / Relatórios</span>
+          </a>
+        </div>
+      </div>
       <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="nav-item link-chat">
         <mat-icon class="nav-icon">forum</mat-icon>
         <span class="nav-label">Conversas</span>
@@ -56,10 +68,7 @@
         <mat-icon class="nav-icon">view_kanban</mat-icon>
         <span class="nav-label">Kanban</span>
       </a>
-      <a mat-list-item routerLink="bi-dashboard" routerLinkActive="active-link" class="nav-item link-bi">
-        <mat-icon class="nav-icon">insights</mat-icon>
-        <span class="nav-label">BI / Relatórios</span>
-      </a>
+      <!-- BI/Relatórios agora é submenu de Dashboard (removido daqui) -->
     </mat-nav-list>
 
     <!-- ── Espaçador flexível ── -->

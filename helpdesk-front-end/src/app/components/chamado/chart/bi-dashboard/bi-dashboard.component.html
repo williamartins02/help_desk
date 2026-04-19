@@ -1,0 +1,499 @@
+<div class="bi-container">
+
+  <!-- ══════════════════════ HERO HEADER ══════════════════════ -->
+  <div class="bi-hero">
+    <div class="bi-hero-orb bi-hero-orb-1"></div>
+    <div class="bi-hero-orb bi-hero-orb-2"></div>
+    <div class="bi-hero-orb bi-hero-orb-3"></div>
+    <div class="bi-hero-grid"></div>
+
+    <div class="bi-hero-content">
+      <div class="bi-hero-left">
+        <div class="bi-hero-icon-badge">
+          <mat-icon class="bi-hero-icon">insights</mat-icon>
+          <div class="bi-hero-icon-ring"></div>
+        </div>
+        <div class="bi-hero-text">
+          <div class="bi-hero-eyebrow">
+            <span class="bi-hero-pill">
+              <mat-icon>bar_chart</mat-icon>
+              Business Intelligence
+            </span>
+            <span class="bi-hero-live" *ngIf="ultimaAtualizacao">
+              <span class="live-dot"></span>
+              AO VIVO
+            </span>
+          </div>
+          <h1 class="bi-hero-title">Dashboard de BI</h1>
+          <p class="bi-hero-subtitle">Relatórios avançados · Análise estratégica de chamados · Indicadores de desempenho</p>
+        </div>
+      </div>
+
+      <div class="bi-hero-right">
+        <div class="bi-update-card" *ngIf="ultimaAtualizacao">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <span class="bi-update-label">Última atualização</span>
+            <span class="bi-update-time">{{ ultimaAtualizacao | date:'HH:mm:ss' }}</span>
+          </div>
+        </div>
+        <div class="bi-export-group">
+          <button class="export-btn export-csv" (click)="exportarCSV()" [disabled]="isLoading || !dashboard"
+                  matTooltip="Exportar dados completos em CSV">
+            <mat-icon>table_view</mat-icon>
+            <span class="export-btn-text">
+              <span class="export-btn-label">CSV</span>
+              <span class="export-btn-sub">Exportar Dados</span>
+            </span>
+          </button>
+          <button class="export-btn export-pdf" (click)="exportarPDF()" [disabled]="isLoading || !dashboard"
+                  matTooltip="Gerar relatório executivo em PDF">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span class="export-btn-text">
+              <span class="export-btn-label">PDF</span>
+              <span class="export-btn-sub">Relatório Executivo</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ FILTROS ══════════════════════ -->
+  <div class="filter-card">
+    <div class="filter-card-header">
+      <div class="filter-card-icon">
+        <mat-icon>tune</mat-icon>
+      </div>
+      <div class="filter-card-text">
+        <span class="filter-card-title">Filtros de Análise</span>
+        <span class="filter-card-sub">Refine os dados por período, técnico, status e prioridade</span>
+      </div>
+      <div class="filter-card-chips">
+        <span class="filter-tag"><mat-icon>date_range</mat-icon>Período</span>
+        <span class="filter-tag filter-tag-green"><mat-icon>engineering</mat-icon>Técnico</span>
+        <span class="filter-tag filter-tag-purple"><mat-icon>flag_circle</mat-icon>Status</span>
+      </div>
+    </div>
+
+    <div class="filter-period-btns">
+      <span class="filter-label"><mat-icon>bolt</mat-icon> Atalhos:</span>
+      <button class="period-btn" (click)="setPeriodoPredefinido(7)">Últimos 7 dias</button>
+      <button class="period-btn" (click)="setPeriodoPredefinido(30)">Últimos 30 dias</button>
+      <button class="period-btn" (click)="setPeriodoPredefinido(90)">Últimos 90 dias</button>
+    </div>
+
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>De</mat-label>
+        <mat-icon matPrefix class="filter-prefix-icon">event_available</mat-icon>
+        <input matInput type="date" [(ngModel)]="filtroInicio">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Até</mat-label>
+        <mat-icon matPrefix class="filter-prefix-icon">event_busy</mat-icon>
+        <input matInput type="date" [(ngModel)]="filtroFim">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Técnico</mat-label>
+        <mat-icon matPrefix class="filter-prefix-icon">engineering</mat-icon>
+        <mat-select [(ngModel)]="filtroTecnico">
+          <mat-option [value]="null">Todos</mat-option>
+          <mat-option *ngFor="let t of tecnicos" [value]="t.id">{{ t.nome }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix class="filter-prefix-icon">flag_circle</mat-icon>
+        <mat-select [(ngModel)]="filtroStatus">
+          <mat-option *ngFor="let s of statusOpcoes" [value]="s.value">{{ s.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Prioridade</mat-label>
+        <mat-icon matPrefix class="filter-prefix-icon">priority_high</mat-icon>
+        <mat-select [(ngModel)]="filtroPrioridade">
+          <mat-option *ngFor="let p of prioridadeOpcoes" [value]="p.value">{{ p.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button class="apply-btn" (click)="aplicarFiltros()">
+        <mat-icon>search</mat-icon>
+        <span>Aplicar Filtros</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ LOADING ══════════════════════ -->
+  <div class="bi-loading" *ngIf="isLoading">
+    <div class="bi-loading-graphic">
+      <div class="bi-loading-ring">
+        <div class="bi-loading-inner">
+          <mat-icon class="bi-loading-icon">insights</mat-icon>
+        </div>
+      </div>
+      <div class="bi-loading-dots">
+        <span class="ld ld-1"></span>
+        <span class="ld ld-2"></span>
+        <span class="ld ld-3"></span>
+      </div>
+    </div>
+    <span class="bi-loading-title">Calculando métricas</span>
+    <p class="bi-loading-sub">Processando dados do período selecionado...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && dashboard">
+
+    <!-- ══════════════════════ ALERTAS ══════════════════════ -->
+    <div class="alert-row" *ngIf="dashboard.alertasGargalo?.length > 0">
+      <div class="alert-item" *ngFor="let a of dashboard.alertasGargalo">
+        <div class="alert-icon-wrap">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <div class="alert-content">
+          <span class="alert-title">Atenção — Gargalo detectado</span>
+          <span class="alert-msg">{{ a }}</span>
+        </div>
+        <span class="alert-badge">Alerta</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ KPI CARDS ══════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">
+        <mat-icon>dashboard</mat-icon>
+        <span>Indicadores de Desempenho</span>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="kpi-grid">
+
+      <div class="kpi-card kpi-total" style="animation-delay:.05s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ dashboard.totalChamados }}</div>
+            <div class="kpi-label">Total de Chamados</div>
+            <div class="kpi-sub-line">no período</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-abertos" style="animation-delay:.1s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>add_circle_outline</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ dashboard.totalAbertos }}</div>
+            <div class="kpi-label">Abertos</div>
+            <div class="kpi-sub-line">aguardando atendimento</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-andamento" style="animation-delay:.15s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>autorenew</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ dashboard.totalAndamento }}</div>
+            <div class="kpi-label">Em Andamento</div>
+            <div class="kpi-sub-line">em execução</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-encerrados" style="animation-delay:.2s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>check_circle_outline</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ dashboard.totalEncerrados }}</div>
+            <div class="kpi-label">Encerrados</div>
+            <div class="kpi-sub-line">concluídos com sucesso</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-criticos" style="animation-delay:.25s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>priority_high</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ dashboard.totalCriticos }}</div>
+            <div class="kpi-label">Críticos Abertos</div>
+            <div class="kpi-sub-line">requerem atenção imediata</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-tempo" style="animation-delay:.3s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>timer</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" [style.color]="tempoColor(dashboard.tempoMedioResolucaoMins)">
+              {{ formatarTempo(dashboard.tempoMedioResolucaoMins) }}
+            </div>
+            <div class="kpi-label">Tempo Médio de Resolução</div>
+            <div class="kpi-sub-line">média do período</div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+      <div class="kpi-card kpi-sla" style="animation-delay:.35s">
+        <div class="kpi-accent"></div>
+        <div class="kpi-inner">
+          <div class="kpi-icon-badge">
+            <mat-icon>verified</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" [style.color]="slaColor(dashboard.slaPercent)">
+              {{ dashboard.slaPercent | number:'1.1-1' }}%
+            </div>
+            <div class="kpi-label">SLA Cumprido</div>
+            <div class="sla-track">
+              <div class="sla-fill" [style.width.%]="dashboard.slaPercent"
+                   [style.background]="slaColor(dashboard.slaPercent)"></div>
+            </div>
+            <div class="kpi-sub-line sla-status"
+                 [style.color]="slaColor(dashboard.slaPercent)">
+              {{ dashboard.slaPercent >= 90 ? '● Excelente' : dashboard.slaPercent >= 70 ? '● Aceitável' : '● Crítico' }}
+            </div>
+          </div>
+        </div>
+        <div class="kpi-shine"></div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ CHARTS ROW 1 ══════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">
+        <mat-icon>show_chart</mat-icon>
+        <span>Análise Visual</span>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header chart-header-blue">
+          <div class="chart-card-icon">
+            <mat-icon>show_chart</mat-icon>
+          </div>
+          <div class="chart-card-text">
+            <span class="chart-card-title">Evolução de Chamados</span>
+            <span class="chart-card-sub">Abertura por dia no período filtrado</span>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas baseChart [data]="lineChartData" [type]="lineChartType" [options]="lineChartOptions"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header chart-header-teal">
+          <div class="chart-card-icon">
+            <mat-icon>donut_large</mat-icon>
+          </div>
+          <div class="chart-card-text">
+            <span class="chart-card-title">Por Status</span>
+            <span class="chart-card-sub">Distribuição atual dos chamados</span>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas baseChart [data]="doughnutStatusData" [type]="doughnutStatusType" [options]="doughnutOptions"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ CHARTS ROW 2 ══════════════════════ -->
+    <div class="charts-row charts-row-last">
+      <div class="chart-card">
+        <div class="chart-card-header chart-header-purple">
+          <div class="chart-card-icon">
+            <mat-icon>pie_chart</mat-icon>
+          </div>
+          <div class="chart-card-text">
+            <span class="chart-card-title">Por Categoria</span>
+            <span class="chart-card-sub">Tipo de problema mais frequente</span>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas baseChart [data]="pieCategData" [type]="pieCategType" [options]="pieOptions"></canvas>
+        </div>
+        <div class="mini-table">
+          <div class="mini-row" *ngFor="let c of categoriaEntries; let i = index">
+            <span class="mini-dot" [style.background]="['#7b1fa2','#0097a7','#e53935','#ff8f00'][i % 4]"></span>
+            <span class="mini-label">{{ c.key }}</span>
+            <span class="mini-value">{{ c.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card chart-wide">
+        <div class="chart-card-header chart-header-amber">
+          <div class="chart-card-icon">
+            <mat-icon>leaderboard</mat-icon>
+          </div>
+          <div class="chart-card-text">
+            <span class="chart-card-title">Produtividade dos Técnicos</span>
+            <span class="chart-card-sub">Chamados resolvidos × SLA no período</span>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas baseChart [data]="barTecData" [type]="barTecType" [options]="barTecOptions"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ RANKING TABLE ══════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">
+        <mat-icon>emoji_events</mat-icon>
+        <span>Ranking de Técnicos</span>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="ranking-card">
+      <div class="ranking-table-wrap">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th class="th-center">Posição</th>
+              <th>Técnico</th>
+              <th class="th-center">Resolvidos</th>
+              <th class="th-center">Tempo Médio</th>
+              <th class="th-center">SLA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of dashboard.tecnicosRanking" class="ranking-row">
+              <td class="rank-pos th-center">
+                <span class="pos-badge" [class.pos-gold]="t.posicao===1" [class.pos-silver]="t.posicao===2" [class.pos-bronze]="t.posicao===3">
+                  {{ posicaoEmoji(t.posicao) }}
+                </span>
+              </td>
+              <td class="rank-tecnico">
+                <div class="tecnico-avatar">
+                  <span class="tecnico-initials">{{ t.nome | slice:0:2 | uppercase }}</span>
+                </div>
+                <div class="tecnico-info">
+                  <span class="tecnico-nome">{{ t.nome }}</span>
+                  <span class="tecnico-cargo">Técnico de Suporte</span>
+                </div>
+              </td>
+              <td class="rank-center">
+                <span class="resolved-chip">
+                  <mat-icon>check_circle</mat-icon>
+                  {{ t.totalResolvidos }}
+                </span>
+              </td>
+              <td class="rank-center" [style.color]="tempoColor(t.tempoMedioResolucaoMins)">
+                <span class="tempo-badge" [style.background]="tempoColor(t.tempoMedioResolucaoMins) + '15'"
+                      [style.color]="tempoColor(t.tempoMedioResolucaoMins)"
+                      [style.border]="'1px solid ' + tempoColor(t.tempoMedioResolucaoMins) + '40'">
+                  <mat-icon>timer</mat-icon>
+                  {{ formatarTempo(t.tempoMedioResolucaoMins) }}
+                </span>
+              </td>
+              <td class="rank-center">
+                <div class="sla-cell">
+                  <span class="sla-chip-value" [style.color]="slaColor(t.slaPercent)">
+                    {{ t.slaPercent | number:'1.1-1' }}%
+                  </span>
+                  <div class="sla-mini-track">
+                    <div class="sla-mini-fill"
+                         [style.width.%]="t.slaPercent"
+                         [style.background]="slaColor(t.slaPercent)">
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="no-data" *ngIf="dashboard.tecnicosRanking.length === 0">
+          <div class="no-data-icon">
+            <mat-icon>person_off</mat-icon>
+          </div>
+          <span>Nenhum técnico com chamados encerrados no período selecionado.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ POR PRIORIDADE ══════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">
+        <mat-icon>flag</mat-icon>
+        <span>Distribuição por Prioridade</span>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="prioridade-card">
+      <div class="prioridade-grid">
+        <div class="prioridade-item" *ngFor="let p of prioridadeEntries">
+          <div class="prioridade-top">
+            <div class="prioridade-name-wrap">
+              <div class="prioridade-dot" [class]="'pdot-' + p.key.toLowerCase()"></div>
+              <span class="prioridade-name">{{ p.key }}</span>
+            </div>
+            <div class="prioridade-stats">
+              <span class="prioridade-count">{{ p.value }}</span>
+              <span class="prioridade-pct" *ngIf="dashboard.totalChamados > 0">
+                {{ (p.value / dashboard.totalChamados) * 100 | number:'1.0-1' }}%
+              </span>
+            </div>
+          </div>
+          <div class="prioridade-track">
+            <div class="prioridade-fill"
+              [style.width.%]="dashboard.totalChamados > 0 ? (p.value / dashboard.totalChamados * 100) : 0"
+              [class]="'prio-fill-' + p.key.toLowerCase()">
+              <div class="prioridade-fill-shine"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <div class="bi-footer">
+    <mat-icon class="bi-footer-icon">support_agent</mat-icon>
+    <span>Help Desk · By Gonçalves M William · Dashboard de BI</span>
+  </div>
+
+</div>
+

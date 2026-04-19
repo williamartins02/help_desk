@@ -1,5 +1,6 @@
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { filter } from 'rxjs/operators';
 import { ChatService } from '../../services/chat.service';
 import { MatDrawer } from '@angular/material/sidenav';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -13,6 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 export class NavComponent implements OnInit, AfterViewInit {
   @ViewChild('drawer') drawer!: MatDrawer;
   isMenuOpen = false;
+  isDashboardOpen = false;
 
   constructor(
     private router: Router,
@@ -22,7 +24,16 @@ export class NavComponent implements OnInit, AfterViewInit {
 
   //Metodo que inicia
   ngOnInit(): void {
-    // Removido redirecionamento automático para 'home'.
+    // Abre o submenu Dashboard se a rota ativa for bi-dashboard
+    this.isDashboardOpen = this.router.url.includes('bi-dashboard');
+
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: any) => {
+        if (e.urlAfterRedirects?.includes('bi-dashboard')) {
+          this.isDashboardOpen = true;
+        }
+      });
   }
 
   ngAfterViewInit() {
