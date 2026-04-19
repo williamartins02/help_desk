@@ -155,78 +155,78 @@
 .kpi-section {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 1rem;
+    gap: .85rem;
     align-items: stretch;
 }
 
 .kpi-section .stat-card {
-    padding: 1.3rem 1.35rem 1.1rem;
-    border-radius: 20px;
+    padding: .85rem 1.1rem .7rem;
+    border-radius: 18px;
     border: 1px solid rgba(255,255,255,.18);
     transition: transform var(--spring), box-shadow var(--transition);
     cursor: default;
     position: relative; overflow: hidden;
     display: flex; flex-direction: column; gap: 0;
-    min-height: 158px; box-sizing: border-box;
+    min-height: 112px; box-sizing: border-box;
 }
 .kpi-section .stat-card:hover      { transform: translateY(-6px); }
 .kpi-section .stat-card[mattooltip]{ cursor: pointer; }
 
 /* Watermark icon */
 .kpi-bg-icon {
-    position: absolute; bottom: -16px; right: -16px;
+    position: absolute; bottom: -8px; right: -8px;
     pointer-events: none; z-index: 0;
 }
 .kpi-bg-icon mat-icon {
-    font-size: 7.5rem; width: 7.5rem; height: 7.5rem;
-    opacity: .065; transition: opacity var(--transition);
+    font-size: 4.2rem; width: 4.2rem; height: 4.2rem;
+    opacity: .10; transition: opacity var(--transition);
 }
-.kpi-section .stat-card:hover .kpi-bg-icon mat-icon { opacity: .13; }
+.kpi-section .stat-card:hover .kpi-bg-icon mat-icon { opacity: .17; }
 
 /* Top row */
 .kpi-section .stat-card-top {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: .9rem; position: relative; z-index: 1;
+    margin-bottom: auto; position: relative; z-index: 1;
 }
 
 .kpi-section .stat-icon-wrap {
-    width: 44px; height: 44px; border-radius: 14px;
+    width: 38px; height: 38px; border-radius: 11px;
     display: flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,.22); flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,.18);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
-.kpi-section .stat-icon { font-size: 1.45rem; width: 1.45rem; height: 1.45rem; color: #fff; }
+.kpi-section .stat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; color: #fff; }
 
 /* Trend badge */
 .kpi-trend-badge {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: .22rem .65rem; border-radius: 999px;
-    font-size: .67rem; font-weight: 700; letter-spacing: .02em; white-space: nowrap;
+    padding: .14rem .48rem; border-radius: 999px;
+    font-size: .62rem; font-weight: 700; letter-spacing: .02em; white-space: nowrap;
 }
-.kpi-trend-badge mat-icon { font-size: .82rem; width: .82rem; height: .82rem; }
+.kpi-trend-badge mat-icon { font-size: .68rem; width: .68rem; height: .68rem; }
 .kpi-badge-neutral { background: rgba(255,255,255,.18); color: rgba(255,255,255,.85); }
 .kpi-badge-success { background: rgba(165,214,167,.25); color: #a5d6a7; }
 .kpi-badge-danger  { background: rgba(255,205,210,.22); color: #ffcdd2; }
 .kpi-badge-warning { background: rgba(255,236,179,.22); color: #ffe082; }
 
 /* Number */
-.kpi-num-block { position: relative; z-index: 1; }
+.kpi-num-block { position: relative; z-index: 1; margin-top: .42rem; }
 .kpi-num-block strong {
-    font-size: 2.65rem; line-height: 1; font-weight: 900;
-    color: #fff; letter-spacing: -1.5px; display: block;
+    font-size: 1.9rem; line-height: 1; font-weight: 900;
+    color: #fff; letter-spacing: -1px; display: block;
 }
 
 /* Label */
 .kpi-card-label {
-    font-size: .7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .08em; color: rgba(255,255,255,.72);
-    margin-top: .2rem; margin-bottom: .65rem;
+    font-size: .6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: rgba(255,255,255,.72);
+    margin-top: .1rem; margin-bottom: .42rem;
     position: relative; z-index: 1; line-height: 1;
 }
 
 /* Progress */
 .kpi-progress-track {
-    width: 100%; height: 4px;
+    width: 100%; height: 3px;
     background: rgba(0,0,0,.12); border-radius: 999px;
     overflow: hidden; margin-top: auto; position: relative; z-index: 1;
 }
@@ -700,8 +700,9 @@ button:focus-visible { outline: 2px solid #1565c0; outline-offset: 3px; border-r
     .hero-icon-ring { display: none; }
     .hero-content h1 { font-size: 1.6rem; }
     .kpi-section { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-    .kpi-section .stat-card { min-height: 130px; }
-    .kpi-num-block strong { font-size: 2rem; }
+    .kpi-section .stat-card { min-height: 100px; }
+    .kpi-num-block strong { font-size: 1.55rem; letter-spacing: -.5px; }
+    .kpi-bg-icon mat-icon { font-size: 3.2rem; width: 3.2rem; height: 3.2rem; }
     .content-card { border-radius: 1.15rem; }
     .toolbar { flex-direction: column; align-items: stretch; }
     .search-field, .add-button { width: 100%; }
