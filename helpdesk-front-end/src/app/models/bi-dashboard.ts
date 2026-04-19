@@ -1,4 +1,14 @@
-﻿export interface TecnicoMetrica {
+﻿export interface ChamadoResumo {
+  id: number;
+  titulo: string;
+  tecnico: string;
+  cliente: string;
+  status: string;
+  prioridade: string;
+  tempoResolucao: string;
+  statusSla: string; // "NO_PRAZO" | "ATRASADO" | "-"
+}
+export interface TecnicoMetrica {
   id: number;
   nome: string;
   totalResolvidos: number;
@@ -26,6 +36,7 @@ export interface BiDashboard {
   tecnicosRanking: TecnicoMetrica[];
   evolucao: EvolucaoDia[];
   alertasGargalo: string[];
+  chamados: ChamadoResumo[];
 }
 export interface BiFiltro {
   dataInicio?: string;

@@ -714,6 +714,21 @@
 .kpi-badge-danger  { background: rgba(254,202,202,.22); color: #fecaca; }
 .kpi-badge-info    { background: rgba(255,255,255,.18); color: rgba(255,255,255,.88); }
 
+/* ── Trend badge dinâmico (substitui kpi-badge nos cards de KPI) ── */
+.kpi-trend-badge {
+  display: inline-flex; align-items: center; gap: .14rem;
+  padding: .12rem .42rem; border-radius: 999px;
+  font-size: .6rem; font-weight: 800; white-space: nowrap; letter-spacing: .02em;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(2px);
+  transition: color var(--transition), background var(--transition);
+}
+.kpi-trend-badge mat-icon {
+  font-size: .72rem !important; width: .72rem !important; height: .72rem !important;
+  color: inherit !important; opacity: 1 !important;
+}
+
 /* Big number */
 .kpi-num { display: flex; align-items: flex-end; margin-top: .35rem; }
 .kpi-num > strong {

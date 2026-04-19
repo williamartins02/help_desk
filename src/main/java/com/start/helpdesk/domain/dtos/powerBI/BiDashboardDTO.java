@@ -18,6 +18,7 @@ public class BiDashboardDTO implements Serializable {
     private List<TecnicoMetricaDTO> tecnicosRanking;
     private List<EvolucaoDiaDTO> evolucao;
     private List<String> alertasGargalo;
+    private List<ChamadoResumoDTO> chamados;
     public BiDashboardDTO() {}
     public long getTotalChamados() { return totalChamados; } public void setTotalChamados(long v) { this.totalChamados = v; }
     public long getTotalEncerrados() { return totalEncerrados; } public void setTotalEncerrados(long v) { this.totalEncerrados = v; }
@@ -32,4 +33,5 @@ public class BiDashboardDTO implements Serializable {
     public List<TecnicoMetricaDTO> getTecnicosRanking() { return tecnicosRanking; } public void setTecnicosRanking(List<TecnicoMetricaDTO> v) { this.tecnicosRanking = v; }
     public List<EvolucaoDiaDTO> getEvolucao() { return evolucao; } public void setEvolucao(List<EvolucaoDiaDTO> v) { this.evolucao = v; }
     public List<String> getAlertasGargalo() { return alertasGargalo; } public void setAlertasGargalo(List<String> v) { this.alertasGargalo = v; }
+    public List<ChamadoResumoDTO> getChamados() { return chamados; } public void setChamados(List<ChamadoResumoDTO> v) { this.chamados = v; }
 }

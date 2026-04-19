@@ -121,7 +121,13 @@
           <div class="kpi-bg-icon"><mat-icon>receipt_long</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>receipt_long</mat-icon></div>
-            <span class="kpi-badge kpi-badge-neutral"><mat-icon>trending_flat</mat-icon> Total</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['total']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['total']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['total']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['total']?.pct != null">{{ kpiTrends['total']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['total'] || kpiTrends['total']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.totalChamados }}</strong></div>
           <div class="kpi-label">Total de Chamados</div>
@@ -133,7 +139,13 @@
           <div class="kpi-bg-icon"><mat-icon>add_circle_outline</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>add_circle_outline</mat-icon></div>
-            <span class="kpi-badge kpi-badge-neutral"><mat-icon>trending_flat</mat-icon> Na fila</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['abertos']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['abertos']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['abertos']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['abertos']?.pct != null">{{ kpiTrends['abertos']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['abertos'] || kpiTrends['abertos']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.totalAbertos }}</strong></div>
           <div class="kpi-label">Abertos</div>
@@ -145,7 +157,13 @@
           <div class="kpi-bg-icon"><mat-icon>autorenew</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>autorenew</mat-icon></div>
-            <span class="kpi-badge kpi-badge-neutral"><mat-icon>trending_flat</mat-icon> Em execução</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['andamento']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['andamento']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['andamento']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['andamento']?.pct != null">{{ kpiTrends['andamento']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['andamento'] || kpiTrends['andamento']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.totalAndamento }}</strong></div>
           <div class="kpi-label">Em Andamento</div>
@@ -157,7 +175,13 @@
           <div class="kpi-bg-icon"><mat-icon>task_alt</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>task_alt</mat-icon></div>
-            <span class="kpi-badge kpi-badge-success"><mat-icon>trending_up</mat-icon> Concluídos</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['encerrados']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['encerrados']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['encerrados']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['encerrados']?.pct != null">{{ kpiTrends['encerrados']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['encerrados'] || kpiTrends['encerrados']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.totalEncerrados }}</strong></div>
           <div class="kpi-label">Encerrados</div>
@@ -169,7 +193,13 @@
           <div class="kpi-bg-icon"><mat-icon>warning_amber</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>priority_high</mat-icon></div>
-            <span class="kpi-badge kpi-badge-danger"><mat-icon>trending_down</mat-icon> Atenção</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['criticos']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['criticos']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['criticos']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['criticos']?.pct != null">{{ kpiTrends['criticos']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['criticos'] || kpiTrends['criticos']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.totalCriticos }}</strong></div>
           <div class="kpi-label">Críticos Abertos</div>
@@ -181,7 +211,13 @@
           <div class="kpi-bg-icon"><mat-icon>timer</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>timer</mat-icon></div>
-            <span class="kpi-badge kpi-badge-info"><mat-icon>schedule</mat-icon> TMR</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['tmr']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['tmr']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['tmr']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['tmr']?.pct != null">{{ kpiTrends['tmr']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['tmr'] || kpiTrends['tmr']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ formatarTempo(dashboard.tempoMedioResolucaoMins) }}</strong></div>
           <div class="kpi-label">Tempo Médio</div>
@@ -193,7 +229,13 @@
           <div class="kpi-bg-icon"><mat-icon>verified</mat-icon></div>
           <div class="kpi-card-top">
             <div class="kpi-icon-wrap"><mat-icon>verified</mat-icon></div>
-            <span class="kpi-badge kpi-badge-success"><mat-icon>check_circle</mat-icon> SLA</span>
+            <span class="kpi-trend-badge"
+                  [style.color]="kpiTrends['sla']?.color || 'rgba(255,255,255,.65)'"
+                  [title]="kpiTrends['sla']?.pct != null ? 'Variação vs período anterior' : 'Sem dados do período anterior'">
+              <mat-icon>{{ kpiTrends['sla']?.icon || 'trending_flat' }}</mat-icon>
+              <span *ngIf="kpiTrends['sla']?.pct != null">{{ kpiTrends['sla']!.pct }}%</span>
+              <span *ngIf="!kpiTrends['sla'] || kpiTrends['sla']?.pct == null">—</span>
+            </span>
           </div>
           <div class="kpi-num"><strong>{{ dashboard.slaPercent | number:'1.1-1' }}%</strong></div>
           <div class="kpi-label">SLA Cumprido</div>
@@ -358,7 +400,7 @@
             </div>
           </div>
           <div class="chart-content">
-            <canvas baseChart [data]="doughnutStatusData" [type]="doughnutStatusType" [options]="doughnutOptions"></canvas>
+            <canvas #doughnutStatusCanvas baseChart [data]="doughnutStatusData" [type]="doughnutStatusType" [options]="doughnutOptions"></canvas>
           </div>
         </div>
       </div>
@@ -394,7 +436,7 @@
             </div>
           </div>
           <div class="chart-content">
-            <canvas baseChart [data]="barTecData" [type]="barTecType" [options]="barTecOptions"></canvas>
+            <canvas #barTecCanvas baseChart [data]="barTecData" [type]="barTecType" [options]="barTecOptions"></canvas>
           </div>
         </div>
       </div>

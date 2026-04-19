@@ -1,6 +1,7 @@
 package com.start.helpdesk.services.powerBI;
 import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.dtos.powerBI.BiDashboardDTO;
+import com.start.helpdesk.domain.dtos.powerBI.ChamadoResumoDTO;
 import com.start.helpdesk.domain.dtos.powerBI.EvolucaoDiaDTO;
 import com.start.helpdesk.domain.dtos.powerBI.TecnicoMetricaDTO;
 import com.start.helpdesk.domain.enums.Classificacao;
@@ -74,6 +75,36 @@ public class BiRelatorioService {
         if (dto.getTotalCriticos() > 0) alertas.add("CRITICO: " + dto.getTotalCriticos() + " chamado(s) sem resolucao");
         if (dto.getSlaPercent() > 0 && dto.getSlaPercent() < 70) alertas.add("SLA abaixo de 70%: " + dto.getSlaPercent() + "%");
         dto.setAlertasGargalo(alertas);
+
+        // ── Lista de chamados individuais ─────────────────────────────────────────
+        List<ChamadoResumoDTO> chamadosResumo = new ArrayList<>();
+        for (Chamado c : chamados) {
+            String tecNome  = c.getTecnico()  != null ? c.getTecnico().getNome()  : "-";
+            String cliNome  = c.getCliente()  != null ? c.getCliente().getNome()  : "-";
+            String statusStr = c.getStatus()   != null ? c.getStatus().getDescricao()   : "-";
+            String prioStr   = c.getPrioridade() != null ? c.getPrioridade().getDescricao() : "-";
+
+            // tempo de resolucao
+            String tempo = "-";
+            if (c.getStatus() == Status.ENCERRADO && c.getDataAbertura() != null && c.getDataFechamento() != null) {
+                long mins = ChronoUnit.MINUTES.between(c.getDataAbertura(), c.getDataFechamento());
+                if (mins < 60) tempo = mins + " min";
+                else { long h = mins / 60; long m = mins % 60; tempo = h + "h" + (m > 0 ? " " + m + "min" : ""); }
+            }
+
+            // status SLA
+            String statusSla = "-";
+            if (c.getPrazoSla() != null) {
+                LocalDateTime ref = (c.getStatus() == Status.ENCERRADO && c.getDataFechamento() != null)
+                        ? c.getDataFechamento() : LocalDateTime.now();
+                statusSla = !ref.isAfter(c.getPrazoSla()) ? "NO_PRAZO" : "ATRASADO";
+            }
+
+            chamadosResumo.add(new ChamadoResumoDTO(c.getId(), c.getTitulo(), tecNome, cliNome,
+                    statusStr, prioStr, tempo, statusSla));
+        }
+        dto.setChamados(chamadosResumo);
+
         return dto;
     }
 }
