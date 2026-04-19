@@ -284,13 +284,15 @@ export class LineChartComponent implements OnInit, OnDestroy {
     const andamento = fc.filter(c => c.status == '1').length;
     const encerrados= fc.filter(c => c.status == '2').length;
     const atrasados = fc.filter(c => c.statusSla === 'ATRASADO' && c.status != '2').length;
+    const criticos  = fc.filter(c => c.prioridade == '3' && c.status != '2').length;
     const total = fc.length || 1;
     const pct = (v: number) => Math.max(5, Math.round((v / total) * 100));
     this.kpiCards = [
-      { label: 'Chamados Abertos', value: abertos,    icon: 'assignment',   colorClass: 'blue',   queryParam: { status: '0' }, trend: 'neutral', trendLabel: 'na fila',          progressPct: pct(abertos) },
-      { label: 'Em Andamento',     value: andamento,  icon: 'autorenew',    colorClass: 'orange', queryParam: { status: '1' }, trend: 'neutral', trendLabel: 'em execução',      progressPct: pct(andamento) },
-      { label: 'Encerrados',       value: encerrados, icon: 'check_circle', colorClass: 'green',  queryParam: { status: '2' }, trend: encerrados > 0 ? 'up' : 'neutral', trendLabel: `${this.resolucaoPercent}% do total`, progressPct: pct(encerrados) },
-      { label: 'SLA Atrasado',     value: atrasados,  icon: atrasados > 0 ? 'alarm_off' : 'alarm_on', colorClass: atrasados > 0 ? 'red' : 'green', queryParam: { sla: 'ATRASADO' }, trend: atrasados > 0 ? 'down' : 'up', trendLabel: atrasados > 0 ? 'atenção necessária' : 'dentro do prazo', progressPct: pct(atrasados) },
+      { label: 'Chamados Abertos',    value: abertos,    icon: 'assignment',              colorClass: 'blue',   queryParam: { status: '0' },              trend: 'neutral', trendLabel: 'na fila',            progressPct: pct(abertos) },
+      { label: 'Em Andamento',        value: andamento,  icon: 'autorenew',               colorClass: 'orange', queryParam: { status: '1' },              trend: 'neutral', trendLabel: 'em execução',        progressPct: pct(andamento) },
+      { label: 'Encerrados',          value: encerrados, icon: 'check_circle',            colorClass: 'green',  queryParam: { status: '2' },              trend: encerrados > 0 ? 'up' : 'neutral', trendLabel: `${this.resolucaoPercent}% do total`, progressPct: pct(encerrados) },
+      { label: 'SLA Atrasado',        value: atrasados,  icon: atrasados > 0 ? 'alarm_off' : 'alarm_on', colorClass: atrasados > 0 ? 'red' : 'green', queryParam: { sla: 'ATRASADO' }, trend: atrasados > 0 ? 'down' : 'up', trendLabel: atrasados > 0 ? 'atenção necessária' : 'dentro do prazo', progressPct: pct(atrasados) },
+      { label: 'Prioridade Crítica',  value: criticos,   icon: 'local_fire_department',   colorClass: 'purple', queryParam: { prioridade: '3', excluirEncerrados: 'true' }, trend: criticos > 0 ? 'down' : 'up', trendLabel: criticos > 0 ? 'requer atenção' : 'sem críticos', progressPct: criticos > 0 ? Math.max(5, Math.round((criticos / total) * 100)) : 5 },
     ];
   }
 
@@ -431,6 +433,7 @@ export class LineChartComponent implements OnInit, OnDestroy {
   get kpiAndamento(): number  { return this.filteredChamados().filter(c => c.status == '1').length; }
   get kpiEncerrados(): number { return this.filteredChamados().filter(c => c.status == '2').length; }
   get kpiAtrasados(): number  { return this.filteredChamados().filter(c => c.statusSla === 'ATRASADO' && c.status != '2').length; }
+  get kpiCriticos(): number   { return this.filteredChamados().filter(c => c.prioridade == '3' && c.status != '2').length; }
 
   // ── Perfil do usuário ─────────────────────────────────────
 

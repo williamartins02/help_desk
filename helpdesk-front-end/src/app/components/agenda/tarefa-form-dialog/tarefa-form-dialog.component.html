@@ -103,13 +103,90 @@
         <span>Vínculo com Chamado <span class="section-optional">(opcional)</span></span>
       </div>
 
+      <!-- Autocomplete de chamados abertos -->
       <mat-form-field class="field field-full" appearance="outline">
-        <mat-label>Nº do Chamado</mat-label>
+        <mat-label>Buscar Chamado</mat-label>
         <mat-icon matPrefix class="field-prefix-icon">receipt_long</mat-icon>
-        <input matInput type="number" formControlName="chamado"
-               placeholder="Deixe em branco para tarefa interna" />
-        <mat-hint>Ao vincular, a tarefa aparecerá associada ao chamado</mat-hint>
+        <input matInput
+               formControlName="chamadoBusca"
+               [matAutocomplete]="autoChamado"
+               (input)="filtrarChamados($any($event.target).value)"
+               placeholder="Busque por nº, título ou cliente..." />
+
+        <!-- Spinner enquanto carrega -->
+        <mat-spinner matSuffix diameter="16" *ngIf="carregandoChamados"
+                     class="spinner-chamado"></mat-spinner>
+
+        <!-- Botão limpar (quando há chamado vinculado) -->
+        <button matSuffix mat-icon-button
+                *ngIf="form.get('chamado')?.value && !carregandoChamados"
+                (click)="limparChamado()"
+                matTooltip="Desvincular chamado"
+                type="button">
+          <mat-icon>link_off</mat-icon>
+        </button>
+
+        <mat-hint>
+          <ng-container *ngIf="form.get('chamado')?.value; else semVinculo">
+            <mat-icon class="hint-icon-ok">check_circle</mat-icon>
+            Chamado #{{ form.get('chamado')?.value }} vinculado
+          </ng-container>
+          <ng-template #semVinculo>Deixe em branco para tarefa interna</ng-template>
+        </mat-hint>
+
+        <mat-autocomplete #autoChamado
+                          [displayWith]="displayChamado"
+                          (optionSelected)="onChamadoSelecionado($event.option.value)">
+          <!-- Opção "nenhum" -->
+          <mat-option [value]="null">
+            <div class="chamado-opt chamado-opt-none">
+              <mat-icon>link_off</mat-icon>
+              <span>— Nenhum (tarefa interna)</span>
+            </div>
+          </mat-option>
+
+          <!-- Chamados filtrados -->
+          <mat-option *ngFor="let c of chamadosFiltrados" [value]="c">
+            <div class="chamado-opt">
+              <div class="chamado-opt-linha1">
+                <span class="chamado-opt-id">#{{ c.id }}</span>
+                <span class="chamado-opt-status"
+                      [class.status-aberto]="c.status === 'ABERTO'"
+                      [class.status-andamento]="c.status === 'ANDAMENTO'">
+                  {{ c.status === 'ABERTO' ? 'Aberto' : 'Em Andamento' }}
+                </span>
+              </div>
+              <span class="chamado-opt-titulo">{{ c.titulo }}</span>
+              <span class="chamado-opt-cliente" *ngIf="c.nomeCliente">
+                <mat-icon>person</mat-icon>{{ c.nomeCliente }}
+              </span>
+            </div>
+          </mat-option>
+
+          <!-- Sem resultados -->
+          <mat-option *ngIf="chamadosFiltrados.length === 0 && !carregandoChamados" disabled>
+            <span class="sem-resultados">Nenhum chamado encontrado</span>
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
+
+      <!-- ── Alerta de conflito de horário ── -->
+      <div class="conflito-panel" *ngIf="conflitos.length > 0">
+        <mat-icon class="conflito-icon">warning_amber</mat-icon>
+        <div class="conflito-texto">
+          <strong>Conflito de horário detectado</strong>
+          <span>Este horário se sobrepõe a {{ conflitos.length === 1 ? 'outra tarefa' : 'outras tarefas' }} do dia:</span>
+          <ul class="conflito-lista">
+            <li *ngFor="let c of conflitos">{{ c }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Erro de horário ── -->
+      <div class="hora-erro-panel" *ngIf="erroHoraFim">
+        <mat-icon>schedule</mat-icon>
+        <span>A Hora de Fim deve ser posterior à Hora de Início.</span>
+      </div>
 
       <!-- ── Ações ── -->
       <div class="dialog-actions">

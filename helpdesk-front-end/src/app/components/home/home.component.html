@@ -37,78 +37,97 @@
   <div class="kpi-row" *ngIf="!isLoading; else kpiLoading">
 
     <!-- Chamados Abertos -->
-    <div class="kpi-card kpi-blue">
+    <div class="stat-card stat-aberto">
       <div class="kpi-bg-icon"><mat-icon>assignment</mat-icon></div>
-      <div class="kpi-top">
-        <div class="kpi-icon-pill kpi-icon-pill-blue">
-          <mat-icon>assignment</mat-icon>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">assignment</mat-icon>
         </div>
         <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>trending_flat</mat-icon> Na fila
         </span>
       </div>
-      <div class="kpi-num">{{ totalAbertos }}</div>
-      <div class="kpi-label">Chamados Abertos</div>
+      <div class="kpi-num-block"><strong>{{ totalAbertos }}</strong></div>
+      <div class="kpi-card-label">Chamados Abertos</div>
       <div class="kpi-progress-track">
-        <div class="kpi-progress-bar kpi-bar-blue"
+        <div class="kpi-progress-bar kpi-bar-white"
              [style.width.%]="totalAbertos > 0 ? 100 : 5"></div>
       </div>
     </div>
 
     <!-- Em Andamento -->
-    <div class="kpi-card kpi-orange">
+    <div class="stat-card stat-andamento">
       <div class="kpi-bg-icon"><mat-icon>pending_actions</mat-icon></div>
-      <div class="kpi-top">
-        <div class="kpi-icon-pill kpi-icon-pill-orange">
-          <mat-icon>pending_actions</mat-icon>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">pending_actions</mat-icon>
         </div>
         <span class="kpi-trend-badge kpi-badge-neutral">
           <mat-icon>trending_flat</mat-icon> Em execução
         </span>
       </div>
-      <div class="kpi-num">{{ totalEmAndamento }}</div>
-      <div class="kpi-label">Em Andamento</div>
+      <div class="kpi-num-block"><strong>{{ totalEmAndamento }}</strong></div>
+      <div class="kpi-card-label">Em Andamento</div>
       <div class="kpi-progress-track">
-        <div class="kpi-progress-bar kpi-bar-orange"
+        <div class="kpi-progress-bar kpi-bar-white"
              [style.width.%]="totalEmAndamento > 0 ? 65 : 5"></div>
       </div>
     </div>
 
     <!-- Críticos -->
-    <div class="kpi-card kpi-red">
+    <div class="stat-card stat-critico">
       <div class="kpi-bg-icon"><mat-icon>warning_amber</mat-icon></div>
-      <div class="kpi-top">
-        <div class="kpi-icon-pill kpi-icon-pill-red">
-          <mat-icon>warning_amber</mat-icon>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">warning_amber</mat-icon>
         </div>
         <span class="kpi-trend-badge kpi-badge-danger">
           <mat-icon>trending_down</mat-icon> Atenção
         </span>
       </div>
-      <div class="kpi-num">{{ totalCriticos }}</div>
-      <div class="kpi-label">Críticos</div>
+      <div class="kpi-num-block"><strong>{{ totalCriticos }}</strong></div>
+      <div class="kpi-card-label">Críticos</div>
       <div class="kpi-progress-track">
-        <div class="kpi-progress-bar kpi-bar-red"
+        <div class="kpi-progress-bar kpi-bar-white"
              [style.width.%]="totalCriticos > 0 ? 40 : 5"></div>
       </div>
     </div>
 
     <!-- Encerrados -->
-    <div class="kpi-card kpi-green">
+    <div class="stat-card stat-encerrado">
       <div class="kpi-bg-icon"><mat-icon>task_alt</mat-icon></div>
-      <div class="kpi-top">
-        <div class="kpi-icon-pill kpi-icon-pill-green">
-          <mat-icon>task_alt</mat-icon>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">task_alt</mat-icon>
         </div>
         <span class="kpi-trend-badge kpi-badge-success">
-          <mat-icon>trending_up</mat-icon> {{ resolucaoPercent }}% resolvidos
+          <mat-icon>trending_up</mat-icon> {{ resolucaoPercent }}%
         </span>
       </div>
-      <div class="kpi-num">{{ totalEncerrados }}</div>
-      <div class="kpi-label">Encerrados</div>
+      <div class="kpi-num-block"><strong>{{ totalEncerrados }}</strong></div>
+      <div class="kpi-card-label">Encerrados</div>
       <div class="kpi-progress-track">
-        <div class="kpi-progress-bar kpi-bar-green"
+        <div class="kpi-progress-bar kpi-bar-white"
              [style.width.%]="resolucaoPercent || 5"></div>
+      </div>
+    </div>
+
+    <!-- Tempo Médio de Resolução -->
+    <div class="stat-card stat-tmr">
+      <div class="kpi-bg-icon"><mat-icon>timer</mat-icon></div>
+      <div class="stat-card-top">
+        <div class="stat-icon-wrap">
+          <mat-icon class="stat-icon">timer</mat-icon>
+        </div>
+        <span class="kpi-trend-badge kpi-badge-info">
+          <mat-icon>schedule</mat-icon> TMR
+        </span>
+      </div>
+      <div class="kpi-num-block"><strong>{{ tempoMedioLabel }}</strong></div>
+      <div class="kpi-card-label">Tempo Médio</div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar kpi-bar-white"
+             [style.width.%]="tempoMedioProgress"></div>
       </div>
     </div>
 
@@ -116,10 +135,11 @@
 
   <ng-template #kpiLoading>
     <div class="kpi-row">
-      <div class="kpi-card kpi-blue  kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="kpi-card kpi-orange kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="kpi-card kpi-red   kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="kpi-card kpi-green kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card stat-aberto   kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card stat-andamento kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card stat-critico  kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card stat-encerrado kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card stat-tmr      kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
     </div>
   </ng-template>
 

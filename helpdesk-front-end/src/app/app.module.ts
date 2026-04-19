@@ -55,6 +55,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule } from '@angular/material/sort';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 
@@ -185,6 +186,7 @@ import {AgendaWsService} from "./services/agenda-ws.service";
     MatDatepickerModule,
     MatTooltipModule,
     MatSortModule,
+    MatAutocompleteModule,
     FormsModule,
     ReactiveFormsModule,
     NgChartsModule,

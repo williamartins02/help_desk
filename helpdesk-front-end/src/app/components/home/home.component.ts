@@ -397,6 +397,40 @@ export class HomeComponent implements OnInit, OnDestroy {
     return Math.round(this.totalEncerrados / this.chamados.length * 100);
   }
 
+  /** Tempo médio de resolução em horas (chamados encerrados com dataFechamento). */
+  get tempoMedioHoras(): number {
+    const fechados = this.chamados.filter(
+      c => c.status == '2' && c.dataAbertura && c.dataFechamento
+    );
+    if (!fechados.length) return 0;
+    const totalMs = fechados.reduce((acc, c) => {
+      const ab = this.parseDate(c.dataAbertura);
+      const fe = this.parseDate(c.dataFechamento);
+      return ab && fe ? acc + (fe.getTime() - ab.getTime()) : acc;
+    }, 0);
+    return Math.round(totalMs / fechados.length / 3_600_000);
+  }
+
+  /** Label formatado: "4h", "1d 3h", "2d", ou "—" quando sem dados. */
+  get tempoMedioLabel(): string {
+    const h = this.tempoMedioHoras;
+    if (h <= 0) return '—';
+    if (h < 24) return `${h}h`;
+    const d = Math.floor(h / 24);
+    const r = h % 24;
+    return r > 0 ? `${d}d ${r}h` : `${d}d`;
+  }
+
+  /** Progresso do TMR (barra): 100% = ≤4h, 50% = 24h, 10% = ≥48h. */
+  get tempoMedioProgress(): number {
+    const h = this.tempoMedioHoras;
+    if (h <= 0) return 5;
+    if (h <= 4)  return 100;
+    if (h <= 24) return Math.round(100 - ((h - 4) / 20) * 50);
+    if (h <= 48) return Math.round(50 - ((h - 24) / 24) * 40);
+    return 10;
+  }
+
   // ── Avisos Importantes ────────────────────────────────────
   get avisosImportantes(): { icon: string; color: string; texto: string }[] {
     const list: { icon: string; color: string; texto: string }[] = [];

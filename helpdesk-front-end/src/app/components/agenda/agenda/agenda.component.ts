@@ -231,7 +231,12 @@ export class AgendaComponent implements OnInit, OnDestroy {
       : this.tecnicoId;
 
     const ref = this.dialog.open(TarefaFormDialogComponent, {
-      data: { tecnicoId: idParaCriacao } as TarefaDialogData,
+      data: {
+        tecnicoId:    idParaCriacao,
+        dataPadrao:   this.dataSelecionada,   // pré-preenche a data selecionada na agenda
+        tarefasDoDia: this.tarefas,           // usado para detectar conflitos de horário
+        isAdmin:      this.isAdmin,           // carrega todos os chamados quando admin
+      } as TarefaDialogData,
       width: '620px', maxWidth: '98vw',
       panelClass: 'dialog-no-padding', disableClose: true
     });
@@ -240,7 +245,12 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
   editarTarefa(tarefa: Tarefa): void {
     const ref = this.dialog.open(TarefaFormDialogComponent, {
-      data: { tarefa, tecnicoId: tarefa.tecnico } as TarefaDialogData,
+      data: {
+        tarefa,
+        tecnicoId:    tarefa.tecnico,
+        tarefasDoDia: this.tarefas,   // mantém detecção de conflitos na edição
+        isAdmin:      this.isAdmin,
+      } as TarefaDialogData,
       width: '620px', maxWidth: '98vw',
       panelClass: 'dialog-no-padding', disableClose: true
     });
