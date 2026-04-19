@@ -75,6 +75,17 @@ public class ChamadoService {
 			}
 		}
 
+		// ── Notifica Kanban e Central via WebSocket (CHAMADO_CRIADO) ────────────
+		// Garante que ambas as telas recebam o novo chamado em tempo real,
+		// sem necessidade de recarregar manualmente.
+		try {
+			agendaEventPublisher.publicarChamadoCriado(
+				chamado.getId(),
+				chamado.getStatus().getCodigo(),
+				chamado.getTecnico().getId()
+			);
+		} catch (Exception ignored) { /* WebSocket não deve bloquear a criação */ }
+
 		return chamado;
 	}
 

@@ -28,7 +28,7 @@ public class AgendaEventoDTO implements Serializable {
 
     /**
      * Tipo do evento para que o frontend saiba qual entidade foi afetada.
-     * Valores possíveis: "TAREFA_ATUALIZADA", "CHAMADO_ATUALIZADO"
+     * Valores possíveis: "TAREFA_ATUALIZADA", "CHAMADO_ATUALIZADO", "CHAMADO_CRIADO", "CHAMADO_REDISTRIBUIDO"
      */
     private String tipo;
 
@@ -39,12 +39,18 @@ public class AgendaEventoDTO implements Serializable {
     private Integer novoStatus;
 
     /**
-     * ID do técnico dono da tarefa (usado para filtrar no cliente —
-     * cada técnico só reage aos próprios eventos).
+     * ID do técnico dono/destino da tarefa (usado para filtrar no cliente).
+     * Em redistribuições, representa o técnico de DESTINO.
      */
     private Integer tecnicoId;
 
     /** Mensagem descritiva do evento (para log / exibição). */
     private String mensagem;
+
+    /**
+     * ID do técnico de ORIGEM — preenchido apenas em eventos CHAMADO_REDISTRIBUIDO.
+     * Permite que o Kanban do técnico origem remova o card imediatamente.
+     */
+    private Integer tecnicoOrigemId;
 }
 

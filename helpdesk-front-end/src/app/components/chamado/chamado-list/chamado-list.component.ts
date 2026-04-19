@@ -117,6 +117,8 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Subscription WebSocket da agenda — limpada no ngOnDestroy */
   private agendaWsSub!: Subscription;
+  /** Subscription WebSocket do Kanban (chamado-atualizado) — sincronização bidirecional */
+  private kanbanWsSub!: Subscription;
 
   constructor(
       public dialog: MatDialog,
@@ -152,6 +154,37 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
         '🔄 Agenda sincronizada',
         { timeOut: 3000, positionClass: 'toast-bottom-right' }
       );
+    });
+
+    // ── WebSocket do Kanban: sincronização bidirecional ───────────────────
+    // Quando um card é movido no Kanban (CHAMADO_ATUALIZADO) ou um chamado
+    // é criado em qualquer tela (CHAMADO_CRIADO), a Central recarrega automaticamente.
+    this.kanbanWsSub = this.agendaWs.chamadoAtualizado$.subscribe(evento => {
+      if (this.usuarioLogado && this.usuarioLogado.tipo === 'TECNICO') {
+        this.findAllByTecnico();
+      } else {
+        this.findAll();
+      }
+      if (evento.tipo === 'CHAMADO_CRIADO') {
+        this.toast.success(
+          `Chamado #${evento.entityId} criado — lista atualizada`,
+          '✅ Kanban sincronizado',
+          { timeOut: 2500, positionClass: 'toast-bottom-right' }
+        );
+      } else if (evento.tipo === 'CHAMADO_REDISTRIBUIDO') {
+        this.toast.info(
+          `Chamado #${evento.entityId} redistribuído — lista atualizada`,
+          '🔄 Redistribuição',
+          { timeOut: 3000, positionClass: 'toast-bottom-right' }
+        );
+      } else {
+        const statusLabel: Record<number, string> = { 0: 'Aberto', 1: 'Em Andamento', 2: 'Encerrado' };
+        this.toast.info(
+          `Chamado #${evento.entityId} → ${statusLabel[evento.novoStatus] ?? ''}`,
+          '🔄 Kanban sincronizado',
+          { timeOut: 2500, positionClass: 'toast-bottom-right' }
+        );
+      }
     });
 
     // Atualiza contadores regressivos a cada segundo — APENAS chamados NÃO encerrados
@@ -424,6 +457,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.refreshTable.unsubscribe();
     if (this.slaAlertSub) this.slaAlertSub.unsubscribe();
     if (this.agendaWsSub) this.agendaWsSub.unsubscribe();
+    if (this.kanbanWsSub) this.kanbanWsSub.unsubscribe();
     if (this.slaTimerInterval) clearInterval(this.slaTimerInterval);
     this.slaService.disconnect();
     this.agendaWs.disconnect();

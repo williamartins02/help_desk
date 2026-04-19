@@ -95,6 +95,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
 import {TarefaFormDialogComponent} from "./components/agenda/tarefa-form-dialog/tarefa-form-dialog.component";
 import {AgendaWsService} from "./services/agenda-ws.service";
+import { KanbanComponent } from './components/chamado/kanban/kanban.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -154,6 +156,7 @@ import {AgendaWsService} from "./services/agenda-ws.service";
     ForgotPasswordComponent,
     ResetPasswordComponent,
     NewBadgeComponent,
+    KanbanComponent,
 
 
   ],
@@ -187,6 +190,7 @@ import {AgendaWsService} from "./services/agenda-ws.service";
     MatTooltipModule,
     MatSortModule,
     MatAutocompleteModule,
+    DragDropModule,
     FormsModule,
     ReactiveFormsModule,
     NgChartsModule,

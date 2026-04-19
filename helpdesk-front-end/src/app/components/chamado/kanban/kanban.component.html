@@ -1,0 +1,373 @@
+<div class="kanban-wrapper">
+
+  <!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+  <section class="kanban-hero">
+    <div class="hero-noise"></div>
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-glow hero-glow-3"></div>
+
+    <div class="hero-left">
+      <div class="hero-icon-wrap">
+        <div class="hero-icon-pulse"></div>
+        <mat-icon class="hero-icon">view_kanban</mat-icon>
+      </div>
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>Sincronização em tempo real</span>
+        </div>
+        <h1 class="hero-title">Kanban <span class="hero-title-accent">de Chamados</span></h1>
+        <p class="hero-sub">Arraste os cards entre colunas para atualizar status instantaneamente.</p>
+      </div>
+    </div>
+
+    <div class="hero-center">
+      <div class="hero-kpi">
+        <div class="kpi-ring kpi-ring-blue">
+          <span class="kpi-val">{{ colAberto.length }}</span>
+        </div>
+        <span class="kpi-label">Abertos</span>
+      </div>
+      <div class="hero-kpi-divider"></div>
+      <div class="hero-kpi">
+        <div class="kpi-ring kpi-ring-amber">
+          <span class="kpi-val">{{ colAndamento.length }}</span>
+        </div>
+        <span class="kpi-label">Andamento</span>
+      </div>
+      <div class="hero-kpi-divider"></div>
+      <div class="hero-kpi">
+        <div class="kpi-ring kpi-ring-green">
+          <span class="kpi-val">{{ colEncerrado.length }}</span>
+        </div>
+        <span class="kpi-label">Encerrados</span>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <button class="btn-criar" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        <span>Novo Chamado</span>
+      </button>
+      <button class="btn-icon-glass" (click)="manualRefresh()" matTooltip="Atualizar dados">
+        <mat-icon [class.spinning]="isLoading">refresh</mat-icon>
+      </button>
+      <div class="last-update-chip">
+        <mat-icon>access_time</mat-icon>
+        <span>{{ lastUpdatedLabel }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ LOADING BAR ════════════════════════════════════════════════════════ -->
+  <div class="loading-bar-wrap" *ngIf="isLoading">
+    <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+  </div>
+
+  <!-- ══ BOARD ══════════════════════════════════════════════════════════════ -->
+  <div class="kanban-board" cdkDropListGroup>
+
+    <!-- ─────────────────── COLUNA: A FAZER ─────────────────────────────── -->
+    <div class="kanban-col">
+      <div class="col-header col-header-blue">
+        <div class="col-header-accent accent-blue"></div>
+        <div class="col-header-inner">
+          <div class="col-icon-wrap col-icon-blue">
+            <mat-icon>inbox</mat-icon>
+          </div>
+          <div class="col-info">
+            <span class="col-name">A Fazer</span>
+            <span class="col-desc">Aguardando atendimento</span>
+          </div>
+          <div class="col-badge col-badge-blue">{{ colAberto.length }}</div>
+        </div>
+      </div>
+
+      <div class="col-drop-zone"
+           cdkDropList
+           id="list-aberto"
+           [cdkDropListData]="colAberto"
+           [cdkDropListConnectedTo]="['list-andamento','list-encerrado']"
+           (cdkDropListDropped)="onDrop($event, '0')">
+
+        <ng-container *ngFor="let chamado of colAberto">
+          <div class="k-card k-card-blue" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
+            <div class="k-card-placeholder" *cdkDragPlaceholder></div>
+            <div class="k-card-accent accent-blue"></div>
+
+            <div class="k-card-row-top">
+              <span class="k-card-id"># {{ chamado.id }}</span>
+              <div class="k-card-top-right">
+                <app-new-badge [show]="newChamadoIds.has(+chamado.id)" marginLeft="0"></app-new-badge>
+                <span class="k-prio-chip" [style.background]="getPrioridadeColor(chamado.prioridade) + '22'"
+                      [style.color]="getPrioridadeColor(chamado.prioridade)"
+                      [style.border]="'1px solid ' + getPrioridadeColor(chamado.prioridade) + '44'">
+                  <mat-icon class="prio-icon">{{ getPrioridadeIcon(chamado.prioridade) }}</mat-icon>
+                  {{ returnPrioridade(chamado.prioridade) }}
+                </span>
+              </div>
+            </div>
+
+            <h3 class="k-card-title" (click)="openRead(chamado)">{{ chamado.titulo }}</h3>
+
+            <div class="k-card-people">
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#1565c0,#42a5f5)">
+                  {{ getInitials(chamado.nomeCliente || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Cliente</span>
+                  <span class="chip-name">{{ chamado.nomeCliente || chamado.cliente }}</span>
+                </div>
+              </div>
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc)">
+                  {{ getInitials(chamado.nomeTecnico || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Técnico</span>
+                  <span class="chip-name">{{ chamado.nomeTecnico || chamado.tecnico }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="k-card-footer">
+              <div class="footer-left">
+                <mat-icon class="time-icon">schedule</mat-icon>
+                <span class="footer-time">{{ getRelativeTime(chamado.dataAbertura) }}</span>
+              </div>
+              <div class="sla-pill"
+                   [class.sla-ok]="getSlaLabel(chamado) === 'NO PRAZO'"
+                   [class.sla-alert]="getSlaLabel(chamado) === 'ALERTA'"
+                   [class.sla-late]="getSlaLabel(chamado) === 'ATRASADO'"
+                   [matTooltip]="'SLA: ' + (slaCountdowns[chamado.id] || '--')">
+                <mat-icon class="sla-i">{{ getSlaIcon(chamado) }}</mat-icon>
+                <span>{{ getSlaLabel(chamado) }}</span>
+              </div>
+            </div>
+
+            <div class="k-card-actions">
+              <button class="k-action-btn" (click)="openEdit(chamado)" matTooltip="Editar chamado">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="k-action-btn" (click)="openRead(chamado)" matTooltip="Ver detalhes">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="empty-state" *ngIf="colAberto.length === 0 && !isLoading">
+          <div class="empty-icon-wrap empty-blue"><mat-icon>inbox</mat-icon></div>
+          <p class="empty-title">Tudo em dia!</p>
+          <p class="empty-sub">Nenhum chamado aguardando</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── COLUNA: EM ANDAMENTO ─────────────────────────── -->
+    <div class="kanban-col">
+      <div class="col-header col-header-amber">
+        <div class="col-header-accent accent-amber"></div>
+        <div class="col-header-inner">
+          <div class="col-icon-wrap col-icon-amber">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
+          <div class="col-info">
+            <span class="col-name">Em Andamento</span>
+            <span class="col-desc">Sendo atendido agora</span>
+          </div>
+          <div class="col-badge col-badge-amber">{{ colAndamento.length }}</div>
+        </div>
+      </div>
+
+      <div class="col-drop-zone"
+           cdkDropList
+           id="list-andamento"
+           [cdkDropListData]="colAndamento"
+           [cdkDropListConnectedTo]="['list-aberto','list-encerrado']"
+           (cdkDropListDropped)="onDrop($event, '1')">
+
+        <ng-container *ngFor="let chamado of colAndamento">
+          <div class="k-card k-card-amber" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
+            <div class="k-card-placeholder" *cdkDragPlaceholder></div>
+            <div class="k-card-accent accent-amber"></div>
+
+            <div class="k-card-row-top">
+              <span class="k-card-id"># {{ chamado.id }}</span>
+              <div class="k-card-top-right">
+                <app-new-badge [show]="newChamadoIds.has(+chamado.id)" marginLeft="0"></app-new-badge>
+                <span class="k-prio-chip" [style.background]="getPrioridadeColor(chamado.prioridade) + '22'"
+                      [style.color]="getPrioridadeColor(chamado.prioridade)"
+                      [style.border]="'1px solid ' + getPrioridadeColor(chamado.prioridade) + '44'">
+                  <mat-icon class="prio-icon">{{ getPrioridadeIcon(chamado.prioridade) }}</mat-icon>
+                  {{ returnPrioridade(chamado.prioridade) }}
+                </span>
+              </div>
+            </div>
+
+            <h3 class="k-card-title" (click)="openRead(chamado)">{{ chamado.titulo }}</h3>
+
+            <div class="k-card-people">
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#e65100,#ffa726)">
+                  {{ getInitials(chamado.nomeCliente || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Cliente</span>
+                  <span class="chip-name">{{ chamado.nomeCliente || chamado.cliente }}</span>
+                </div>
+              </div>
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#558b2f,#9ccc65)">
+                  {{ getInitials(chamado.nomeTecnico || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Técnico</span>
+                  <span class="chip-name">{{ chamado.nomeTecnico || chamado.tecnico }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="k-card-footer">
+              <div class="footer-left">
+                <mat-icon class="time-icon">schedule</mat-icon>
+                <span class="footer-time">{{ getRelativeTime(chamado.dataAbertura) }}</span>
+              </div>
+              <div class="sla-pill"
+                   [class.sla-ok]="getSlaLabel(chamado) === 'NO PRAZO'"
+                   [class.sla-alert]="getSlaLabel(chamado) === 'ALERTA'"
+                   [class.sla-late]="getSlaLabel(chamado) === 'ATRASADO'"
+                   [matTooltip]="'SLA: ' + (slaCountdowns[chamado.id] || '--')">
+                <mat-icon class="sla-i">{{ getSlaIcon(chamado) }}</mat-icon>
+                <span>{{ getSlaLabel(chamado) }}</span>
+              </div>
+            </div>
+
+            <div class="k-card-actions">
+              <button class="k-action-btn" (click)="openEdit(chamado)" matTooltip="Editar chamado">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="k-action-btn" (click)="openRead(chamado)" matTooltip="Ver detalhes">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="empty-state" *ngIf="colAndamento.length === 0 && !isLoading">
+          <div class="empty-icon-wrap empty-amber"><mat-icon>pending_actions</mat-icon></div>
+          <p class="empty-title">Sem atividade</p>
+          <p class="empty-sub">Nenhum chamado em andamento</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── COLUNA: FINALIZADO ───────────────────────────── -->
+    <div class="kanban-col">
+      <div class="col-header col-header-green">
+        <div class="col-header-accent accent-green"></div>
+        <div class="col-header-inner">
+          <div class="col-icon-wrap col-icon-green">
+            <mat-icon>verified</mat-icon>
+          </div>
+          <div class="col-info">
+            <span class="col-name">Finalizado</span>
+            <span class="col-desc">Chamados concluídos</span>
+          </div>
+          <div class="col-badge col-badge-green">{{ colEncerrado.length }}</div>
+        </div>
+      </div>
+
+      <div class="col-drop-zone"
+           cdkDropList
+           id="list-encerrado"
+           [cdkDropListData]="colEncerrado"
+           [cdkDropListConnectedTo]="['list-aberto','list-andamento']"
+           (cdkDropListDropped)="onDrop($event, '2')">
+
+        <ng-container *ngFor="let chamado of colEncerrado">
+          <div class="k-card k-card-green k-card-done" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
+            <div class="k-card-placeholder" *cdkDragPlaceholder></div>
+            <div class="k-card-accent accent-green"></div>
+
+            <div class="k-card-row-top">
+              <span class="k-card-id"># {{ chamado.id }}</span>
+              <div class="k-card-top-right">
+                <app-new-badge [show]="newChamadoIds.has(+chamado.id)" marginLeft="0"></app-new-badge>
+                <span class="k-prio-chip" [style.background]="getPrioridadeColor(chamado.prioridade) + '22'"
+                      [style.color]="getPrioridadeColor(chamado.prioridade)"
+                      [style.border]="'1px solid ' + getPrioridadeColor(chamado.prioridade) + '44'">
+                  <mat-icon class="prio-icon">{{ getPrioridadeIcon(chamado.prioridade) }}</mat-icon>
+                  {{ returnPrioridade(chamado.prioridade) }}
+                </span>
+              </div>
+            </div>
+
+            <h3 class="k-card-title" (click)="openRead(chamado)">{{ chamado.titulo }}</h3>
+
+            <div class="k-card-people">
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#2e7d32,#66bb6a)">
+                  {{ getInitials(chamado.nomeCliente || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Cliente</span>
+                  <span class="chip-name">{{ chamado.nomeCliente || chamado.cliente }}</span>
+                </div>
+              </div>
+              <div class="avatar-chip">
+                <div class="avatar" style="background:linear-gradient(135deg,#00695c,#26a69a)">
+                  {{ getInitials(chamado.nomeTecnico || '') }}
+                </div>
+                <div class="chip-info">
+                  <span class="chip-role">Técnico</span>
+                  <span class="chip-name">{{ chamado.nomeTecnico || chamado.tecnico }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="k-card-footer">
+              <div class="footer-left">
+                <mat-icon class="time-icon">schedule</mat-icon>
+                <span class="footer-time">{{ getRelativeTime(chamado.dataAbertura) }}</span>
+              </div>
+              <div class="sla-pill"
+                   [class.sla-ok]="getSlaLabel(chamado) === 'NO PRAZO'"
+                   [class.sla-alert]="getSlaLabel(chamado) === 'ALERTA'"
+                   [class.sla-late]="getSlaLabel(chamado) === 'ATRASADO'"
+                   [matTooltip]="'SLA: ' + (slaCountdowns[chamado.id] || '--')">
+                <mat-icon class="sla-i">{{ getSlaIcon(chamado) }}</mat-icon>
+                <span>{{ getSlaLabel(chamado) }}</span>
+              </div>
+            </div>
+
+            <div class="k-card-actions">
+              <button class="k-action-btn" (click)="openRead(chamado)" matTooltip="Ver detalhes">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="empty-state" *ngIf="colEncerrado.length === 0 && !isLoading">
+          <div class="empty-icon-wrap empty-green"><mat-icon>verified</mat-icon></div>
+          <p class="empty-title">Nada encerrado</p>
+          <p class="empty-sub">Chamados finalizados aparecerão aqui</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /kanban-board -->
+</div>
+

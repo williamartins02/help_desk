@@ -9,16 +9,18 @@ import { debounceTime } from 'rxjs/operators';
  * Espelha o `AgendaEventoDTO` do backend.
  */
 export interface AgendaEvento {
-  /** "TAREFA_ATUALIZADA" | "CHAMADO_ATUALIZADO" */
+  /** "TAREFA_ATUALIZADA" | "CHAMADO_ATUALIZADO" | "CHAMADO_CRIADO" | "CHAMADO_REDISTRIBUIDO" */
   tipo: string;
   /** ID da entidade afetada */
   entityId: number;
   /** Novo status (código numérico) */
   novoStatus: number;
-  /** ID do técnico responsável */
+  /** ID do técnico responsável (destino em redistribuições) */
   tecnicoId: number;
   /** Mensagem descritiva */
   mensagem: string;
+  /** ID do técnico de origem — preenchido apenas em CHAMADO_REDISTRIBUIDO */
+  tecnicoOrigemId?: number;
 }
 
 /**

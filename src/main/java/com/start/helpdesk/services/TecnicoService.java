@@ -41,6 +41,8 @@ public class TecnicoService {
     private ChamadoRepository chamadoRepository;
     @Autowired
     private AvatarGeneratorService avatarGeneratorService;
+    @Autowired
+    private AgendaEventPublisher agendaEventPublisher;
 
     public Tecnico findById(Integer id) {
         Optional<Tecnico> tecnicoObj = tecnicoRepository.findById(id);
@@ -113,6 +115,16 @@ public class TecnicoService {
                 if (request.getChamadosIds().contains(chamado.getId())) {
                     chamado.setTecnico(tecnicoDestino);
                     chamadoRepository.save(chamado);
+                    // ── Notifica Kanban e Central em tempo real ────────────────────────
+                    // O evento faz o Kanban do técnico origem remover o card e o do destino exibi-lo.
+                    try {
+                        agendaEventPublisher.publicarChamadoRedistribuido(
+                            chamado.getId(),
+                            chamado.getStatus().getCodigo(),
+                            tecnicoId,
+                            tecnicoDestino.getId()
+                        );
+                    } catch (Exception ignored) { /* WS não bloqueia a operação */ }
                 }
             }
         }
@@ -134,6 +146,15 @@ public class TecnicoService {
                 if (request.getChamadosIds().contains(chamado.getId())) {
                     chamado.setTecnico(tecnicoDestino);
                     chamadoRepository.save(chamado);
+                    // ── Notifica Kanban e Central em tempo real ────────────────────────
+                    try {
+                        agendaEventPublisher.publicarChamadoRedistribuido(
+                            chamado.getId(),
+                            chamado.getStatus().getCodigo(),
+                            tecnicoId,
+                            tecnicoDestino.getId()
+                        );
+                    } catch (Exception ignored) { /* WS não bloqueia a operação */ }
                 }
             }
         }

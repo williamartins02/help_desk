@@ -32,13 +32,12 @@ public class AgendaEventPublisher {
      * @param tecnicoId  ID do técnico dono da tarefa (permite filtragem no frontend)
      */
     public void publicarTarefaAtualizada(Integer tarefaId, Integer novoStatus, Integer tecnicoId) {
-        AgendaEventoDTO evento = new AgendaEventoDTO(
-            "TAREFA_ATUALIZADA",
-            tarefaId,
-            novoStatus,
-            tecnicoId,
-            "Tarefa #" + tarefaId + " atualizada para status " + novoStatus
-        );
+        AgendaEventoDTO evento = new AgendaEventoDTO();
+        evento.setTipo("TAREFA_ATUALIZADA");
+        evento.setEntityId(tarefaId);
+        evento.setNovoStatus(novoStatus);
+        evento.setTecnicoId(tecnicoId);
+        evento.setMensagem("Tarefa #" + tarefaId + " atualizada para status " + novoStatus);
         messagingTemplate.convertAndSend("/agenda/tarefa-atualizada", evento);
     }
 
@@ -50,14 +49,52 @@ public class AgendaEventPublisher {
      * @param tecnicoId  ID do técnico responsável pelo chamado
      */
     public void publicarChamadoAtualizado(Integer chamadoId, Integer novoStatus, Integer tecnicoId) {
-        AgendaEventoDTO evento = new AgendaEventoDTO(
-            "CHAMADO_ATUALIZADO",
-            chamadoId,
-            novoStatus,
-            tecnicoId,
-            "Chamado #" + chamadoId + " atualizado para status " + novoStatus
-        );
+        AgendaEventoDTO evento = new AgendaEventoDTO();
+        evento.setTipo("CHAMADO_ATUALIZADO");
+        evento.setEntityId(chamadoId);
+        evento.setNovoStatus(novoStatus);
+        evento.setTecnicoId(tecnicoId);
+        evento.setMensagem("Chamado #" + chamadoId + " atualizado para status " + novoStatus);
+        messagingTemplate.convertAndSend("/agenda/chamado-atualizado", evento);
+    }
+
+    /**
+     * Publica um evento de criação de Chamado para todos os clientes conectados.
+     * Garante que Kanban e Central de Chamados exibam o novo chamado em tempo real.
+     *
+     * @param chamadoId  ID do chamado criado
+     * @param novoStatus código numérico do status inicial (normalmente 0=ABERTO)
+     * @param tecnicoId  ID do técnico responsável pelo chamado
+     */
+    public void publicarChamadoCriado(Integer chamadoId, Integer novoStatus, Integer tecnicoId) {
+        AgendaEventoDTO evento = new AgendaEventoDTO();
+        evento.setTipo("CHAMADO_CRIADO");
+        evento.setEntityId(chamadoId);
+        evento.setNovoStatus(novoStatus);
+        evento.setTecnicoId(tecnicoId);
+        evento.setMensagem("Chamado #" + chamadoId + " criado com status " + novoStatus);
+        messagingTemplate.convertAndSend("/agenda/chamado-atualizado", evento);
+    }
+
+    /**
+     * Publica um evento de redistribuição de Chamado.
+     * O Kanban do técnico de origem remove o card; o do destino o exibe automaticamente.
+     *
+     * @param chamadoId      ID do chamado redistribuído
+     * @param novoStatus     Status atual do chamado
+     * @param tecnicoOrigemId  ID do técnico que perdeu o chamado
+     * @param tecnicoDestinoId ID do técnico que recebeu o chamado
+     */
+    public void publicarChamadoRedistribuido(Integer chamadoId, Integer novoStatus,
+                                              Integer tecnicoOrigemId, Integer tecnicoDestinoId) {
+        AgendaEventoDTO evento = new AgendaEventoDTO();
+        evento.setTipo("CHAMADO_REDISTRIBUIDO");
+        evento.setEntityId(chamadoId);
+        evento.setNovoStatus(novoStatus);
+        evento.setTecnicoId(tecnicoDestinoId);
+        evento.setTecnicoOrigemId(tecnicoOrigemId);
+        evento.setMensagem("Chamado #" + chamadoId + " redistribuído do técnico " +
+                           tecnicoOrigemId + " para " + tecnicoDestinoId);
         messagingTemplate.convertAndSend("/agenda/chamado-atualizado", evento);
     }
 }
-
