@@ -6,7 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChamadoService } from 'src/app/services/chamado.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { AgendaWsService } from 'src/app/services/agenda-ws.service';
+import { TecnicoService } from 'src/app/services/tecnico.service';
 import { Chamado } from 'src/app/models/chamado';
+import { Tecnico } from 'src/app/models/tecnico';
 import { ChamadoUpdateComponent } from '../chamado-update/chamado-update.component';
 import { ChamadoReadComponent } from '../chamado-read/chamado-read.component';
 import { ChamadoCreateComponent } from '../chamado-create/chamado-create.component';
@@ -23,6 +25,24 @@ export class KanbanComponent implements OnInit, OnDestroy {
   colAberto: Chamado[]      = [];
   colAndamento: Chamado[]   = [];
   colEncerrado: Chamado[]   = [];
+
+  // ── Filter state ──────────────────────────────────────────────────────────
+  tecnicos: Tecnico[] = [];
+  selectedTecnicoId: number | null = null;
+  searchQuery = '';
+
+  // ── Computed getters for filtered board columns ───────────────────────────
+  get filteredAberto(): Chamado[]    { return this.applySearch(this.colAberto); }
+  get filteredAndamento(): Chamado[] { return this.applySearch(this.colAndamento); }
+  get filteredEncerrado(): Chamado[] { return this.applySearch(this.colEncerrado); }
+
+  // isAdmin: any logged-in non-tecnico user (admin, superadmin, etc.)
+  get isAdmin(): boolean   { return !!this.usuarioLogado && this.usuarioLogado.tipo !== 'TECNICO'; }
+  get isTecnico(): boolean { return this.usuarioLogado?.tipo === 'TECNICO'; }
+
+  get totalFiltered(): number {
+    return this.filteredAberto.length + this.filteredAndamento.length + this.filteredEncerrado.length;
+  }
 
   isLoading = false;
   lastUpdated: Date = new Date();
@@ -49,6 +69,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     private chamadoService: ChamadoService,
     private authService: AuthenticationService,
     private agendaWs: AgendaWsService,
+    private tecnicoService: TecnicoService,
     private toast: ToastrService,
     private dialog: MatDialog,
     private zone: NgZone
@@ -68,6 +89,14 @@ export class KanbanComponent implements OnInit, OnDestroy {
     }
 
     this.loadChamados();
+
+    // Load technicians list for admin filter dropdown
+    if (this.isAdmin) {
+      this.tecnicoService.findAllAtivos().subscribe(
+        (ts) => { this.tecnicos = ts; },
+        () => {}
+      );
+    }
 
     // Subscribe to refresh$ (triggered after any create/update in ChamadoService)
     this.refreshSub = this.chamadoService.refresh$.subscribe(() => {
@@ -138,9 +167,18 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   loadChamados(): void {
     this.isLoading = true;
-    const obs = this.usuarioLogado?.tipo === 'TECNICO'
-      ? this.chamadoService.findMyChamados()
-      : this.chamadoService.findAll();
+
+    let obs;
+    if (this.isTecnico) {
+      // Técnico: sempre vê apenas seus próprios chamados
+      obs = this.chamadoService.findMyChamados();
+    } else if (this.selectedTecnicoId) {
+      // Admin com técnico selecionado: filtra por técnico
+      obs = this.chamadoService.findByTecnico(this.selectedTecnicoId);
+    } else {
+      // Admin sem filtro: vê todos os chamados
+      obs = this.chamadoService.findAll();
+    }
 
     obs.subscribe(
       (chamados: Chamado[]) => {
@@ -275,6 +313,39 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   manualRefresh(): void {
     this.loadChamados();
+  }
+
+  // ── Filter methods ────────────────────────────────────────────────────────
+  onTecnicoFilterChange(): void {
+    this.loadChamados();
+  }
+
+  clearTecnicoFilter(): void {
+    this.selectedTecnicoId = null;
+    this.loadChamados();
+  }
+
+  onSearchChange(): void { /* reactive via ngModel getter */ }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+  }
+
+  getTecnicoNome(id: number | null): string {
+    if (!id) return '';
+    const t = this.tecnicos.find(t => String(t.id) === String(id));
+    return t ? t.nome : String(id);
+  }
+
+  private applySearch(list: Chamado[]): Chamado[] {
+    // Busca textual só se aplica ao perfil TÉCNICO
+    if (!this.isTecnico || !this.searchQuery.trim()) return list;
+    const q = this.searchQuery.toLowerCase().trim();
+    return list.filter(c =>
+      String(c.id).includes(q) ||
+      (c.titulo || '').toLowerCase().includes(q) ||
+      (c.nomeCliente || '').toLowerCase().includes(q)
+    );
   }
 
   // ── Label helpers ─────────────────────────────────────────────────────────

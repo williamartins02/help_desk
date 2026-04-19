@@ -25,21 +25,21 @@
     <div class="hero-center">
       <div class="hero-kpi">
         <div class="kpi-ring kpi-ring-blue">
-          <span class="kpi-val">{{ colAberto.length }}</span>
+          <span class="kpi-val">{{ filteredAberto.length }}</span>
         </div>
         <span class="kpi-label">Abertos</span>
       </div>
       <div class="hero-kpi-divider"></div>
       <div class="hero-kpi">
         <div class="kpi-ring kpi-ring-amber">
-          <span class="kpi-val">{{ colAndamento.length }}</span>
+          <span class="kpi-val">{{ filteredAndamento.length }}</span>
         </div>
         <span class="kpi-label">Andamento</span>
       </div>
       <div class="hero-kpi-divider"></div>
       <div class="hero-kpi">
         <div class="kpi-ring kpi-ring-green">
-          <span class="kpi-val">{{ colEncerrado.length }}</span>
+          <span class="kpi-val">{{ filteredEncerrado.length }}</span>
         </div>
         <span class="kpi-label">Encerrados</span>
       </div>
@@ -57,6 +57,60 @@
         <mat-icon>access_time</mat-icon>
         <span>{{ lastUpdatedLabel }}</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ══ FILTER BAR ═══════════════════════════════════════════════════════════ -->
+  <section class="filter-bar">
+
+    <!-- Admin: dropdown de técnicos -->
+    <ng-container *ngIf="isAdmin">
+      <div class="filter-group">
+        <span class="filter-label"><mat-icon>manage_accounts</mat-icon> Filtrar por técnico</span>
+        <div class="filter-select-wrap">
+          <mat-icon class="select-prefix">person_search</mat-icon>
+          <select class="filter-native-select" [(ngModel)]="selectedTecnicoId" (change)="onTecnicoFilterChange()">
+            <option [ngValue]="null">Todos os técnicos</option>
+            <option *ngFor="let t of tecnicos" [ngValue]="t.id">{{ t.nome }}</option>
+          </select>
+          <mat-icon class="select-suffix">expand_more</mat-icon>
+        </div>
+      </div>
+      <div class="filter-active-chip" *ngIf="selectedTecnicoId">
+        <mat-icon>filter_alt</mat-icon>
+        <span>Técnico: <strong>{{ getTecnicoNome(selectedTecnicoId) }}</strong></span>
+        <button class="chip-close-btn" (click)="clearTecnicoFilter()" matTooltip="Limpar filtro">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Técnico: busca textual -->
+    <ng-container *ngIf="isTecnico">
+      <div class="filter-search-wrap">
+        <mat-icon class="search-prefix">search</mat-icon>
+        <input
+          class="filter-search-input"
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Buscar por título, cliente ou #ID…"
+          autocomplete="off"
+        />
+        <button class="search-clear-btn" *ngIf="searchQuery" (click)="clearSearch()" matTooltip="Limpar busca">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="filter-results-chip" *ngIf="searchQuery">
+        <mat-icon>filter_list</mat-icon>
+        <span>{{ totalFiltered }} resultado(s)</span>
+      </div>
+    </ng-container>
+
+    <div class="filter-spacer"></div>
+
+    <div class="filter-total-chip">
+      <mat-icon>assignment</mat-icon>
+      <span>{{ colAberto.length + colAndamento.length + colEncerrado.length }} chamados</span>
     </div>
   </section>
 
@@ -80,7 +134,7 @@
             <span class="col-name">A Fazer</span>
             <span class="col-desc">Aguardando atendimento</span>
           </div>
-          <div class="col-badge col-badge-blue">{{ colAberto.length }}</div>
+          <div class="col-badge col-badge-blue">{{ filteredAberto.length }}</div>
         </div>
       </div>
 
@@ -91,7 +145,7 @@
            [cdkDropListConnectedTo]="['list-andamento','list-encerrado']"
            (cdkDropListDropped)="onDrop($event, '0')">
 
-        <ng-container *ngFor="let chamado of colAberto">
+        <ng-container *ngFor="let chamado of filteredAberto">
           <div class="k-card k-card-blue" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
             <div class="k-card-placeholder" *cdkDragPlaceholder></div>
             <div class="k-card-accent accent-blue"></div>
@@ -161,7 +215,7 @@
           </div>
         </ng-container>
 
-        <div class="empty-state" *ngIf="colAberto.length === 0 && !isLoading">
+        <div class="empty-state" *ngIf="filteredAberto.length === 0 && !isLoading">
           <div class="empty-icon-wrap empty-blue"><mat-icon>inbox</mat-icon></div>
           <p class="empty-title">Tudo em dia!</p>
           <p class="empty-sub">Nenhum chamado aguardando</p>
@@ -181,7 +235,7 @@
             <span class="col-name">Em Andamento</span>
             <span class="col-desc">Sendo atendido agora</span>
           </div>
-          <div class="col-badge col-badge-amber">{{ colAndamento.length }}</div>
+          <div class="col-badge col-badge-amber">{{ filteredAndamento.length }}</div>
         </div>
       </div>
 
@@ -192,7 +246,7 @@
            [cdkDropListConnectedTo]="['list-aberto','list-encerrado']"
            (cdkDropListDropped)="onDrop($event, '1')">
 
-        <ng-container *ngFor="let chamado of colAndamento">
+        <ng-container *ngFor="let chamado of filteredAndamento">
           <div class="k-card k-card-amber" [class.k-card-new]="newChamadoIds.has(+chamado.id)" cdkDrag [cdkDragData]="chamado">
             <div class="k-card-placeholder" *cdkDragPlaceholder></div>
             <div class="k-card-accent accent-amber"></div>
@@ -262,7 +316,7 @@
           </div>
         </ng-container>
 
-        <div class="empty-state" *ngIf="colAndamento.length === 0 && !isLoading">
+        <div class="empty-state" *ngIf="filteredAndamento.length === 0 && !isLoading">
           <div class="empty-icon-wrap empty-amber"><mat-icon>pending_actions</mat-icon></div>
           <p class="empty-title">Sem atividade</p>
           <p class="empty-sub">Nenhum chamado em andamento</p>
@@ -360,7 +414,7 @@
           </div>
         </ng-container>
 
-        <div class="empty-state" *ngIf="colEncerrado.length === 0 && !isLoading">
+        <div class="empty-state" *ngIf="filteredEncerrado.length === 0 && !isLoading">
           <div class="empty-icon-wrap empty-green"><mat-icon>verified</mat-icon></div>
           <p class="empty-title">Nada encerrado</p>
           <p class="empty-sub">Chamados finalizados aparecerão aqui</p>
