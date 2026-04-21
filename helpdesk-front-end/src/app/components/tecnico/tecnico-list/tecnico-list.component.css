@@ -832,10 +832,11 @@ button:focus-visible { outline: 2px solid #1565c0; outline-offset: 3px; border-r
   min-width:   34px !important;
   flex-shrink: 0 !important;
   font-size:   19px !important;
-  line-height: 34px !important;
-  display:     inline-flex !important;
+  line-height: 1 !important;           /* evita desalinhamento de baseline em ícone-fonte */
+  display:     flex !important;        /* flex (não inline-flex) dentro do flex container do mat-menu-item */
   align-items: center !important;
   justify-content: center !important;
+  overflow:    hidden !important;      /* garante que o glifo não vaze da pílula */
   border-radius: 10px !important;
   margin: 0 !important;
   transition:
