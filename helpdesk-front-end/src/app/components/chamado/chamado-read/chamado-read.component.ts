@@ -32,7 +32,7 @@ export class ChamadoReadComponent implements OnInit, OnDestroy {
   private slaInterval: any;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { id: Number },
+    @Inject(MAT_DIALOG_DATA) public data: { id: number },
     private chamadoService: ChamadoService,
     private toast: ToastrService,
     private route: ActivatedRoute,

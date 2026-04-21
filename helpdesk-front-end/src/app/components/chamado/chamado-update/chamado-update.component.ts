@@ -53,7 +53,7 @@ export class ChamadoUpdateComponent implements OnInit {
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {id: Number},
+    @Inject(MAT_DIALOG_DATA) public data: {id: number},
     private chamadoService: ChamadoService,
     private clienteService: ClienteService,
     private tecnicoService: TecnicoService,

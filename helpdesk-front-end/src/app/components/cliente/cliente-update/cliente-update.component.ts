@@ -39,7 +39,7 @@ export class ClienteUpdateComponent implements OnInit {
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {id: Number},
+    @Inject(MAT_DIALOG_DATA) public data: {id: number},
     public dialogRef: MatDialogRef<ClienteUpdateComponent>,
     private service: ClienteService,
     private toast: ToastrService,

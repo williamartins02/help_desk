@@ -45,7 +45,7 @@ export class TecnicoTelefoneCreateComponent implements OnInit {
      public dialogRef: MatDialogRef<TecnicoTelefoneCreateComponent>,
      private tecnicoService: TecnicoService,
      public dialog: MatDialog,
-     @Inject(MAT_DIALOG_DATA) public data: {id: Number},
+     @Inject(MAT_DIALOG_DATA) public data: {id: number},
    ) {
     this.genericDialog = new GenericDialog(dialog);
     }
@@ -88,7 +88,7 @@ export class TecnicoTelefoneCreateComponent implements OnInit {
      })
    }
    /*Passando informações para serem gravada, telefone */
-   private async generatePayload(id: Number, telefone: Telefone): Promise<Telefone> {
+   private async generatePayload(id: number, telefone: Telefone): Promise<Telefone> {
     const tecnico = await this.tecnicoService.findById(id).toPromise();
 
     return {

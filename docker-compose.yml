@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+
+  # ── Banco de Dados MySQL ─────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: helpdesk-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: helpdesk
+      MYSQL_USER: ${DB_USERNAME:-helpdesk}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-helpdesk}
+    ports:
+      - "3306:3306"
+    volumes:
+      - helpdesk_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Back-end Spring Boot ─────────────────────────────────────────────────
+  backend:
+    build: .
+    container_name: helpdesk-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://db:3306/helpdesk?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-helpdesk}
+      DB_PASSWORD: ${DB_PASSWORD:-helpdesk}
+      JWT_SECRET: ${JWT_SECRET:-changeme-use-a-strong-secret-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:4200}
+    ports:
+      - "8080:8080"
+
+  # ── Front-end Angular (Nginx) ────────────────────────────────────────────
+  frontend:
+    image: nginx:alpine
+    container_name: helpdesk-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./helpdesk-front-end/dist/helpdesk-front-end:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "4200:80"
+
+volumes:
+  helpdesk_db_data:
+

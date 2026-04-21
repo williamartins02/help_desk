@@ -16,6 +16,7 @@ import { TecnicoCreateComponent } from './components/tecnico/tecnico-create/tecn
 
 
 import { AuthInterceptorProvider } from './interceptors/auth.interceptor';
+import { ErrorInterceptorProvider } from './interceptors/error.interceptor';
 import { NgModule } from '@angular/core';
 import { BrowserModule }           from '@angular/platform-browser';
 import { CommonModule }            from '@angular/common';
@@ -207,6 +208,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
   providers: [
     AuthInterceptorProvider,
+    ErrorInterceptorProvider,
     {
       provide: MatDialogRef,
       useValue: {}

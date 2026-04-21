@@ -86,7 +86,7 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Inject(MAT_DIALOG_DATA) public data: { id: Number, string: Text };
+  @Inject(MAT_DIALOG_DATA) public data: { id: number, string: Text };
 
   private genericDialog: GenericDialog;
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
@@ -550,14 +550,14 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
         .afterClosed().subscribe(() => {});
   }
 
-  openEdit(id: Number): void {
+  openEdit(id: number): void {
     this.dialog.open(ChamadoUpdateComponent, {
       width: "720px", maxHeight: "90vh", minHeight: "580px",
       panelClass: "custom-dialog-container", data: { id }
     }).afterClosed().subscribe(() => {});
   }
 
-  openRed(id: Number): void {
+  openRed(id: number): void {
     this.dialog.open(ChamadoReadComponent, {
       width: "720px", maxHeight: "90vh",
       panelClass: "custom-dialog-container", data: { id }

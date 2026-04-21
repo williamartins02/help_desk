@@ -3,6 +3,8 @@ package com.start.helpdesk.repositories;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +18,13 @@ public interface ChamadoRepository extends JpaRepository<Chamado, Integer> {
 
     List<Chamado> findByClienteId(Integer clienteId);
     List<Chamado> findByTecnicoId(Integer tecnicoId);
+
+    /** Versão paginada de findAll — usada pelo endpoint /chamados/page */
+    @org.springframework.lang.NonNull
+    Page<Chamado> findAll(@org.springframework.lang.NonNull Pageable pageable);
+
+    /** Versão paginada por técnico */
+    Page<Chamado> findByTecnicoId(Integer tecnicoId, Pageable pageable);
 
     /** Chamados de um técnico que ainda não estão encerrados (ABERTO ou ANDAMENTO). */
     @Query("SELECT c FROM Chamado c WHERE c.tecnico.id = :tecnicoId AND c.status <> :statusEncerrado")

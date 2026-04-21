@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.start.helpdesk.services.exception.DataIntegrityViolationException;
 import com.start.helpdesk.services.exception.ObjectnotFoundException;
+import com.start.helpdesk.services.exception.UnauthorizedException;
 
 
 /*tratamento de Exceções personalizada..*/
@@ -45,18 +46,26 @@ public class ResourceExceptionHandler {
 		
 			/*Exceção para tratar campo obrigatorio "Nome, CPF, E-mail e senha"*/
 		
-			@ExceptionHandler(MethodArgumentNotValidException.class)
-			public ResponseEntity<StandarError> validationErrors(MethodArgumentNotValidException ex, 
-					HttpServletRequest request){
-				
-				ValidationError errors = new ValidationError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), 
-						"Validation error", "Erro na validação dos campos", request.getRequestURI());
-				for(FieldError err : ex.getBindingResult().getFieldErrors()) {
-					errors.addError(err.getField(), err.getDefaultMessage());
-				}
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-			}
-			
+		@ExceptionHandler(MethodArgumentNotValidException.class)
+		public ResponseEntity<StandarError> validationErrors(MethodArgumentNotValidException ex,
+				HttpServletRequest request){
 
+			ValidationError errors = new ValidationError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(),
+					"Validation error", "Erro na validação dos campos", request.getRequestURI());
+			for(FieldError err : ex.getBindingResult().getFieldErrors()) {
+				errors.addError(err.getField(), err.getDefaultMessage());
+			}
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+		}
+
+		/** Exceção para acesso não autorizado (perfil insuficiente / token inválido) */
+		@ExceptionHandler(UnauthorizedException.class)
+		public ResponseEntity<StandarError> unauthorizedException(UnauthorizedException ex,
+				HttpServletRequest request) {
+
+			StandarError error = new StandarError(System.currentTimeMillis(), HttpStatus.FORBIDDEN.value(),
+					"Acesso negado", ex.getMessage(), request.getRequestURI());
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+		}
 
 }

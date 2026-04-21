@@ -6,10 +6,13 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 import com.start.helpdesk.services.exception.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.start.helpdesk.services.EncerrarChamadoEmail.ChamadoEmailService;
-import com.start.helpdesk.services.AgendaEventPublisher;
 import com.start.helpdesk.domain.Chamado;
 import com.start.helpdesk.domain.Cliente;
 import com.start.helpdesk.domain.Tecnico;
@@ -22,6 +25,8 @@ import com.start.helpdesk.services.exception.ObjectnotFoundException;
 
 @Service
 public class ChamadoService {
+
+	private static final Logger log = LoggerFactory.getLogger(ChamadoService.class);
 
 	@Autowired
 	private ChamadoRepository chamadoRepository;
@@ -54,6 +59,24 @@ public class ChamadoService {
 		return chamadoRepository.findAll();
 	}
 
+	/**
+	 * Versão paginada de findAll — use este método em produção quando o volume
+	 * de chamados for grande. Retorna um Page com metadados (total, páginas, etc.).
+	 * Endpoint: GET /chamados/page?page=0&size=20&sort=dataAbertura,desc
+	 */
+	public Page<ChamadoDTO> findAllPaginado(Pageable pageable) {
+		Page<Chamado> page = chamadoRepository.findAll(pageable);
+		return page.map(ChamadoDTO::new);
+	}
+
+	/**
+	 * Versão paginada por técnico.
+	 */
+	public Page<ChamadoDTO> findByTecnicoIdPaginado(Integer tecnicoId, Pageable pageable) {
+		Page<Chamado> page = chamadoRepository.findByTecnicoId(tecnicoId, pageable);
+		return page.map(ChamadoDTO::new);
+	}
+
 	public List<Chamado> findByClienteId(Integer clienteId) {
 		return chamadoRepository.findByClienteId(clienteId);
 	}
@@ -72,6 +95,7 @@ public class ChamadoService {
 				tarefaService.criarTarefaParaChamado(chamado, tecnico);
 			} catch (Exception e) {
 				// Falha na criação da tarefa não impede a criação do chamado
+				log.warn("Falha ao criar tarefa para o chamado id={}: {}", chamado.getId(), e.getMessage());
 			}
 		}
 
@@ -85,7 +109,9 @@ public class ChamadoService {
 				chamado.getTecnico().getId()
 			);
 			agendaEventPublisher.publicarBiRefresh();
-		} catch (Exception ignored) { /* WebSocket não deve bloquear a criação */ }
+		} catch (Exception e) { /* WebSocket não deve bloquear a criação */
+			log.warn("Falha ao publicar evento WebSocket para chamado id={}: {}", chamado.getId(), e.getMessage());
+		}
 
 		return chamado;
 	}
@@ -114,7 +140,9 @@ public class ChamadoService {
 		if (tarefaService != null) {
 			try {
 				tarefaService.sincronizarStatusPorChamado(salvo.getId(), salvo.getStatus().getCodigo());
-			} catch (Exception ignored) { /* Sync não deve bloquear o save do chamado */ }
+			} catch (Exception e) {
+				log.warn("Falha ao sincronizar tarefas para chamado id={}: {}", salvo.getId(), e.getMessage());
+			}
 		}
 
 		// ── Notifica Central de Chamados via WebSocket (auto-refresh da lista) ─
@@ -125,7 +153,9 @@ public class ChamadoService {
 				salvo.getTecnico().getId()
 			);
 			agendaEventPublisher.publicarBiRefresh();
-		} catch (Exception ignored) { /* WebSocket não deve bloquear a operação */ }
+		} catch (Exception e) { /* WebSocket não deve bloquear a operação */
+			log.warn("Falha ao publicar evento WebSocket de atualização para chamado id={}: {}", salvo.getId(), e.getMessage());
+		}
 
 		return salvo;
 	}

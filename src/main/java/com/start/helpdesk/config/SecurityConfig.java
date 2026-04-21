@@ -41,7 +41,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			"/h2-console/**",
 			"/auth/forgot-password",
 			"/auth/reset-password",
-			"/chat-websocket/**"   // ← WebSocket / SockJS endpoint
+			"/chat-websocket/**",    // ← WebSocket / SockJS endpoint
+			// Swagger / OpenAPI
+			"/swagger-ui.html",
+			"/swagger-ui/**",
+			"/v3/api-docs/**"
 	};
 
 	@Autowired

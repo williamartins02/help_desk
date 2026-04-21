@@ -43,7 +43,7 @@ export class ClienteListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   CLIENTE_DATA: Cliente[] = [];
   //injetando o ID para abrir no modal
-  @Inject(MAT_DIALOG_DATA) public data: { id: Number };
+  @Inject(MAT_DIALOG_DATA) public data: { id: number };
   //informaçoes da tabela (COLUNNAS)
   displayedColumns: string[] = ['id', 'nome', 'cpf', 'email', 'acoes'];
   dataSource = new MatTableDataSource<Cliente>(this.CLIENTE_DATA);
@@ -216,7 +216,7 @@ export class ClienteListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  openEdit(id: Number): void {
+  openEdit(id: number): void {
     this.dialog.open(ClienteUpdateComponent, {
       width: '560px',
       maxHeight: '90vh',

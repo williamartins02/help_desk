@@ -388,7 +388,7 @@ export class TecnicoListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  openEdit(id: Number): void {
+  openEdit(id: number): void {
     this.dialog.open(TecnicoUpdateComponent, {
       width: '600px',
       data: { id }//Pegando ID tecnico para editar..

@@ -131,14 +131,14 @@ export class TecnicoTelefoneListComponent implements OnInit, OnDestroy {
     });
   }
 
-  openEdit(id: Number): void {
+  openEdit(id: number): void {
     this.dialog.open(TecnicoTelefoneUpdateComponent, {
       width: '600px',
       data: { id }
     });
   }
 
-  openDelete(id: Number): void {
+  openDelete(id: number): void {
     this.dialog.open(TecnicoTelefoneDeleteComponent, {
       width: '520px',
       maxWidth: '95vw',

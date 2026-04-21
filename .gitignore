@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Segredos e configurações sensíveis ###
+# Nunca commitar arquivos com credenciais reais
+.env
+src/main/resources/application-dev.properties
+src/main/resources/application-prod.properties
+

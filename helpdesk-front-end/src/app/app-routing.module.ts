@@ -1,5 +1,6 @@
 
 import { AuthGuard } from './authentication/auth.guard';
+import { RoleGuard } from './authentication/role.guard';
 import { LoginComponent } from './components/login/login.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
@@ -37,18 +38,17 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomeComponent },
-      { path: 'tecnicos', component: TecnicoListComponent },
-      { path: 'tecnicos/telefones/:id', component: TecnicoTelefoneListComponent },
-      // {path: 'tecnicos/update/:id', component: TecnicoUpdateComponent},
-      { path: 'clientes', component: ClienteListComponent },
+      { path: 'tecnicos', component: TecnicoListComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
+      { path: 'tecnicos/telefones/:id', component: TecnicoTelefoneListComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
+      { path: 'clientes', component: ClienteListComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
       { path: 'chamados', component: ChamadoListComponent },
       { path: 'chart', component: LineChartComponent },
-      { path: 'chamados/relatorios', component: RelatorioChamadoComponent },
+      { path: 'chamados/relatorios', component: RelatorioChamadoComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
       { path: 'chat', component: ChatComponent },
-      { path: 'usuarios', component: UsuariosListComponent },
+      { path: 'usuarios', component: UsuariosListComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
       { path: 'agenda', component: AgendaComponent },
       { path: 'kanban', component: KanbanComponent },
-      { path: 'bi-dashboard', component: BiDashboardComponent },
+      { path: 'bi-dashboard', component: BiDashboardComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
     ]
   }
 ];

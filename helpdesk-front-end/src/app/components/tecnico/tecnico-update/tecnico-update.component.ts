@@ -50,7 +50,7 @@ export class TecnicoUpdateComponent implements OnInit {
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {id: Number},
+    @Inject(MAT_DIALOG_DATA) public data: {id: number},
     public  dialogRef: MatDialogRef<TecnicoUpdateComponent>,
     private service:   TecnicoService,
     private toast:     ToastrService,
