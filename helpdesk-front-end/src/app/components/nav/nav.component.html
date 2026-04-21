@@ -36,16 +36,17 @@
         <mat-icon class="nav-icon">receipt_long</mat-icon>
         <span class="nav-label">Central de Chamados</span>
       </a>
-      <!-- ── Dashboard (com submenu) ── -->
+      <!-- ── Dashboard (com submenu apenas para ROLE_ADMIN) ── -->
       <div class="nav-group">
         <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="nav-item link-chart nav-group-toggle"
            [routerLinkActiveOptions]="{exact: true}"
            (click)="isDashboardOpen = !isDashboardOpen">
           <mat-icon class="nav-icon">dashboard</mat-icon>
           <span class="nav-label">Dashboard</span>
-          <mat-icon class="nav-chevron" [class.rotated]="isDashboardOpen">expand_more</mat-icon>
+          <mat-icon class="nav-chevron" [class.rotated]="isDashboardOpen"
+                    *appShowForRoles="['ROLE_ADMIN']">expand_more</mat-icon>
         </a>
-        <div class="nav-submenu" [class.open]="isDashboardOpen">
+        <div class="nav-submenu" [class.open]="isDashboardOpen" *appShowForRoles="['ROLE_ADMIN']">
           <a mat-list-item routerLink="bi-dashboard" routerLinkActive="active-link" class="nav-item nav-subitem link-bi">
             <mat-icon class="nav-icon">insights</mat-icon>
             <span class="nav-label">BI / Relatórios</span>
@@ -56,7 +57,8 @@
         <mat-icon class="nav-icon">forum</mat-icon>
         <span class="nav-label">Conversas</span>
       </a>
-      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="nav-item link-usuarios">
+      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="nav-item link-usuarios"
+         *appShowForRoles="['ROLE_ADMIN']">
         <mat-icon class="nav-icon">manage_accounts</mat-icon>
         <span class="nav-label">Gestão de Usuários</span>
       </a>
