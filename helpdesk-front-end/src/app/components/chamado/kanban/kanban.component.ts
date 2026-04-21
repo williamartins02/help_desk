@@ -264,8 +264,23 @@ export class KanbanComponent implements OnInit, OnDestroy {
       event.currentIndex
     );
 
-    const previousStatus = chamado.status;
+    const previousStatus      = chamado.status;
+    const previousFechamento  = chamado.dataFechamento;
+    const previousStatusSla   = chamado.statusSla;
+
     chamado.status = newStatus;
+
+    // Ao finalizar: registra dataFechamento agora e recalcula statusSla
+    if (newStatus === '2' && !chamado.dataFechamento) {
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      chamado.dataFechamento = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} - ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    // Recalcula statusSla com base no prazo vs dataFechamento real
+    if (newStatus === '2') {
+      chamado.statusSla = this.computeSlaStatus(chamado);
+    }
 
     this.chamadoService.update(chamado).subscribe(
       () => {
@@ -277,7 +292,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
         );
       },
       () => {
-        chamado.status = previousStatus;
+        // Rollback completo em caso de erro
+        chamado.status        = previousStatus;
+        chamado.dataFechamento = previousFechamento;
+        chamado.statusSla     = previousStatusSla;
         transferArrayItem(
           event.container.data,
           event.previousContainer.data,
