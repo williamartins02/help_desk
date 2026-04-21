@@ -55,7 +55,8 @@
             <mat-icon matPrefix class="field-prefix-icon">title</mat-icon>
             <input matInput placeholder="Ex.: Trocar teclado"
                    [(ngModel)]="chamado.titulo" name="titulo"
-                   [formControl]="titulo" required />
+                   [formControl]="titulo" required
+                   (input)="onInputChange()" />
             <mat-hint>Descreva o problema em poucas palavras</mat-hint>
             <mat-error *ngIf="titulo.invalid">Título é obrigatório</mat-error>
           </mat-form-field>
@@ -119,7 +120,7 @@
             <mat-icon matPrefix class="field-prefix-icon">engineering</mat-icon>
             <mat-select [(ngModel)]="chamado.tecnico" name="tecnico" [formControl]="tecnico" required>
               <mat-option value="">NENHUM</mat-option>
-              <mat-option *ngFor="let tec of tecnicos" value="{{ tec.id }}">{{ tec.nome }}</mat-option>
+              <mat-option *ngFor="let tec of tecnicos" [value]="tec.id.toString()">{{ tec.nome }}</mat-option>
             </mat-select>
             <mat-error *ngIf="tecnico.invalid">Selecione um técnico</mat-error>
           </mat-form-field>
@@ -138,7 +139,7 @@
             <mat-icon matPrefix class="field-prefix-icon">person</mat-icon>
             <mat-select [(ngModel)]="chamado.cliente" name="cliente" [formControl]="cliente" required>
               <mat-option value="">NENHUM</mat-option>
-              <mat-option *ngFor="let cli of clientes" value="{{ cli.id }}">{{ cli.nome }}</mat-option>
+              <mat-option *ngFor="let cli of clientes" [value]="cli.id.toString()">{{ cli.nome }}</mat-option>
             </mat-select>
             <mat-error *ngIf="cliente.invalid">Selecione um cliente</mat-error>
           </mat-form-field>
@@ -164,9 +165,127 @@
                     [(ngModel)]="chamado.observacoes" name="observacoes"
                     [formControl]="observacoes" required
                     class="observacoes"
+                    (input)="onInputChange()"
                     placeholder="Ex.: Trocar bateria de notebook..."></textarea>
           <mat-error *ngIf="observacoes.invalid">Observações são obrigatórias</mat-error>
         </mat-form-field>
+      </div>
+
+      <!-- ══ Seção 4: Inteligência — Sugestões Automáticas (somente Admin) ══ -->
+      <div class="ia-panel" *ngIf="paineAberto && isAdmin">
+
+        <!-- Cabeçalho do painel -->
+        <div class="ia-header" (click)="togglePainel()">
+          <div class="ia-header-left">
+            <div class="ia-icon-wrap">
+              <mat-icon>psychology</mat-icon>
+            </div>
+            <div>
+              <span class="ia-title">Assistente Inteligente</span>
+              <span class="ia-sub">Baseado no histórico real de chamados</span>
+            </div>
+          </div>
+          <div class="ia-header-right">
+            <mat-spinner *ngIf="carregandoSugestoes" diameter="18" strokeWidth="2"></mat-spinner>
+            <mat-icon class="ia-chevron">expand_less</mat-icon>
+          </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="ia-body">
+
+          <!-- Grid de 2 colunas: Técnico sugerido + Classificação sugerida -->
+          <div class="ia-grid">
+
+            <!-- Card: Técnico sugerido -->
+            <div class="ia-card" [class.ia-card--empty]="!sugestaoTecnico">
+              <div class="ia-card-header">
+                <mat-icon class="ia-card-icon">engineering</mat-icon>
+                <span class="ia-card-label">Técnico sugerido</span>
+              </div>
+              <ng-container *ngIf="sugestaoTecnico; else semDadosTecnico">
+                <p class="ia-card-name">{{ sugestaoTecnico.nomeTecnico }}</p>
+                <p class="ia-card-meta">
+                  <mat-icon class="ia-meta-icon">history</mat-icon>
+                  {{ sugestaoTecnico.totalChamadosSemelhantes }} chamados similares resolvidos
+                </p>
+                <p class="ia-card-meta">
+                  <mat-icon class="ia-meta-icon">timer</mat-icon>
+                  Tempo médio: {{ sugestaoTecnico.tempoMedioResolucao }}
+                </p>
+                <button type="button" class="ia-btn-apply" *ngIf="isAdmin" (click)="aplicarSugestaoTecnico()">
+                  <mat-icon>check_circle</mat-icon> Aplicar sugestão
+                </button>
+              </ng-container>
+              <ng-template #semDadosTecnico>
+                <p class="ia-empty-msg">
+                  <mat-icon>info</mat-icon>
+                  Histórico insuficiente para sugestão
+                </p>
+              </ng-template>
+            </div>
+
+            <!-- Card: Classificação sugerida -->
+            <div class="ia-card" [class.ia-card--empty]="!sugestaoClassificacao">
+              <div class="ia-card-header">
+                <mat-icon class="ia-card-icon">category</mat-icon>
+                <span class="ia-card-label">Classificação sugerida</span>
+              </div>
+              <ng-container *ngIf="sugestaoClassificacao; else semDadosClasse">
+                <p class="ia-card-name">{{ sugestaoClassificacao.classificacaoNome }}</p>
+                <p class="ia-card-meta">
+                  <mat-icon class="ia-meta-icon">bar_chart</mat-icon>
+                  {{ sugestaoClassificacao.totalOcorrencias }} ocorrências similares
+                </p>
+                <button type="button" class="ia-btn-apply ia-btn-apply--green" (click)="aplicarSugestaoClassificacao()">
+                  <mat-icon>check_circle</mat-icon> Aplicar sugestão
+                </button>
+              </ng-container>
+              <ng-template #semDadosClasse>
+                <p class="ia-empty-msg">
+                  <mat-icon>info</mat-icon>
+                  Preencha título ou observações para sugerir
+                </p>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- Chamados semelhantes -->
+          <div class="ia-similares" *ngIf="chamadosSemelhantes.length > 0">
+            <div class="ia-similares-header">
+              <mat-icon>find_in_page</mat-icon>
+              <span>Chamados semelhantes resolvidos</span>
+              <span class="ia-badge">{{ chamadosSemelhantes.length }}</span>
+            </div>
+            <div class="ia-similar-list">
+              <div class="ia-similar-item" *ngFor="let c of chamadosSemelhantes">
+                <div class="ia-similar-id">#{{ c.id }}</div>
+                <div class="ia-similar-info">
+                  <span class="ia-similar-titulo">{{ c.titulo }}</span>
+                  <span class="ia-similar-meta">
+                    Resolvido por <strong>{{ c.nomeTecnico }}</strong>
+                    em {{ c.tempoResolucao }}
+                    &bull; {{ c.classificacao }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado: sem similares -->
+          <div class="ia-no-similares" *ngIf="!carregandoSugestoes && chamadosSemelhantes.length === 0">
+            <mat-icon>search_off</mat-icon>
+            <span>Nenhum chamado semelhante encontrado no histórico</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Gatilho para abrir painel caso ainda não tenha aberto (somente Admin) -->
+      <div class="ia-hint" *ngIf="isAdmin && !paineAberto && (chamado.titulo?.length >= 3 || chamado.observacoes?.length >= 3)">
+        <mat-icon>psychology</mat-icon>
+        <span>O Assistente Inteligente tem sugestões disponíveis —</span>
+        <button type="button" class="ia-hint-btn" (click)="togglePainel()">ver sugestões</button>
       </div>
 
       <!-- ── Ações ── -->

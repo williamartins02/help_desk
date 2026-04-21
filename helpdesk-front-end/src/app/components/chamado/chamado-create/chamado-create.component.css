@@ -329,6 +329,238 @@
 mat-icon { opacity: 0.85 !important; }
 
 /* ══════════════════════════════════════════════════════════════
+   PAINEL DE INTELIGÊNCIA
+   ══════════════════════════════════════════════════════════════ */
+
+/* Container principal */
+.ia-panel {
+  background: #fff;
+  border: 1.5px solid #e3eaf8;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, .07);
+}
+
+/* Cabeçalho do painel */
+.ia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(90deg, #e8f0fe 0%, #f0f7ff 100%);
+  border-bottom: 1px solid #d0def8;
+  cursor: pointer;
+  user-select: none;
+}
+.ia-header:hover { background: linear-gradient(90deg, #dde8fd 0%, #eaf3ff 100%); }
+
+.ia-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ia-icon-wrap {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(21,101,192,.25);
+}
+.ia-icon-wrap mat-icon {
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: #fff !important; opacity: 1 !important;
+}
+
+.ia-title {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1a237e;
+  line-height: 1.2;
+}
+.ia-sub {
+  display: block;
+  font-size: 0.69rem;
+  color: #78909c;
+  margin-top: 1px;
+}
+
+.ia-header-right {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.ia-chevron { color: #90a4ae; font-size: 1.15rem; width: 1.15rem; height: 1.15rem; opacity: 1 !important; }
+
+/* Corpo do painel */
+.ia-body { padding: 0.85rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Grid de cards */
+.ia-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+/* Card individual */
+.ia-card {
+  border: 1px solid #e3eaf8;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.ia-card--empty { background: #fafafa; border-color: #eee; }
+
+.ia-card-header {
+  display: flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 0.15rem;
+}
+.ia-card-icon {
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: #1565c0 !important; opacity: 1 !important;
+}
+.ia-card-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #1565c0;
+  letter-spacing: 0.2px;
+}
+
+.ia-card-name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #212121;
+}
+.ia-card-meta {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #607d8b;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.ia-meta-icon {
+  font-size: 0.82rem; width: 0.82rem; height: 0.82rem;
+  color: #90a4ae !important; opacity: 1 !important;
+}
+
+/* Botão aplicar sugestão */
+.ia-btn-apply {
+  margin-top: 0.35rem;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #1565c0, #1976d2);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(21,101,192,.3);
+  transition: all .12s ease;
+  align-self: flex-start;
+}
+.ia-btn-apply:hover { background: linear-gradient(135deg, #0d47a1, #1565c0); transform: translateY(-1px); }
+.ia-btn-apply mat-icon { font-size: 0.82rem; width: 0.82rem; height: 0.82rem; opacity: 1 !important; }
+
+.ia-btn-apply--green {
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  box-shadow: 0 2px 8px rgba(46,125,50,.3);
+}
+.ia-btn-apply--green:hover { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+
+/* Mensagem sem dados */
+.ia-empty-msg {
+  margin: 0;
+  font-size: 0.71rem;
+  color: #b0bec5;
+  display: flex; align-items: center; gap: 0.25rem;
+  font-style: italic;
+}
+.ia-empty-msg mat-icon { font-size: 0.82rem; width: 0.82rem; height: 0.82rem; opacity: 1 !important; }
+
+/* Seção chamados semelhantes */
+.ia-similares { border-top: 1px solid #eef2ff; padding-top: 0.65rem; }
+
+.ia-similares-header {
+  display: flex; align-items: center; gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.77rem;
+  font-weight: 700;
+  color: #37474f;
+}
+.ia-similares-header mat-icon {
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: #f57c00 !important; opacity: 1 !important;
+}
+.ia-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px;
+  border-radius: 999px;
+  background: #f57c00;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0 0.3rem;
+}
+
+.ia-similar-list { display: flex; flex-direction: column; gap: 0.45rem; }
+
+.ia-similar-item {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: #f8faff;
+  border: 1px solid #e8edf8;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+}
+.ia-similar-id {
+  font-size: 0.72rem; font-weight: 800;
+  color: #1565c0; white-space: nowrap;
+  padding-top: 1px;
+}
+.ia-similar-info { display: flex; flex-direction: column; gap: 0.12rem; min-width: 0; }
+.ia-similar-titulo {
+  font-size: 0.78rem; font-weight: 600; color: #263238;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ia-similar-meta { font-size: 0.68rem; color: #78909c; }
+.ia-similar-meta strong { color: #455a64; }
+
+/* Estado sem similares */
+.ia-no-similares {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.72rem; color: #b0bec5;
+  border-top: 1px solid #eef2ff;
+  padding-top: 0.6rem;
+  font-style: italic;
+}
+.ia-no-similares mat-icon {
+  font-size: 1rem; width: 1rem; height: 1rem;
+  color: #cfd8dc !important; opacity: 1 !important;
+}
+
+/* Hint discreto abaixo das observações */
+.ia-hint {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.72rem; color: #90a4ae;
+  padding: 0.3rem 0.1rem;
+}
+.ia-hint mat-icon {
+  font-size: 0.95rem; width: 0.95rem; height: 0.95rem;
+  color: #1976d2 !important; opacity: 1 !important;
+}
+.ia-hint-btn {
+  border: none; background: none; padding: 0;
+  font-size: 0.72rem; font-weight: 700;
+  color: #1565c0; cursor: pointer; text-decoration: underline;
+}
+.ia-hint-btn:hover { color: #0d47a1; }
+
+/* ══════════════════════════════════════════════════════════════
    RESPONSIVIDADE
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {

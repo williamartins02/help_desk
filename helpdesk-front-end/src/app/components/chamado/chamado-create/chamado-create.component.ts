@@ -4,14 +4,22 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Chamado } from './../../../models/chamado';
 
-import { throwError } from "rxjs";
+import { throwError, Subject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
 import { ToastrService } from "ngx-toastr";
 import { ChamadoService } from "src/app/services/chamado.service";
 import { TecnicoService } from "./../../../services/tecnico.service";
 import { ClienteService } from "./../../../services/cliente.service";
+import { InteligenteService } from "./../../../services/inteligente.service";
 import { Tecnico } from "./../../../models/tecnico";
 import { Cliente } from "./../../../models/cliente";
-import { Component, OnInit } from "@angular/core";
+import {
+  SugestaoTecnico,
+  SugestaoClassificacao,
+  ChamadoSemelhant,
+  SugestaoRequest
+} from "./../../../models/inteligente";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
 import { JwtHelperService } from "@auth0/angular-jwt";
 
@@ -20,10 +28,21 @@ import { JwtHelperService } from "@auth0/angular-jwt";
   templateUrl: "./chamado-create.component.html",
   styleUrls: ["./chamado-create.component.css"],
 })
-export class ChamadoCreateComponent implements OnInit {
+export class ChamadoCreateComponent implements OnInit, OnDestroy {
   private genericDialog: GenericDialog;
   private matDialogRef: MatDialogRef<GenericDialogComponent>;
   private jwtHelper = new JwtHelperService();
+
+  // ── Inteligência ─────────────────────────────────────────────────────────
+  sugestaoTecnico:        SugestaoTecnico | null = null;
+  sugestaoClassificacao:  SugestaoClassificacao | null = null;
+  chamadosSemelhantes:    ChamadoSemelhant[] = [];
+  carregandoSugestoes     = false;
+  paineAberto             = false;
+
+  private inputSubject$ = new Subject<void>();
+  private inputSub: any;
+  // ─────────────────────────────────────────────────────────────────────────
 
   isAdmin = false;
   tecnicoLogadoNome = '';
@@ -55,6 +74,7 @@ export class ChamadoCreateComponent implements OnInit {
     private  chamadoService: ChamadoService,
     private  clienteService: ClienteService,
     private  tecnicoService: TecnicoService,
+    private  inteligenteService: InteligenteService,
     private  toast: ToastrService,
     private router: Router,
     public  dialogRef: MatDialogRef<ChamadoCreateComponent>,
@@ -68,6 +88,11 @@ export class ChamadoCreateComponent implements OnInit {
     this.detectarPerfil();
     this.findaAllClientes();
     this.findAllTecnico();
+    this.iniciarListenerInteligencia();
+  }
+
+  ngOnDestroy(): void {
+    if (this.inputSub) this.inputSub.unsubscribe();
   }
 
   private detectarPerfil(): void {
@@ -135,6 +160,76 @@ export class ChamadoCreateComponent implements OnInit {
       }
     );
   }
+
+  // ── Inteligência ─────────────────────────────────────────────────────────
+
+  /** Inicia debounce que dispara consultas de inteligência ao digitar. */
+  private iniciarListenerInteligencia(): void {
+    this.inputSub = this.inputSubject$.pipe(
+      debounceTime(800)
+    ).subscribe(() => this.consultarInteligencia());
+  }
+
+  /** Chamado pelos eventos (input) do título e observações no template. */
+  onInputChange(): void {
+    // Assistente Inteligente é exclusivo para perfil Admin
+    if (!this.isAdmin) return;
+
+    const temConteudo = (this.chamado.titulo?.length ?? 0) >= 3
+                     || (this.chamado.observacoes?.length ?? 0) >= 3;
+    if (temConteudo) {
+      this.inputSubject$.next();
+    }
+  }
+
+  private consultarInteligencia(): void {
+    const req: SugestaoRequest = {
+      titulo:        this.chamado.titulo || '',
+      observacoes:   this.chamado.observacoes || '',
+      classificacao: this.chamado.classificacao !== '' ? Number(this.chamado.classificacao) : null
+    };
+
+    this.carregandoSugestoes = true;
+    this.paineAberto = true;
+
+    // Dispara as 3 consultas em paralelo
+    this.inteligenteService.sugerirTecnico(req).subscribe(s => {
+      this.sugestaoTecnico = s;
+    });
+    this.inteligenteService.sugerirClassificacao(req).subscribe(s => {
+      this.sugestaoClassificacao = s;
+    });
+    this.inteligenteService.chamadosSemelhantes(req).subscribe(list => {
+      this.chamadosSemelhantes = list;
+      this.carregandoSugestoes = false;
+    });
+  }
+
+  /** Aplica a sugestão de técnico no formulário (somente para admins). */
+  aplicarSugestaoTecnico(): void {
+    if (!this.sugestaoTecnico || !this.isAdmin) return;
+    // mat-option usa value="{{ tec.id }}" (string interpolada) → obrigatório converter para string
+    const idStr = String(this.sugestaoTecnico.tecnicoId);
+    this.chamado.tecnico = idStr;
+    this.tecnico.setValue(idStr);
+    this.toast.info(`Técnico ${this.sugestaoTecnico.nomeTecnico} selecionado`, 'Sugestão aplicada');
+  }
+
+  /** Aplica a sugestão de classificação no formulário. */
+  aplicarSugestaoClassificacao(): void {
+    if (!this.sugestaoClassificacao) return;
+    // mat-option usa value="0", "1", "2"… (string) → converter para garantir correspondência
+    const codigoStr = String(this.sugestaoClassificacao.classificacaoCodigo);
+    this.chamado.classificacao = codigoStr;
+    this.classificacao.setValue(codigoStr);
+    this.toast.info(`Classificação ${this.sugestaoClassificacao.classificacaoNome} selecionada`, 'Sugestão aplicada');
+  }
+
+  togglePainel(): void {
+    this.paineAberto = !this.paineAberto;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   validaCampos(): boolean {
     // Quando ROLE_TECNICO o FormControl fica disabled (válido automaticamente)
