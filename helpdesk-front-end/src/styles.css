@@ -133,12 +133,19 @@ table {
 .mat-select-panel,
 .mat-autocomplete-panel,
 .mat-mdc-autocomplete-panel,
-.mat-menu-panel,
-.mat-mdc-menu-panel,
 .mat-datepicker-content {
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  max-height: 256px;               /* padrão razoável; pode ser sobrescrito */
+  max-height: 256px;
+  min-width: fit-content !important;
+}
+
+/* Menu padrão (sem classe customizada) */
+.mat-menu-panel:not(.actions-dropdown-panel),
+.mat-mdc-menu-panel:not(.actions-dropdown-panel) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 256px;
   min-width: fit-content !important;
 }
 
@@ -490,4 +497,531 @@ body, body * {
   transition: background-color 0.25s ease, color 0.15s ease, border-color 0.2s ease, box-shadow 0.25s ease;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   ACTIONS DROPDOWN PANEL — Premium mat-menu (Angular Material v13)
+   Uso: panelClass="actions-dropdown-panel" no <mat-menu>
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Animações ── */
+@keyframes adp-open {
+  from { opacity: 0; transform: scale(.93) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+@keyframes adp-icon-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ══ 1. PAINEL ═══════════════════════════════════════════════════ */
+.actions-dropdown-panel.mat-menu-panel {
+  min-width: 236px !important;
+  max-width: 236px !important;
+  width:     236px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: #f8fafd !important;
+  box-shadow:
+    0 0 0 1px rgba(21, 101, 192, .11),
+    0 2px 6px  rgba(15, 23, 42, .06),
+    0 14px 36px rgba(15, 23, 42, .13),
+    0 32px 64px rgba(15, 23, 42, .08) !important;
+  margin-top: 8px !important;
+  transform-origin: top right !important;
+  animation: adp-open .22s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Faixa de acento no topo */
+.actions-dropdown-panel.mat-menu-panel::before {
+  content: '';
+  display: block;
+  height: 3.5px;
+  background: linear-gradient(90deg,
+    #0d47a1 0%, #1565c0 20%, #1976d2 50%, #42a5f5 80%, #90caf9 100%);
+}
+
+/* Remove max-height global */
+.actions-dropdown-panel.mat-menu-panel,
+.actions-dropdown-panel .mat-menu-content {
+  max-height: none !important;
+}
+
+/* ── Cabeçalho interno "Ações" ── */
+.actions-dropdown-panel .mat-menu-content {
+  padding: 0 !important;
+}
+.actions-dropdown-panel .mat-menu-content::before {
+  content: 'Ações disponíveis';
+  display: flex;
+  align-items: center;
+  padding: 9px 14px 7px;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(21, 101, 192, .08);
+  background: linear-gradient(135deg, rgba(21,101,192,.04) 0%, rgba(0,188,212,.03) 100%);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* CDK overlay */
+.cdk-overlay-pane:has(.actions-dropdown-panel) {
+  overflow: visible !important;
+}
+
+/* ══ 2. ITENS ════════════════════════════════════════════════════ */
+.actions-dropdown-panel .menu-action-item.mat-menu-item {
+  min-height: 48px !important;
+  height:     48px !important;
+  padding:    0 14px 0 12px !important;
+  display:    flex !important;
+  align-items: center !important;
+  gap:        12px !important;
+  border-radius: 0 !important;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif !important;
+  font-size:   .845rem !important;
+  font-weight: 500 !important;
+  letter-spacing: .01em !important;
+  color: #1e293b !important;
+  box-shadow: inset 4px 0 0 transparent !important;
+  transition:
+    background   .17s ease,
+    color        .17s ease,
+    box-shadow   .17s ease !important;
+}
+
+/* Linha separadora */
+.actions-dropdown-panel .menu-action-item.mat-menu-item + .menu-action-item.mat-menu-item {
+  border-top: 1px solid rgba(226,232,240,.6) !important;
+}
+
+/* Hover/Active padrão */
+.actions-dropdown-panel .menu-action-item.mat-menu-item:not([disabled]):hover {
+  background: rgba(21, 101, 192, .06) !important;
+  color: #1565c0 !important;
+  box-shadow: inset 4px 0 0 #1565c0 !important;
+}
+.actions-dropdown-panel .menu-action-item.mat-menu-item:not([disabled]):active {
+  background: rgba(21, 101, 192, .12) !important;
+  color: #0d47a1 !important;
+  box-shadow: inset 4px 0 0 #0d47a1 !important;
+}
+
+/* Hover/Active danger */
+.actions-dropdown-panel .menu-action-danger.mat-menu-item  { color: #b91c1c !important; }
+.actions-dropdown-panel .menu-action-danger.mat-menu-item:not([disabled]):hover {
+  background: rgba(198, 40, 40, .06) !important;
+  color: #b71c1c !important;
+  box-shadow: inset 4px 0 0 #c62828 !important;
+}
+.actions-dropdown-panel .menu-action-danger.mat-menu-item:not([disabled]):active {
+  background: rgba(198, 40, 40, .13) !important;
+  color: #7f1d1d !important;
+  box-shadow: inset 4px 0 0 #7f1d1d !important;
+}
+
+/* Hover/Active success */
+.actions-dropdown-panel .menu-action-success.mat-menu-item { color: #15803d !important; }
+.actions-dropdown-panel .menu-action-success.mat-menu-item:not([disabled]):hover {
+  background: rgba(27, 94, 32, .06) !important;
+  color: #1b5e20 !important;
+  box-shadow: inset 4px 0 0 #2e7d32 !important;
+}
+.actions-dropdown-panel .menu-action-success.mat-menu-item:not([disabled]):active {
+  background: rgba(27, 94, 32, .13) !important;
+  color: #14532d !important;
+  box-shadow: inset 4px 0 0 #14532d !important;
+}
+
+/* Disabled */
+.actions-dropdown-panel .menu-action-item.mat-menu-item[disabled] {
+  opacity: .38 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  filter: grayscale(.6) !important;
+}
+
+/* Span do texto — herda cor do item */
+.actions-dropdown-panel .menu-action-item.mat-menu-item > span {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .17s ease;
+}
+
+/* ══ 3. ÍCONE-PÍLULA — estilo base ══════════════════════════════ */
+.actions-dropdown-panel .mat-icon.menu-icon {
+  width:      34px !important;
+  height:     34px !important;
+  min-width:  34px !important;
+  max-width:  34px !important;
+  flex-shrink: 0 !important;
+  font-size:  19px !important;
+  line-height: 34px !important;
+  display:    inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border-radius: 10px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  transition:
+    transform  .2s cubic-bezier(.34, 1.56, .64, 1),
+    background .17s ease,
+    box-shadow .17s ease,
+    color      .17s ease !important;
+}
+
+/* Micro-bounce ao hover */
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon {
+  transform: scale(1.15) rotate(-4deg) !important;
+  animation: adp-icon-pop .26s cubic-bezier(.34, 1.56, .64, 1) both !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon {
+  transform: scale(.95) rotate(0deg) !important;
+}
+.actions-dropdown-panel .menu-action-item[disabled] .mat-icon.menu-icon {
+  transform: none !important;
+}
+
+/* ══ 4. CORES DAS PÍLULAS ════════════════════════════════════════ */
+
+/* ── Editar — azul-céu pastel ── */
+.actions-dropdown-panel .mat-icon.menu-icon.icon-edit {
+  background: #ddeeff !important;
+  color:       #1d6fa8 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(29, 111, 168, .25),
+               0 2px 6px rgba(29, 111, 168, .14) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-edit {
+  background: #c3dff8 !important;
+  color:       #0e5a8a !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(14, 90, 138, .38),
+               0 4px 12px rgba(14, 90, 138, .22) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-edit {
+  background: #a8cff2 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(14, 90, 138, .52) !important;
+}
+
+/* ── Ver telefones — verde-menta pastel ── */
+.actions-dropdown-panel .mat-icon.menu-icon.icon-phone {
+  background: #d9f0db !important;
+  color:       #2d7a35 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(45, 122, 53, .25),
+               0 2px 6px rgba(45, 122, 53, .12) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-phone {
+  background: #b8e4bc !important;
+  color:       #1c5f22 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(28, 95, 34, .38),
+               0 4px 12px rgba(28, 95, 34, .20) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-phone {
+  background: #9dd9a3 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(28, 95, 34, .52) !important;
+}
+
+/* ── Redistribuir — índigo/lilás pastel ── */
+.actions-dropdown-panel .mat-icon.menu-icon.icon-transfer {
+  background: #e8e4f8 !important;
+  color:       #5645a6 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(86, 69, 166, .25),
+               0 2px 6px rgba(86, 69, 166, .12) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-transfer {
+  background: #d2caf2 !important;
+  color:       #3d2d88 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(61, 45, 136, .38),
+               0 4px 12px rgba(61, 45, 136, .20) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-transfer {
+  background: #bcb1ec !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(61, 45, 136, .52) !important;
+}
+
+/* ── Inativar / danger — rosa-coral pastel ── */
+.actions-dropdown-panel .mat-icon.menu-icon.icon-danger {
+  background: #fce8e8 !important;
+  color:       #b83232 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(184, 50, 50, .24),
+               0 2px 6px rgba(184, 50, 50, .12) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-danger {
+  background: #f9cfcf !important;
+  color:       #8b1c1c !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(139, 28, 28, .40),
+               0 4px 12px rgba(139, 28, 28, .22) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-danger {
+  background: #f5b8b8 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(139, 28, 28, .55) !important;
+}
+
+/* ── Reativar / success — esmeralda pastel ── */
+.actions-dropdown-panel .mat-icon.menu-icon.icon-success {
+  background: #d8f4e2 !important;
+  color:       #1f7a45 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(31, 122, 69, .24),
+               0 2px 6px rgba(31, 122, 69, .12) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-success {
+  background: #b5e9c8 !important;
+  color:       #155c33 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(21, 92, 51, .40),
+               0 4px 12px rgba(21, 92, 51, .20) !important;
+}
+.actions-dropdown-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-success {
+  background: #95dcb0 !important;
+  box-shadow:  inset 0 0 0 1.5px rgba(21, 92, 51, .55) !important;
+}
+
+/* ══ 5. DIVISOR ══════════════════════════════════════════════════ */
+.actions-dropdown-panel .mat-divider {
+  margin: 2px 0 !important;
+  border-top-color: rgba(21, 101, 192, .09) !important;
+  opacity: 1 !important;
+}
+
+/* Rodapé */
+.actions-dropdown-panel .mat-menu-content::after {
+  content: '';
+  display: block;
+  height: 4px;
+  pointer-events: none;
+}
+
+/* ══ 6. RIPPLE ══════════════════════════════════════════════════ */
+.actions-dropdown-panel .mat-menu-ripple,
+.actions-dropdown-panel .mat-ripple-element { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   Design tokens + semantic per-action classes
+   .menu-item--edit | .menu-item--view | .menu-item--redistribute
+   .menu-item--deactivate | .menu-item--reactivate
+   ══════════════════════════════════════════════════════════════════ */
+.actions-dropdown-panel {
+  /* Editar — azul-cobalto */
+  --adp-edit-base:       #1a5fa8;
+  --adp-edit-hover:      #0d47a1;
+  --adp-edit-bg-hover:   rgba(21, 101, 192, .07);
+  --adp-edit-bg-active:  rgba(21, 101, 192, .14);
+  --adp-edit-bar:        #1565c0;
+  /* Ver / Telefones — verde-teal */
+  --adp-view-base:       #1e6e2a;
+  --adp-view-hover:      #155220;
+  --adp-view-bg-hover:   rgba(27, 94, 32, .07);
+  --adp-view-bg-active:  rgba(27, 94, 32, .14);
+  --adp-view-bar:        #2e7d32;
+  /* Redistribuir — índigo/lilás */
+  --adp-redist-base:      #5645a6;
+  --adp-redist-hover:     #3d2d88;
+  --adp-redist-bg-hover:  rgba(86, 69, 166, .07);
+  --adp-redist-bg-active: rgba(86, 69, 166, .14);
+  --adp-redist-bar:       #5645a6;
+  /* Inativar — vermelho-coral */
+  --adp-deact-base:      #b71c1c;
+  --adp-deact-hover:     #7f1d1d;
+  --adp-deact-bg-hover:  rgba(198, 40, 40, .07);
+  --adp-deact-bg-active: rgba(198, 40, 40, .14);
+  --adp-deact-bar:       #c62828;
+  /* Reativar — verde-esmeralda */
+  --adp-react-base:      #1a6b3a;
+  --adp-react-hover:     #14532d;
+  --adp-react-bg-hover:  rgba(27, 94, 32, .07);
+  --adp-react-bg-active: rgba(27, 94, 32, .14);
+  --adp-react-bar:       #1b5e20;
+}
+
+/* Cor base sutil no texto */
+.actions-dropdown-panel .menu-item--edit.mat-menu-item      { color: #1e2c3d !important; }
+.actions-dropdown-panel .menu-item--view.mat-menu-item      { color: #1a2e1c !important; }
+.actions-dropdown-panel .menu-item--redistribute.mat-menu-item { color: #221d35 !important; }
+
+/* Hover/Active por classe semântica */
+
+/* Editar */
+.actions-dropdown-panel .menu-item--edit.mat-menu-item:not([disabled]):hover {
+  background: var(--adp-edit-bg-hover) !important;
+  color:      var(--adp-edit-base)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-edit-bar) !important;
+}
+.actions-dropdown-panel .menu-item--edit.mat-menu-item:not([disabled]):active {
+  background: var(--adp-edit-bg-active) !important;
+  color:      var(--adp-edit-hover)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-edit-hover) !important;
+}
+
+/* Ver telefones */
+.actions-dropdown-panel .menu-item--view.mat-menu-item:not([disabled]):hover {
+  background: var(--adp-view-bg-hover) !important;
+  color:      var(--adp-view-base)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-view-bar) !important;
+}
+.actions-dropdown-panel .menu-item--view.mat-menu-item:not([disabled]):active {
+  background: var(--adp-view-bg-active) !important;
+  color:      var(--adp-view-hover)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-view-hover) !important;
+}
+
+/* Redistribuir */
+.actions-dropdown-panel .menu-item--redistribute.mat-menu-item:not([disabled]):hover {
+  background: var(--adp-redist-bg-hover) !important;
+  color:      var(--adp-redist-base)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-redist-bar) !important;
+}
+.actions-dropdown-panel .menu-item--redistribute.mat-menu-item:not([disabled]):active {
+  background: var(--adp-redist-bg-active) !important;
+  color:      var(--adp-redist-hover)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-redist-hover) !important;
+}
+
+/* Inativar */
+.actions-dropdown-panel .menu-item--deactivate.mat-menu-item:not([disabled]):hover {
+  background: var(--adp-deact-bg-hover) !important;
+  color:      var(--adp-deact-base)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-deact-bar) !important;
+}
+.actions-dropdown-panel .menu-item--deactivate.mat-menu-item:not([disabled]):active {
+  background: var(--adp-deact-bg-active) !important;
+  color:      var(--adp-deact-hover)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-deact-hover) !important;
+}
+
+/* Reativar */
+.actions-dropdown-panel .menu-item--reactivate.mat-menu-item:not([disabled]):hover {
+  background: var(--adp-react-bg-hover) !important;
+  color:      var(--adp-react-base)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-react-bar) !important;
+}
+.actions-dropdown-panel .menu-item--reactivate.mat-menu-item:not([disabled]):active {
+  background: var(--adp-react-bg-active) !important;
+  color:      var(--adp-react-hover)     !important;
+  box-shadow: inset 4px 0 0 var(--adp-react-hover) !important;
+}
+
+/* Disabled semantic */
+.actions-dropdown-panel .menu-item--edit[disabled].mat-menu-item,
+.actions-dropdown-panel .menu-item--view[disabled].mat-menu-item,
+.actions-dropdown-panel .menu-item--redistribute[disabled].mat-menu-item,
+.actions-dropdown-panel .menu-item--deactivate[disabled].mat-menu-item,
+.actions-dropdown-panel .menu-item--reactivate[disabled].mat-menu-item {
+  opacity: .38 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  filter: grayscale(.65) !important;
+  color: #94a3b8 !important;
+}
+
+/* ══ 7. DARK MODE ═════════════════════════════════════════════════ */
+body.dark-mode .actions-dropdown-panel.mat-menu-panel {
+  background: #141c28 !important;
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, .13),
+    0 2px 6px  rgba(0, 0, 0, .32),
+    0 14px 36px rgba(0, 0, 0, .48),
+    0 32px 64px rgba(0, 0, 0, .28) !important;
+}
+body.dark-mode .actions-dropdown-panel.mat-menu-panel::before {
+  background: linear-gradient(90deg, #1a237e 0%, #1565c0 45%, #42a5f5 100%);
+}
+body.dark-mode .actions-dropdown-panel .mat-menu-content::before {
+  color: #475569;
+  background: linear-gradient(135deg, rgba(96,165,250,.05) 0%, rgba(56,189,248,.03) 100%);
+  border-bottom-color: rgba(96, 165, 250, .10);
+}
+
+body.dark-mode .actions-dropdown-panel .menu-action-item.mat-menu-item { color: #c8d8f0 !important; }
+body.dark-mode .actions-dropdown-panel .menu-action-item.mat-menu-item + .menu-action-item.mat-menu-item {
+  border-top-color: rgba(255,255,255,.06) !important;
+}
+body.dark-mode .actions-dropdown-panel .menu-action-item.mat-menu-item:not([disabled]):hover {
+  background: rgba(96, 165, 250, .09) !important;
+  color: #93c5fd !important;
+  box-shadow: inset 4px 0 0 #3b82f6 !important;
+}
+body.dark-mode .actions-dropdown-panel .menu-action-item.mat-menu-item:not([disabled]):active {
+  background: rgba(96, 165, 250, .17) !important;
+  color: #bfdbfe !important;
+  box-shadow: inset 4px 0 0 #60a5fa !important;
+}
+
+body.dark-mode .actions-dropdown-panel .menu-action-danger.mat-menu-item  { color: #fca5a5 !important; }
+body.dark-mode .actions-dropdown-panel .menu-action-danger.mat-menu-item:not([disabled]):hover {
+  background: rgba(239, 68, 68, .09) !important; color: #f87171 !important;
+  box-shadow: inset 4px 0 0 #ef4444 !important;
+}
+body.dark-mode .actions-dropdown-panel .menu-action-danger.mat-menu-item:not([disabled]):active {
+  background: rgba(239, 68, 68, .17) !important; color: #fecaca !important;
+  box-shadow: inset 4px 0 0 #dc2626 !important;
+}
+
+body.dark-mode .actions-dropdown-panel .menu-action-success.mat-menu-item { color: #86efac !important; }
+body.dark-mode .actions-dropdown-panel .menu-action-success.mat-menu-item:not([disabled]):hover {
+  background: rgba(52, 211, 153, .09) !important; color: #6ee7b7 !important;
+  box-shadow: inset 4px 0 0 #34d399 !important;
+}
+body.dark-mode .actions-dropdown-panel .menu-action-success.mat-menu-item:not([disabled]):active {
+  background: rgba(52, 211, 153, .17) !important; color: #a7f3d0 !important;
+  box-shadow: inset 4px 0 0 #10b981 !important;
+}
+
+/* Pílulas dark mode */
+body.dark-mode .actions-dropdown-panel .mat-icon.menu-icon.icon-edit {
+  background: rgba(29, 111, 168, .22) !important; color: #7ec8f0 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(126, 200, 240, .22), 0 2px 8px rgba(29, 111, 168, .18) !important;
+}
+body.dark-mode .actions-dropdown-panel .mat-icon.menu-icon.icon-phone {
+  background: rgba(45, 122, 53, .24) !important; color: #86c98d !important;
+  box-shadow: inset 0 0 0 1.5px rgba(134, 201, 141, .22), 0 2px 8px rgba(45, 122, 53, .18) !important;
+}
+body.dark-mode .actions-dropdown-panel .mat-icon.menu-icon.icon-transfer {
+  background: rgba(86, 69, 166, .26) !important; color: #b8aff5 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(184, 175, 245, .22), 0 2px 8px rgba(86, 69, 166, .20) !important;
+}
+body.dark-mode .actions-dropdown-panel .mat-icon.menu-icon.icon-danger {
+  background: rgba(184, 50, 50, .24) !important; color: #f4a0a0 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 160, 160, .22), 0 2px 8px rgba(184, 50, 50, .20) !important;
+}
+body.dark-mode .actions-dropdown-panel .mat-icon.menu-icon.icon-success {
+  background: rgba(31, 122, 69, .26) !important; color: #80dba0 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(128, 219, 160, .22), 0 2px 8px rgba(31, 122, 69, .20) !important;
+}
+
+body.dark-mode .actions-dropdown-panel .mat-divider {
+  border-top-color: rgba(96, 165, 250, .10) !important;
+}
+
+/* Dark mode tokens */
+body.dark-mode .actions-dropdown-panel {
+  --adp-edit-base: #7ec8f0;   --adp-edit-hover: #bfdbfe;
+  --adp-edit-bg-hover: rgba(96,165,250,.09); --adp-edit-bg-active: rgba(96,165,250,.17); --adp-edit-bar: #3b82f6;
+  --adp-view-base: #86c98d;   --adp-view-hover: #a7f3d0;
+  --adp-view-bg-hover: rgba(52,211,153,.09); --adp-view-bg-active: rgba(52,211,153,.17); --adp-view-bar: #34d399;
+  --adp-redist-base: #b8aff5; --adp-redist-hover: #ddd6fe;
+  --adp-redist-bg-hover: rgba(167,139,250,.09); --adp-redist-bg-active: rgba(167,139,250,.17); --adp-redist-bar: #a78bfa;
+  --adp-deact-base: #fca5a5;  --adp-deact-hover: #fecaca;
+  --adp-deact-bg-hover: rgba(239,68,68,.09); --adp-deact-bg-active: rgba(239,68,68,.17); --adp-deact-bar: #ef4444;
+  --adp-react-base: #80dba0;  --adp-react-hover: #a7f3d0;
+  --adp-react-bg-hover: rgba(52,211,153,.09); --adp-react-bg-active: rgba(52,211,153,.17); --adp-react-bar: #10b981;
+}
+
+body.dark-mode .actions-dropdown-panel .menu-item--edit.mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--view.mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--redistribute.mat-menu-item { color: #94a3b8 !important; }
+
+body.dark-mode .actions-dropdown-panel .menu-item--edit[disabled].mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--view[disabled].mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--redistribute[disabled].mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--deactivate[disabled].mat-menu-item,
+body.dark-mode .actions-dropdown-panel .menu-item--reactivate[disabled].mat-menu-item {
+  color: #475569 !important;
+}
 

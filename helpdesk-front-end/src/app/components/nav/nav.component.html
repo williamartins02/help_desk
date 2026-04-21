@@ -1,107 +1,110 @@
 <mat-drawer-container class="container" autosize>
 
-  <mat-drawer #drawer class="sidenav" mode="side">
-    <!-- ── Seção de identidade ── -->
-    <div class="brand-header">
-      <div class="brand-icon-wrap">
-        <mat-icon>support_agent</mat-icon>
-      </div>
-      <div class="brand-info">
-        <span class="brand-name">Help<span class="brand-accent">Desk</span></span>
-        <span class="brand-sub">Sistema de Chamados</span>
-      </div>
-    </div>
-
-    <!-- ── Label de seção ── -->
-    <p class="nav-section-label">Navegação</p>
-
-    <!-- ── Itens de navegação ── -->
-    <mat-nav-list class="nav-list">
-      <a mat-list-item routerLink="home" routerLinkActive="active-link" class="nav-item link-home"
-         [routerLinkActiveOptions]="{exact: true}">
-        <mat-icon class="nav-icon">home</mat-icon>
-        <span class="nav-label">Home</span>
-      </a>
-      <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="nav-item link-tecnicos"
-         *appShowForRoles="['ROLE_ADMIN']">
-        <mat-icon class="nav-icon">engineering</mat-icon>
-        <span class="nav-label">Equipe Técnica</span>
-      </a>
-      <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="nav-item link-clientes"
-         *appShowForRoles="['ROLE_ADMIN']">
-        <mat-icon class="nav-icon">group</mat-icon>
-        <span class="nav-label">Base de Clientes</span>
-      </a>
-      <a mat-list-item routerLink="chamados" routerLinkActive="active-link" class="nav-item link-chamados">
-        <mat-icon class="nav-icon">receipt_long</mat-icon>
-        <span class="nav-label">Central de Chamados</span>
-      </a>
-      <!-- ── Dashboard (com submenu apenas para ROLE_ADMIN) ── -->
-      <div class="nav-group">
-        <a mat-list-item routerLink="chart" routerLinkActive="active-link" class="nav-item link-chart nav-group-toggle"
-           [routerLinkActiveOptions]="{exact: true}"
-           (click)="isDashboardOpen = !isDashboardOpen">
-          <mat-icon class="nav-icon">dashboard</mat-icon>
-          <span class="nav-label">Dashboard</span>
-          <mat-icon class="nav-chevron" [class.rotated]="isDashboardOpen"
-                    *appShowForRoles="['ROLE_ADMIN']">expand_more</mat-icon>
-        </a>
-        <div class="nav-submenu" [class.open]="isDashboardOpen" *appShowForRoles="['ROLE_ADMIN']">
-          <a mat-list-item routerLink="bi-dashboard" routerLinkActive="active-link" class="nav-item nav-subitem link-bi">
-            <mat-icon class="nav-icon">insights</mat-icon>
-            <span class="nav-label">BI / Relatórios</span>
-          </a>
+    <mat-drawer #drawer class="sidenav" mode="side">
+        <!-- ── Seção de identidade ── -->
+        <div class="brand-header">
+            <div class="brand-icon-wrap">
+                <mat-icon>support_agent</mat-icon>
+            </div>
+            <div class="brand-info">
+                <span class="brand-name">Help<span class="brand-accent">Desk</span></span>
+                <span class="brand-sub">Sistema de Chamados</span>
+            </div>
         </div>
-      </div>
-      <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="nav-item link-chat">
-        <mat-icon class="nav-icon">forum</mat-icon>
-        <span class="nav-label">Conversas</span>
-      </a>
-      <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="nav-item link-usuarios"
-         *appShowForRoles="['ROLE_ADMIN']">
-        <mat-icon class="nav-icon">manage_accounts</mat-icon>
-        <span class="nav-label">Gestão de Usuários</span>
-      </a>
-      <a mat-list-item routerLink="agenda" routerLinkActive="active-link" class="nav-item link-agenda">
-        <mat-icon class="nav-icon">event_note</mat-icon>
-        <span class="nav-label">Agenda de Tarefas</span>
-      </a>
-      <a mat-list-item routerLink="kanban" routerLinkActive="active-link" class="nav-item link-kanban">
-        <mat-icon class="nav-icon">view_kanban</mat-icon>
-        <span class="nav-label">Kanban</span>
-      </a>
-      <!-- BI/Relatórios agora é submenu de Dashboard (removido daqui) -->
-    </mat-nav-list>
 
-    <!-- ── Espaçador flexível ── -->
-    <div class="sidenav-spacer"></div>
+        <!-- ── Label de seção ── -->
+        <p class="nav-section-label">Navegação</p>
 
-    <!-- ── Rodapé: sair ── -->
-    <div class="sidenav-footer">
-      <div class="footer-divider"></div>
-      <a mat-list-item class="logout-item" (click)="logout()">
-        <mat-icon class="nav-icon">logout</mat-icon>
-        <span class="nav-label">Sair</span>
-      </a>
+        <!-- ── Itens de navegação ── -->
+        <mat-nav-list class="nav-list">
+            <a mat-list-item routerLink="home" routerLinkActive="active-link" class="nav-item link-home"
+               [routerLinkActiveOptions]="{exact: true}">
+                <mat-icon class="nav-icon">home</mat-icon>
+                <span class="nav-label">Home</span>
+            </a>
+            <a mat-list-item routerLink="tecnicos" routerLinkActive="active-link" class="nav-item link-tecnicos"
+               *appShowForRoles="['ROLE_ADMIN']">
+                <mat-icon class="nav-icon">engineering</mat-icon>
+                <span class="nav-label">Equipe Técnica</span>
+            </a>
+            <a mat-list-item routerLink="clientes" routerLinkActive="active-link" class="nav-item link-clientes"
+               *appShowForRoles="['ROLE_ADMIN']">
+                <mat-icon class="nav-icon">group</mat-icon>
+                <span class="nav-label">Base de Clientes</span>
+            </a>
+            <a mat-list-item routerLink="chamados" routerLinkActive="active-link" class="nav-item link-chamados">
+                <mat-icon class="nav-icon">receipt_long</mat-icon>
+                <span class="nav-label">Central de Chamados</span>
+            </a>
+            <!-- ── Dashboard (com submenu apenas para ROLE_ADMIN) ── -->
+            <div class="nav-group">
+                <a mat-list-item routerLink="chart" routerLinkActive="active-link"
+                   class="nav-item link-chart nav-group-toggle"
+                   [routerLinkActiveOptions]="{exact: true}"
+                   (click)="isDashboardOpen = !isDashboardOpen">
+                    <mat-icon class="nav-icon">dashboard</mat-icon>
+                    <span class="nav-label">Dashboard</span>
+                    <mat-icon class="nav-chevron" [class.rotated]="isDashboardOpen"
+                              *appShowForRoles="['ROLE_ADMIN']">expand_more
+                    </mat-icon>
+                </a>
+                <div class="nav-submenu" [class.open]="isDashboardOpen" *appShowForRoles="['ROLE_ADMIN']">
+                    <a mat-list-item routerLink="bi-dashboard" routerLinkActive="active-link"
+                       class="nav-item nav-subitem link-bi">
+                        <mat-icon class="nav-icon">insights</mat-icon>
+                        <span class="nav-label">BI / Relatórios</span>
+                    </a>
+                </div>
+            </div>
+            <a mat-list-item routerLink="usuarios" routerLinkActive="active-link" class="nav-item link-usuarios"
+               *appShowForRoles="['ROLE_ADMIN']">
+                <mat-icon class="nav-icon">manage_accounts</mat-icon>
+                <span class="nav-label">Gestão de Usuários</span>
+            </a>
+            <a mat-list-item routerLink="agenda" routerLinkActive="active-link" class="nav-item link-agenda">
+                <mat-icon class="nav-icon">event_note</mat-icon>
+                <span class="nav-label">Agenda de Tarefas</span>
+            </a>
+            <a mat-list-item routerLink="kanban" routerLinkActive="active-link" class="nav-item link-kanban">
+                <mat-icon class="nav-icon">view_kanban</mat-icon>
+                <span class="nav-label">Kanban</span>
+            </a>
+            <a mat-list-item routerLink="chat" routerLinkActive="active-link" class="nav-item link-chat">
+                <mat-icon class="nav-icon">forum</mat-icon>
+                <span class="nav-label">Conversas</span>
+            </a>
+            <!-- BI/Relatórios agora é submenu de Dashboard (removido daqui) -->
+        </mat-nav-list>
+
+        <!-- ── Espaçador flexível ── -->
+        <div class="sidenav-spacer"></div>
+
+        <!-- ── Rodapé: sair ── -->
+        <div class="sidenav-footer">
+            <div class="footer-divider"></div>
+            <a mat-list-item class="logout-item" (click)="logout()">
+                <mat-icon class="nav-icon">logout</mat-icon>
+                <span class="nav-label">Sair</span>
+            </a>
+        </div>
+    </mat-drawer>
+
+    <!-- HEADER SEMPRE NO TOPO -->
+    <div class="header-wrapper">
+        <app-header>
+            <button class="nav-hamburger-btn" mat-icon-button
+                    (click)="drawer.toggle()"
+                    [class.menu-open]="isMenuOpen"
+                    aria-label="Alternar menu">
+                <mat-icon>menu</mat-icon>
+            </button>
+        </app-header>
     </div>
-  </mat-drawer>
 
-  <!-- HEADER SEMPRE NO TOPO -->
-  <div class="header-wrapper">
-    <app-header>
-      <button class="nav-hamburger-btn" mat-icon-button
-              (click)="drawer.toggle()"
-              [class.menu-open]="isMenuOpen"
-              aria-label="Alternar menu">
-        <mat-icon>menu</mat-icon>
-      </button>
-    </app-header>
-  </div>
-
-  <!-- MAIN CONTENT BELOW HEADER -->
-  <div class="sidenav-content">
-    <router-outlet></router-outlet>
-  </div>
+    <!-- MAIN CONTENT BELOW HEADER -->
+    <div class="sidenav-content">
+        <router-outlet></router-outlet>
+    </div>
 
 </mat-drawer-container>
 

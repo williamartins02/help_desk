@@ -45,7 +45,9 @@
     <div class="kpi-section">
 
         <div class="stat-card stat-kpi-total" matTooltip="Total de técnicos registrados no sistema">
-            <div class="kpi-bg-icon"><mat-icon>engineering</mat-icon></div>
+            <div class="kpi-bg-icon">
+                <mat-icon>engineering</mat-icon>
+            </div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">engineering</mat-icon>
@@ -65,13 +67,16 @@
 
         <div class="stat-card stat-kpi-ativos"
              [matTooltip]="countAtivos + ' de ' + totalTecnicos + ' técnicos estão ativos'">
-            <div class="kpi-bg-icon"><mat-icon>check_circle</mat-icon></div>
+            <div class="kpi-bg-icon">
+                <mat-icon>check_circle</mat-icon>
+            </div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">check_circle</mat-icon>
                 </div>
                 <span class="kpi-trend-badge kpi-badge-success">
-                    <mat-icon>trending_up</mat-icon> {{ ativosPct }}%
+                    <mat-icon>trending_up</mat-icon>
+                    {{ ativosPct }}%
                 </span>
             </div>
             <div class="kpi-num-block">
@@ -85,13 +90,16 @@
 
         <div class="stat-card stat-kpi-inativos"
              [matTooltip]="countInativos + ' de ' + totalTecnicos + ' técnicos estão inativos'">
-            <div class="kpi-bg-icon"><mat-icon>person_off</mat-icon></div>
+            <div class="kpi-bg-icon">
+                <mat-icon>person_off</mat-icon>
+            </div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">person_off</mat-icon>
                 </div>
                 <span class="kpi-trend-badge kpi-badge-danger">
-                    <mat-icon>trending_down</mat-icon> {{ inativosPct }}%
+                    <mat-icon>trending_down</mat-icon>
+                    {{ inativosPct }}%
                 </span>
             </div>
             <div class="kpi-num-block">
@@ -105,7 +113,9 @@
 
         <div class="stat-card stat-kpi-novos"
              [matTooltip]="countNovosMes + ' técnico(s) cadastrado(s) em ' + mesAtual">
-            <div class="kpi-bg-icon"><mat-icon>person_add</mat-icon></div>
+            <div class="kpi-bg-icon">
+                <mat-icon>person_add</mat-icon>
+            </div>
             <div class="stat-card-top">
                 <div class="stat-icon-wrap">
                     <mat-icon class="stat-icon">person_add</mat-icon>
@@ -385,80 +395,75 @@
                             <ng-container matColumnDef="acoes">
                                 <th mat-header-cell *matHeaderCellDef> Ações</th>
                                 <td mat-cell *matCellDef="let tecnico" class="actions-cell">
-                                    <div class="actions-group">
 
-                                        <!-- Editar: bloqueado para inativos -->
-                                        <button
-                                                type="button"
-                                                mat-icon-button
-                                                class="action-btn edit-action"
-                                                [matTooltip]="tecnico.ativo === false ? 'Técnico inativo — edição bloqueada' : 'Editar técnico'"
-                                                matTooltipShowDelay="400"
-                                                [attr.aria-label]="'Editar técnico ' + tecnico.nome"
+                                    <!-- Botão único de Ações -->
+                                    <button type="button"
+                                            class="actions-menu-btn"
+                                            [class.checking]="checkingId === tecnico.id"
+                                            [matMenuTriggerFor]="actionsMenu"
+                                            matTooltip="Ações disponíveis"
+                                            [attr.aria-label]="'Ações para ' + tecnico.nome">
+                                        <mat-spinner *ngIf="checkingId === tecnico.id" diameter="16"
+                                                     class="btn-spinner"></mat-spinner>
+                                        <mat-icon *ngIf="checkingId !== tecnico.id">more_vert</mat-icon>
+                                    </button>
+
+                                    <!-- Dropdown menu -->
+                                    <mat-menu #actionsMenu="matMenu"
+                                              class="actions-dropdown-panel"
+                                              xPosition="before"
+                                              yPosition="below"
+                                              [overlapTrigger]="false">
+
+                                        <!-- Editar -->
+                                        <button mat-menu-item
+                                                class="menu-action-item menu-item--edit"
                                                 [disabled]="tecnico.ativo === false"
                                                 (click)="openEdit(tecnico.id)">
-                                            <mat-icon>edit</mat-icon>
+                                            <mat-icon class="menu-icon icon-edit">edit</mat-icon>
+                                            <span>Editar cadastro</span>
                                         </button>
 
-                                        <!-- Inativar (apenas para técnicos ativos) -->
-                                        <button
-                                                *ngIf="tecnico.ativo !== false"
-                                                type="button"
-                                                mat-icon-button
-                                                class="action-btn delete-action"
-                                                [matTooltip]="checkingId === tecnico.id ? 'Verificando chamados...' : 'Inativar técnico'"
-                                                matTooltipShowDelay="400"
-                                                [attr.aria-label]="'Inativar técnico ' + tecnico.nome"
-                                                [disabled]="checkingId === tecnico.id"
-                                                (click)="inativarComValidacao(tecnico.id)"
-                                        >
-                                            <mat-icon *ngIf="checkingId !== tecnico.id">person_off</mat-icon>
-                                            <mat-spinner *ngIf="checkingId === tecnico.id" diameter="18"></mat-spinner>
-                                        </button>
-
-                                        <!-- Redistribuir chamados (apenas para técnicos ativos) -->
-                                        <button
-                                                *ngIf="tecnico.ativo !== false"
-                                                type="button"
-                                                mat-icon-button
-                                                class="action-btn transfer-action"
-                                                matTooltip="Redistribuir chamados"
-                                                matTooltipShowDelay="400"
-                                                [attr.aria-label]="'Redistribuir chamados de ' + tecnico.nome"
-                                                (click)="abrirTransferencia(tecnico.id)"
-                                        >
-                                            <mat-icon>swap_horiz</mat-icon>
-                                        </button>
-
-                                        <!-- Reativar (apenas para técnicos inativos) -->
-                                        <button
-                                                *ngIf="tecnico.ativo === false"
-                                                type="button"
-                                                mat-icon-button
-                                                class="action-btn reativar-action"
-                                                matTooltip="Reativar técnico"
-                                                matTooltipShowDelay="400"
-                                                [attr.aria-label]="'Reativar técnico ' + tecnico.nome"
-                                                (click)="reativar(tecnico.id)"
-                                        >
-                                            <mat-icon>person_check</mat-icon>
-                                        </button>
-
-                                        <!-- Telefones: bloqueado para inativos -->
-                                        <button
-                                                type="button"
-                                                mat-icon-button
-                                                class="action-btn phone-action"
-                                                [matTooltip]="tecnico.ativo === false ? 'Técnico inativo — ações bloqueadas' : 'Visualizar telefones'"
-                                                matTooltipShowDelay="400"
-                                                [attr.aria-label]="'Ver telefones de ' + tecnico.nome"
+                                        <!-- Telefones -->
+                                        <button mat-menu-item
+                                                class="menu-action-item menu-item--view"
                                                 [disabled]="tecnico.ativo === false"
-                                                [routerLink]="tecnico.ativo !== false ? ['/tecnicos/telefones', tecnico.id] : null"
-                                        >
-                                            <mat-icon>phone_iphone</mat-icon>
+                                                [routerLink]="tecnico.ativo !== false ? ['/tecnicos/telefones', tecnico.id] : null">
+                                            <mat-icon class="menu-icon icon-phone">phone_iphone</mat-icon>
+                                            <span>Ver telefones</span>
                                         </button>
 
-                                    </div>
+                                        <!-- Redistribuir chamados (apenas ativos) -->
+                                        <button *ngIf="tecnico.ativo !== false"
+                                                mat-menu-item
+                                                class="menu-action-item menu-item--redistribute"
+                                                (click)="abrirTransferencia(tecnico.id)">
+                                            <mat-icon class="menu-icon icon-transfer">swap_horiz</mat-icon>
+                                            <span>Redistribuir chamados</span>
+                                        </button>
+
+                                        <mat-divider></mat-divider>
+
+                                        <!-- Inativar (apenas ativos) -->
+                                        <button *ngIf="tecnico.ativo !== false"
+                                                mat-menu-item
+                                                class="menu-action-item menu-action-danger menu-item--deactivate"
+                                                [disabled]="checkingId === tecnico.id"
+                                                (click)="inativarComValidacao(tecnico.id)">
+                                            <mat-icon class="menu-icon icon-danger">person_off</mat-icon>
+                                            <span>Inativar técnico</span>
+                                        </button>
+
+                                        <!-- Reativar (apenas inativos) -->
+                                        <button *ngIf="tecnico.ativo === false"
+                                                mat-menu-item
+                                                class="menu-action-item menu-action-success menu-item--reactivate"
+                                                (click)="reativar(tecnico.id)">
+                                            <mat-icon class="menu-icon icon-success">person_check</mat-icon>
+                                            <span>Reativar técnico</span>
+                                        </button>
+
+                                    </mat-menu>
                                 </td>
                             </ng-container>
 
