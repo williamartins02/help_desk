@@ -73,23 +73,71 @@
 
 
 
-    <!-- ── LOADING ── -->
-    <div class="bi-loading" *ngIf="isLoading">
-      <div class="bi-loading-ring">
-        <div class="bi-loading-inner">
-          <mat-icon class="bi-loading-icon">insights</mat-icon>
+    <!-- ── SKELETON LOADING ── -->
+    <div class="bi-skeleton" *ngIf="isLoading">
+
+      <!-- KPI Cards skeleton -->
+      <div class="bi-sk-kpi-grid">
+        <div class="bi-sk-kpi-card" *ngFor="let i of [1,2,3,4,5,6]">
+          <div class="bi-sk-kpi-top">
+            <span class="sk sk-circle bi-sk-icon"></span>
+            <span class="sk sk-rect bi-sk-badge"></span>
+          </div>
+          <span class="sk sk-rect bi-sk-num"></span>
+          <span class="sk sk-line-sm bi-sk-label"></span>
+          <span class="sk bi-sk-bar"></span>
         </div>
       </div>
-      <div class="bi-loading-dots">
-        <span class="ld ld-1"></span>
-        <span class="ld ld-2"></span>
-        <span class="ld ld-3"></span>
+
+      <!-- Charts row skeleton -->
+      <div class="bi-sk-charts-row">
+        <div class="bi-sk-chart-card">
+          <div class="bi-sk-chart-header">
+            <span class="sk sk-rect" style="width:50%;height:16px"></span>
+          </div>
+          <div class="bi-sk-chart-body">
+            <div class="bi-sk-bar-chart">
+              <span class="sk bi-sk-bar-item" *ngFor="let h of [60,85,40,70,55,90,45]"
+                    [style.height]="h + '%'"></span>
+            </div>
+          </div>
+        </div>
+        <div class="bi-sk-chart-card bi-sk-chart-card-sm">
+          <div class="bi-sk-chart-header">
+            <span class="sk sk-rect" style="width:55%;height:16px"></span>
+          </div>
+          <div class="bi-sk-donut-wrap">
+            <span class="sk sk-circle bi-sk-donut"></span>
+            <div class="bi-sk-legend">
+              <span class="sk sk-line" style="height:12px" *ngFor="let l of [1,2,3]"></span>
+            </div>
+          </div>
+        </div>
       </div>
-      <span class="bi-loading-title">Calculando métricas</span>
-      <p class="bi-loading-sub">Processando dados do período selecionado…</p>
+
+      <!-- Table skeleton -->
+      <div class="bi-sk-table-card">
+        <div class="bi-sk-table-header">
+          <span class="sk sk-rect" style="width:40%;height:16px"></span>
+        </div>
+        <div class="bi-sk-table-row bi-sk-table-head-row">
+          <span class="sk sk-rect" style="width:30px;height:13px" *ngFor="let c of [1,2,3,4,5,6]"></span>
+        </div>
+        <div class="bi-sk-table-row" *ngFor="let r of [1,2,3,4,5,6]"
+             [style.animation-delay]="(r * 0.06) + 's'">
+          <span class="sk sk-rect bi-sk-td" style="width:60px"></span>
+          <span class="sk sk-rect bi-sk-td" style="width:140px"></span>
+          <span class="sk sk-rect bi-sk-td" style="width:80px;border-radius:99px!important"></span>
+          <span class="sk sk-rect bi-sk-td" style="width:80px;border-radius:99px!important"></span>
+          <span class="sk sk-rect bi-sk-td" style="width:60px"></span>
+          <span class="sk sk-rect bi-sk-td" style="width:70px"></span>
+        </div>
+      </div>
+
     </div>
 
     <ng-container *ngIf="!isLoading && dashboard">
+      <div class="sk-fade-in">
 
       <!-- ── ALERTAS ── -->
       <div class="alert-row" *ngIf="dashboard.alertasGargalo?.length > 0">
@@ -556,6 +604,8 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /div.sk-fade-in -->
 
     </ng-container>
 

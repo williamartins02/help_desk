@@ -334,11 +334,47 @@
 
       <div class="table-wrapper">
         <div *ngIf="isLoading" class="loading-overlay">
-          <mat-spinner diameter="46"></mat-spinner>
-          <span>Atualizando chamados...</span>
+          <!-- Skeleton table rows -->
+          <div class="sk-table-wrap">
+            <div class="sk-table-row sk-table-header">
+              <span class="sk sk-rect" style="width:40px;height:14px"></span>
+              <span class="sk sk-rect" style="width:120px;height:14px"></span>
+              <span class="sk sk-rect" style="width:80px;height:14px"></span>
+              <span class="sk sk-rect" style="width:90px;height:14px"></span>
+              <span class="sk sk-rect" style="width:90px;height:14px"></span>
+              <span class="sk sk-rect" style="width:80px;height:14px"></span>
+              <span class="sk sk-rect" style="width:70px;height:14px"></span>
+              <span class="sk sk-rect" style="width:80px;height:14px"></span>
+              <span class="sk sk-rect" style="width:60px;height:14px"></span>
+            </div>
+            <div class="sk-table-row" *ngFor="let i of [1,2,3,4,5,6,7,8]"
+                 [style.animation-delay]="(i * 0.05) + 's'">
+              <span class="sk sk-rect sk-table-id"></span>
+              <div class="sk-table-title-cell">
+                <span class="sk sk-rect" style="height:13px;width:85%"></span>
+                <span class="sk sk-rect" style="height:10px;width:55%"></span>
+              </div>
+              <span class="sk sk-rect sk-table-badge"></span>
+              <div class="sk-table-person">
+                <span class="sk sk-circle sk-table-avatar"></span>
+                <span class="sk sk-rect sk-table-name"></span>
+              </div>
+              <div class="sk-table-person">
+                <span class="sk sk-circle sk-table-avatar"></span>
+                <span class="sk sk-rect sk-table-name"></span>
+              </div>
+              <div class="sk-table-date-cell">
+                <span class="sk sk-rect" style="height:12px;width:80%"></span>
+                <span class="sk sk-rect" style="height:10px;width:65%"></span>
+              </div>
+              <span class="sk sk-rect sk-table-badge"></span>
+              <span class="sk sk-rect sk-table-badge"></span>
+              <span class="sk sk-rect sk-table-badge" style="width:44px"></span>
+            </div>
+          </div>
         </div>
 
-        <cdk-virtual-scroll-viewport appendOnly itemSize="56" class="example-viewport">
+        <cdk-virtual-scroll-viewport appendOnly itemSize="56" class="example-viewport sk-fade-in">
           <table mat-table matSort class="professional-table" [dataSource]="dataSource">
 
             <ng-container matColumnDef="id">

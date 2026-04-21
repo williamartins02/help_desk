@@ -285,6 +285,79 @@ table {
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   💎 SKELETON LOADING — shimmer animation + utility classes
+   ══════════════════════════════════════════════════════════════════ */
+
+@keyframes sk-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+/* Base skeleton element */
+.sk {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #e2e8f0 25%,
+    #f1f5f9 50%,
+    #e2e8f0 75%
+  );
+  background-size: 600px 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+/* Dark mode shimmer */
+body.dark-mode .sk {
+  background: linear-gradient(
+    90deg,
+    #1e2130 25%,
+    #252b3b 50%,
+    #1e2130 75%
+  );
+  background-size: 600px 100%;
+}
+
+/* Preset sizes */
+.sk-line       { height: 12px; width: 100%; }
+.sk-line-sm    { height: 10px; width: 60%; }
+.sk-line-lg    { height: 16px; width: 100%; }
+.sk-title      { height: 20px; width: 55%; }
+.sk-circle     { border-radius: 50% !important; }
+.sk-rect       { border-radius: 8px !important; }
+
+/* Fade-in when real content replaces skeleton */
+.sk-fade-in {
+  animation: fadeInZoom 0.3s ease both;
+}
+
+/* ── Dark mode: skeleton cards surfaces ── */
+body.dark-mode .kpi-skeleton-card,
+body.dark-mode .bi-sk-kpi-card,
+body.dark-mode .bi-sk-chart-card,
+body.dark-mode .bi-sk-table-card,
+body.dark-mode .sk-table-wrap {
+  background: #1e2130 !important;
+}
+
+body.dark-mode .bi-sk-chart-header,
+body.dark-mode .bi-sk-table-header,
+body.dark-mode .bi-sk-table-head-row {
+  border-color: rgba(255,255,255,.07) !important;
+  background: #161b27 !important;
+}
+
+body.dark-mode .bi-sk-table-row,
+body.dark-mode .sk-table-row {
+  border-color: rgba(255,255,255,.05) !important;
+}
+
+body.dark-mode .loading-overlay,
+body.dark-mode .sk-table-wrap {
+  background: rgba(30,33,48,.97) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
    🌙 DARK MODE — aplica-se quando body.dark-mode está ativo
    ══════════════════════════════════════════════════════════════════ */
 

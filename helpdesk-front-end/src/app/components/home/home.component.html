@@ -34,7 +34,7 @@
   </div>
 
   <!-- ══ KPI CARDS ══════════════════════════════════════════════════════ -->
-  <div class="kpi-row" *ngIf="!isLoading; else kpiLoading">
+  <div class="kpi-row sk-fade-in" *ngIf="!isLoading; else kpiLoading">
 
     <!-- Chamados Abertos -->
     <div class="stat-card stat-aberto">
@@ -135,11 +135,15 @@
 
   <ng-template #kpiLoading>
     <div class="kpi-row">
-      <div class="stat-card stat-aberto   kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="stat-card stat-andamento kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="stat-card stat-critico  kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="stat-card stat-encerrado kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
-      <div class="stat-card stat-tmr      kpi-skeleton"><mat-spinner diameter="28"></mat-spinner></div>
+      <div class="stat-card kpi-skeleton-card" *ngFor="let i of [1,2,3,4,5]">
+        <div class="kpi-sk-top">
+          <span class="sk sk-circle kpi-sk-icon"></span>
+          <span class="sk sk-line-sm kpi-sk-badge"></span>
+        </div>
+        <span class="sk sk-title kpi-sk-num"></span>
+        <span class="sk sk-line-sm kpi-sk-label"></span>
+        <span class="sk kpi-sk-bar"></span>
+      </div>
     </div>
   </ng-template>
 
@@ -170,7 +174,15 @@
 
       <div class="panel-card-body">
         <div *ngIf="isLoading" class="act-loading">
-          <mat-spinner diameter="30"></mat-spinner>
+          <div class="act-sk-list">
+            <div class="act-sk-item" *ngFor="let i of [1,2,3,4]">
+              <span class="sk sk-circle act-sk-icon"></span>
+              <div class="act-sk-body">
+                <span class="sk sk-line act-sk-line-a"></span>
+                <span class="sk sk-line-sm act-sk-line-b"></span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="!isLoading && atividadesRecentes.length === 0" class="act-empty">
@@ -178,7 +190,7 @@
           <span>Sem atividades recentes</span>
         </div>
 
-        <div class="act-list" *ngIf="!isLoading && atividadesRecentes.length > 0">
+        <div class="act-list sk-fade-in" *ngIf="!isLoading && atividadesRecentes.length > 0">
           <div class="act-item" *ngFor="let item of atividadesRecentes">
             <div class="act-icon-circle" [style.background]="item.iconColor + '20'" [style.color]="item.iconColor">
               <mat-icon>{{ item.icon }}</mat-icon>
