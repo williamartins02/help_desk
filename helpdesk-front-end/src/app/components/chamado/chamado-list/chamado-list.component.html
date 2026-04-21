@@ -496,20 +496,54 @@
             </ng-container>
 
             <ng-container matColumnDef="acoes">
-              <th mat-header-cell *matHeaderCellDef> Acoes </th>
+              <th mat-header-cell *matHeaderCellDef> Ações </th>
               <td mat-cell *matCellDef="let chamado" class="actions-cell">
-                <div class="actions-group">
-                  <button type="button" mat-icon-button class="action-btn edit-action"
-                          [matTooltip]="chamado.status == '2' ? 'Chamado encerrado não pode ser reaberto. Crie um novo chamado.' : 'Editar chamado'"
+
+                <!-- Botão único de Ações -->
+                <button type="button"
+                        class="actions-menu-btn"
+                        [matMenuTriggerFor]="chamadoActionsMenu"
+                        matTooltip="Ações disponíveis"
+                        [attr.aria-label]="'Ações para chamado #' + chamado.id">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <!-- Dropdown menu -->
+                <mat-menu #chamadoActionsMenu="matMenu"
+                          class="chamado-actions-panel"
+                          xPosition="before"
+                          yPosition="below"
+                          [overlapTrigger]="false">
+
+                  <!-- Editar -->
+                  <button mat-menu-item
+                          class="menu-action-item menu-item--edit"
+                          [disabled]="chamado.status == '2'"
                           (click)="onEditChamado(chamado)">
-                    <mat-icon>edit</mat-icon>
+                    <mat-icon class="menu-icon icon-edit">edit</mat-icon>
+                    <span>Editar chamado</span>
                   </button>
-                  <button type="button" mat-icon-button class="action-btn view-action"
-                          matTooltip="Visualizar chamado"
+
+                  <!-- Visualizar -->
+                  <button mat-menu-item
+                          class="menu-action-item menu-item--view"
                           (click)="openRed(chamado.id)">
-                    <mat-icon>visibility</mat-icon>
+                    <mat-icon class="menu-icon icon-view">visibility</mat-icon>
+                    <span>Visualizar chamado</span>
                   </button>
-                </div>
+
+                  <mat-divider></mat-divider>
+
+                  <!-- Encerrar (apenas se não encerrado) -->
+                  <button *ngIf="chamado.status != '2'"
+                          mat-menu-item
+                          class="menu-action-item menu-action-danger menu-item--close"
+                          (click)="onInlineStatusChange(chamado, '2')">
+                    <mat-icon class="menu-icon icon-close">lock</mat-icon>
+                    <span>Encerrar chamado</span>
+                  </button>
+
+                </mat-menu>
               </td>
             </ng-container>
 

@@ -781,6 +781,286 @@ table { width: 100%; }
 .ctc-sla-alerta  { background: rgba(255,152,0,.15);  color: #e65100; }
 .ctc-sla-atrasado{ background: rgba(244,67,54,.15);  color: #c62828; }
 
+/* ══════════════════════════════════════════════════════════════
+   ACTIONS CELL + DROPDOWN PREMIUM — mesmo padrão de Equipe Técnica
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Célula e botão disparador ── */
+.actions-cell { width: 56px; text-align: center; }
+
+.actions-menu-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #f8fafc; color: #607d8b; cursor: pointer;
+  transition: background .2s cubic-bezier(.4,0,.2,1),
+              border-color .2s cubic-bezier(.4,0,.2,1),
+              color .2s cubic-bezier(.4,0,.2,1),
+              transform .32s cubic-bezier(.34,1.56,.64,1),
+              box-shadow .2s cubic-bezier(.4,0,.2,1);
+  flex-shrink: 0;
+}
+.actions-menu-btn:hover {
+  background: #eef2f9; border-color: #1565c0; color: #1565c0;
+  transform: translateY(-1px); box-shadow: 0 4px 12px rgba(21,101,192,.18);
+}
+.actions-menu-btn:focus-visible { outline: 2px solid #1565c0; outline-offset: 2px; }
+.actions-menu-btn mat-icon { font-size: 1.15rem; width: 1.15rem; height: 1.15rem; }
+
+/* ── Animações do painel ── */
+@keyframes cap-open {
+  from { opacity: 0; transform: scale(.93) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+@keyframes cap-icon-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ── 1. Painel ── */
+::ng-deep .chamado-actions-panel.mat-menu-panel {
+  min-width: 230px !important;
+  max-width: 230px !important;
+  width:     230px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: #f8fafd !important;
+  box-shadow:
+    0 0 0 1px rgba(21,101,192,.12),
+    0 4px 12px rgba(15,23,42,.08),
+    0 16px 40px rgba(15,23,42,.14) !important;
+  animation: cap-open .22s cubic-bezier(.22,1,.36,1) both !important;
+}
+::ng-deep .chamado-actions-panel.mat-menu-panel::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, #006064 0%, #00838f 30%, #0097a7 60%, #26c6da 100%);
+  flex-shrink: 0;
+}
+::ng-deep .chamado-actions-panel.mat-menu-panel,
+::ng-deep .chamado-actions-panel .mat-menu-content {
+  max-height: none !important;
+}
+
+/* ── 2. Cabeçalho interno ── */
+::ng-deep .chamado-actions-panel .mat-menu-content {
+  padding: 0 !important;
+}
+::ng-deep .chamado-actions-panel .mat-menu-content::before {
+  content: 'Ações do chamado';
+  display: flex;
+  align-items: center;
+  padding: 8px 14px 6px;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  font-size: .63rem;
+  font-weight: 800;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(0,150,166,.10);
+  background: linear-gradient(135deg, rgba(0,131,143,.06) 0%, rgba(38,198,218,.03) 100%);
+  pointer-events: none;
+  user-select: none;
+}
+::ng-deep .chamado-actions-panel .mat-menu-content::after {
+  content: '';
+  display: block;
+  height: 4px;
+  pointer-events: none;
+}
+
+/* ── 3. Itens ── */
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item {
+  min-height: 48px !important;
+  height:     48px !important;
+  padding:    0 14px 0 12px !important;
+  display:    flex !important;
+  align-items: center !important;
+  gap:        12px !important;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif !important;
+  font-size:   .845rem !important;
+  font-weight: 500 !important;
+  color: #1e293b !important;
+  box-shadow: inset 4px 0 0 transparent !important;
+  transition: background .17s ease, color .17s ease, box-shadow .17s ease !important;
+  border-top: 1px solid rgba(226,232,240,.5) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item:first-of-type {
+  border-top: none !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item[disabled] {
+  opacity: .38 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  filter: grayscale(.6) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item > span {
+  color: inherit !important;
+  flex: 1;
+  transition: color .17s ease;
+}
+
+/* Hover/Active padrão */
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item:not([disabled]):hover {
+  background: rgba(0,131,143,.07) !important;
+  color: #00838f !important;
+  box-shadow: inset 4px 0 0 #0097a7 !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item.mat-menu-item:not([disabled]):active {
+  background: rgba(0,131,143,.13) !important;
+  color: #006064 !important;
+  box-shadow: inset 4px 0 0 #006064 !important;
+}
+
+/* Danger (Encerrar) */
+::ng-deep .chamado-actions-panel .menu-action-danger.mat-menu-item  { color: #b91c1c !important; }
+::ng-deep .chamado-actions-panel .menu-action-danger.mat-menu-item:not([disabled]):hover {
+  background: rgba(198,40,40,.06) !important;
+  color: #b71c1c !important;
+  box-shadow: inset 4px 0 0 #c62828 !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-danger.mat-menu-item:not([disabled]):active {
+  background: rgba(198,40,40,.13) !important;
+  color: #7f1d1d !important;
+  box-shadow: inset 4px 0 0 #7f1d1d !important;
+}
+
+/* ── 4. Ícone-pílula ── */
+::ng-deep .chamado-actions-panel .mat-icon.menu-icon {
+  width:       34px !important;
+  height:      34px !important;
+  min-width:   34px !important;
+  flex-shrink: 0 !important;
+  font-size:   19px !important;
+  line-height: 1 !important;
+  display:     flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow:    hidden !important;
+  border-radius: 10px !important;
+  margin: 0 !important;
+  transition:
+    transform  .2s cubic-bezier(.34,1.56,.64,1),
+    background .17s ease,
+    color      .17s ease !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon {
+  transform: scale(1.14) rotate(-5deg) !important;
+  animation: cap-icon-pop .26s cubic-bezier(.34,1.56,.64,1) both !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon {
+  transform: scale(.93) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item[disabled] .mat-icon.menu-icon {
+  transform: none !important;
+}
+
+/* ── 5. Cores das pílulas ── */
+
+/* Editar — azul */
+::ng-deep .chamado-actions-panel .mat-icon.menu-icon.icon-edit {
+  background: #ddeeff !important;
+  color:      #1d6fa8 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(29,111,168,.25), 0 2px 6px rgba(29,111,168,.14) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-edit {
+  background: #c3dff8 !important;
+  color:      #0e5a8a !important;
+  box-shadow: inset 0 0 0 1.5px rgba(14,90,138,.38), 0 4px 12px rgba(14,90,138,.22) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-edit {
+  background: #a8cff2 !important;
+}
+
+/* Visualizar — teal */
+::ng-deep .chamado-actions-panel .mat-icon.menu-icon.icon-view {
+  background: #d0f4f7 !important;
+  color:      #006064 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(0,96,100,.25), 0 2px 6px rgba(0,96,100,.12) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-view {
+  background: #aaecf2 !important;
+  color:      #004d50 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(0,77,80,.38), 0 4px 12px rgba(0,77,80,.20) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-view {
+  background: #80dfe7 !important;
+}
+
+/* Encerrar — coral vermelho */
+::ng-deep .chamado-actions-panel .mat-icon.menu-icon.icon-close {
+  background: #fce8e8 !important;
+  color:      #b83232 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(184,50,50,.24), 0 2px 6px rgba(184,50,50,.12) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):hover .mat-icon.menu-icon.icon-close {
+  background: #f9cfcf !important;
+  color:      #8b1c1c !important;
+  box-shadow: inset 0 0 0 1.5px rgba(139,28,28,.40), 0 4px 12px rgba(139,28,28,.22) !important;
+}
+::ng-deep .chamado-actions-panel .menu-action-item:not([disabled]):active .mat-icon.menu-icon.icon-close {
+  background: #f5b8b8 !important;
+}
+
+/* ── 6. Hover semântico por classe ── */
+::ng-deep .chamado-actions-panel .menu-item--edit.mat-menu-item { color: #1e2c3d !important; }
+::ng-deep .chamado-actions-panel .menu-item--edit.mat-menu-item:not([disabled]):hover {
+  background: rgba(21,101,192,.07) !important;
+  color: #1a5fa8 !important;
+  box-shadow: inset 4px 0 0 #1565c0 !important;
+}
+::ng-deep .chamado-actions-panel .menu-item--edit.mat-menu-item:not([disabled]):active {
+  background: rgba(21,101,192,.14) !important;
+  color: #0d47a1 !important;
+  box-shadow: inset 4px 0 0 #0d47a1 !important;
+}
+
+::ng-deep .chamado-actions-panel .menu-item--view.mat-menu-item { color: #0e3438 !important; }
+::ng-deep .chamado-actions-panel .menu-item--view.mat-menu-item:not([disabled]):hover {
+  background: rgba(0,131,143,.07) !important;
+  color: #006064 !important;
+  box-shadow: inset 4px 0 0 #0097a7 !important;
+}
+::ng-deep .chamado-actions-panel .menu-item--view.mat-menu-item:not([disabled]):active {
+  background: rgba(0,131,143,.14) !important;
+  color: #004d50 !important;
+  box-shadow: inset 4px 0 0 #004d50 !important;
+}
+
+::ng-deep .chamado-actions-panel .menu-item--close.mat-menu-item:not([disabled]):hover {
+  background: rgba(198,40,40,.07) !important;
+  color: #b71c1c !important;
+  box-shadow: inset 4px 0 0 #c62828 !important;
+}
+::ng-deep .chamado-actions-panel .menu-item--close.mat-menu-item:not([disabled]):active {
+  background: rgba(198,40,40,.14) !important;
+  color: #7f1d1d !important;
+  box-shadow: inset 4px 0 0 #7f1d1d !important;
+}
+
+/* Disabled semântico */
+::ng-deep .chamado-actions-panel .menu-item--edit[disabled].mat-menu-item,
+::ng-deep .chamado-actions-panel .menu-item--view[disabled].mat-menu-item,
+::ng-deep .chamado-actions-panel .menu-item--close[disabled].mat-menu-item {
+  opacity: .38 !important;
+  filter: grayscale(.65) !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* ── 7. Divisor ── */
+::ng-deep .chamado-actions-panel .mat-divider {
+  margin: 2px 0 !important;
+  border-top-color: rgba(0,131,143,.09) !important;
+}
+
+/* ── 8. Ripple desabilitado ── */
+::ng-deep .chamado-actions-panel .mat-menu-ripple,
+::ng-deep .chamado-actions-panel .mat-ripple-element { display: none !important; }
+
+
 /* ══ Responsivo ══════════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
   .kpi-section { grid-template-columns: repeat(4, 1fr); }
