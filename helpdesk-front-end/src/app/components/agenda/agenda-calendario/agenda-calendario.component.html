@@ -152,6 +152,8 @@
                    class="task-card"
                    [style.border-left-color]="getCorTarefa(t)"
                    [style.background]="getBgTarefa(t)"
+                   [class.task-card-execucao]="t.status === 1"
+                   [class.task-card-concluido]="t.status === 2"
                    (click)="$event.stopPropagation(); editarTarefa(t)"
                    [matTooltip]="t.titulo + (t.horaInicio ? ' — ' + t.horaInicio : '')">
 
@@ -169,6 +171,16 @@
                   {{ getLabelTipo(t) }}
                 </span>
                 <span class="task-titulo">{{ t.titulo }}</span>
+                <!-- Status badge visível no card -->
+                <span class="task-status-badge"
+                      [class.badge-pendente]="t.status === 0"
+                      [class.badge-execucao]="t.status === 1"
+                      [class.badge-concluido]="t.status === 2">
+                  <mat-icon *ngIf="t.status === 0">radio_button_unchecked</mat-icon>
+                  <mat-icon *ngIf="t.status === 1">timelapse</mat-icon>
+                  <mat-icon *ngIf="t.status === 2">check_circle</mat-icon>
+                  {{ t.status === 0 ? 'Pendente' : t.status === 1 ? 'Em andamento' : 'Concluído' }}
+                </span>
                 <span class="task-chamado" *ngIf="t.chamado">
                   <mat-icon>receipt_long</mat-icon> #{{ t.chamado }}
                 </span>
@@ -222,10 +234,20 @@
                  class="task-card task-card-dia"
                  [style.border-left-color]="getCorTarefa(t)"
                  [style.background]="getBgTarefa(t)"
+                 [class.task-card-execucao]="t.status === 1"
+                 [class.task-card-concluido]="t.status === 2"
                  (click)="$event.stopPropagation(); editarTarefa(t)"
                  [matTooltip]="t.titulo">
               <span class="task-hora" *ngIf="t.horaInicio">{{ t.horaInicio }}</span>
               <span class="task-titulo">{{ t.titulo }}</span>
+              <span class="task-status-badge"
+                    [class.badge-pendente]="t.status === 0"
+                    [class.badge-execucao]="t.status === 1"
+                    [class.badge-concluido]="t.status === 2">
+                <mat-icon *ngIf="t.status === 1">timelapse</mat-icon>
+                <mat-icon *ngIf="t.status === 2">check_circle</mat-icon>
+                {{ t.status === 0 ? 'Pendente' : t.status === 1 ? 'Em andamento' : 'Concluído' }}
+              </span>
             </div>
           </div>
         </div>

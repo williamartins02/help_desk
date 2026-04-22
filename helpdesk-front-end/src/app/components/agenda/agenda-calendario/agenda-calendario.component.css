@@ -358,6 +358,24 @@
 }
 .task-chamado mat-icon { font-size: 10px !important; width: 10px !important; height: 10px !important; }
 
+/* ── Status badge (inline no card) ─────────────────────────────────────── */
+.task-status-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; border-radius: 20px;
+  padding: 1px 6px; margin-top: 2px; width: fit-content;
+}
+.task-status-badge mat-icon {
+  font-size: 10px !important; width: 10px !important; height: 10px !important;
+}
+.badge-pendente  { background: #fef3c7; color: #92400e; }
+.badge-execucao  { background: #fff3e0; color: #b45309; border: 1px solid #f97316; }
+.badge-concluido { background: #dcfce7; color: #15803d; }
+
+/* ── Card highlights por status ─────────────────────────────────────────── */
+.task-card-execucao  { box-shadow: 0 0 0 1px #fb923c44 inset; }
+.task-card-concluido { opacity: .88; }
+
 /* Placeholder célula vazia */
 .cell-vazio {
   flex: 1; display: flex; align-items: center; justify-content: center;

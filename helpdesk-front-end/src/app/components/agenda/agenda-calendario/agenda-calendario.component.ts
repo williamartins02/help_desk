@@ -7,6 +7,7 @@ import { TarefaService } from '../../../services/tarefa.service';
 import { TecnicoService } from '../../../services/tecnico.service';
 import { AuthenticationService } from '../../../services/authentication.service';
 import { ChamadoService } from '../../../services/chamado.service';
+import { AgendaWsService } from '../../../services/agenda-ws.service';
 import { Tecnico } from '../../../models/tecnico';
 import { TarefaFormDialogComponent, TarefaDialogData } from '../tarefa-form-dialog/tarefa-form-dialog.component';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -88,12 +89,16 @@ export class AgendaCalendarioComponent implements OnInit, OnDestroy {
   private jwtHelper = new JwtHelperService();
   private tecnicoSub!: Subscription;
   private chamadoRefreshSub!: Subscription;
+  private tarefaRefreshSub!: Subscription;
+  private wsTarefaSub!: Subscription;
+  private wsChamadoSub!: Subscription;
 
   constructor(
     private tarefaService: TarefaService,
     private tecnicoService: TecnicoService,
     private authService: AuthenticationService,
     private chamadoService: ChamadoService,
+    private agendaWs: AgendaWsService,
     private dialog: MatDialog,
     private toastr: ToastrService,
   ) {}
@@ -101,17 +106,54 @@ export class AgendaCalendarioComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.lerPerfil();
 
-    // Recarrega o calendário sempre que um chamado for criado ou atualizado
-    // (inclui encerramento, reatribuição de técnico, etc.)
+    // ── Conectar ao WebSocket para sincronização em tempo real ────────────
+    this.agendaWs.connect();
+
+    // ── Recarrega quando um chamado é criado/atualizado via HTTP ─────────
+    // (ex: formulário de criação, edição na Central de Chamados)
     this.chamadoRefreshSub = this.chamadoService.refresh$.subscribe(() => {
       this.carregarDados();
       this.toastr.info('Calendário atualizado — chamado alterado.', '', { timeOut: 2500 });
     });
+
+    // ── Recarrega quando uma tarefa é criada/editada/status alterado via HTTP ─
+    // (ex: ações na tela Agenda de Tarefas: Iniciar, Concluir, Reabrir, Drag&Drop)
+    this.tarefaRefreshSub = this.tarefaService.refresh$.subscribe(() => {
+      this.carregarDados();
+    });
+
+    // ── WebSocket: atualização de chamado em tempo real ───────────────────
+    // (ex: Kanban drag & drop altera status do chamado)
+    this.wsChamadoSub = this.agendaWs.chamadoAtualizado$.subscribe(evento => {
+      this.carregarDados();
+      const statusLabel: Record<number, string> = { 0: 'Aberto', 1: 'Em Andamento', 2: 'Encerrado' };
+      const label = statusLabel[evento.novoStatus] ?? '';
+      const msg = evento.tipo === 'CHAMADO_CRIADO'
+        ? `Chamado #${evento.entityId} criado`
+        : `Chamado #${evento.entityId} → ${label}`;
+      this.toastr.info(msg, '🔄 Calendário sincronizado', { timeOut: 2500, positionClass: 'toast-bottom-right' });
+    });
+
+    // ── WebSocket: atualização de tarefa em tempo real ────────────────────
+    // (ex: Agenda de Tarefas atualiza status via WebSocket)
+    this.wsTarefaSub = this.agendaWs.tarefaAtualizada$.subscribe(evento => {
+      this.carregarDados();
+      const statusLabel: Record<number, string> = { 0: 'Pendente', 1: 'Em Andamento', 2: 'Concluído' };
+      this.toastr.info(
+        `Tarefa #${evento.entityId} → ${statusLabel[evento.novoStatus] ?? ''}`,
+        '🔄 Calendário sincronizado',
+        { timeOut: 2500, positionClass: 'toast-bottom-right' }
+      );
+    });
   }
 
   ngOnDestroy(): void {
-    if (this.tecnicoSub)       this.tecnicoSub.unsubscribe();
+    if (this.tecnicoSub)        this.tecnicoSub.unsubscribe();
     if (this.chamadoRefreshSub) this.chamadoRefreshSub.unsubscribe();
+    if (this.tarefaRefreshSub)  this.tarefaRefreshSub.unsubscribe();
+    if (this.wsTarefaSub)       this.wsTarefaSub.unsubscribe();
+    if (this.wsChamadoSub)      this.wsChamadoSub.unsubscribe();
+    this.agendaWs.disconnect();
   }
 
   // ── Getters ───────────────────────────────────────────────────────────────
@@ -224,8 +266,30 @@ export class AgendaCalendarioComponent implements OnInit, OnDestroy {
     return 'interna';
   }
 
-  getCorTarefa(t: Tarefa): string  { return this.TIPO_COR[this.getTipo(t)]  || '#37474f'; }
-  getBgTarefa(t: Tarefa):  string  { return this.TIPO_BG[this.getTipo(t)]   || '#eceff1'; }
+  /**
+   * Cor da borda esquerda do card.
+   * Status 1 (Em andamento) → laranja.
+   * Status 2 (Concluído)    → verde.
+   * Status 0 (Pendente)     → cor do tipo.
+   */
+  getCorTarefa(t: Tarefa): string {
+    if (t.status === 1) return '#e65100';   // Em andamento → laranja
+    if (t.status === 2) return '#2e7d32';   // Concluído    → verde
+    return this.TIPO_COR[this.getTipo(t)] || '#37474f';
+  }
+
+  /**
+   * Cor de fundo do card.
+   * Status 1 (Em andamento) → fundo laranja claro.
+   * Status 2 (Concluído)    → fundo verde claro.
+   * Status 0 (Pendente)     → fundo do tipo.
+   */
+  getBgTarefa(t: Tarefa): string {
+    if (t.status === 1) return '#fff3e0';   // Em andamento
+    if (t.status === 2) return '#e8f5e9';   // Concluído
+    return this.TIPO_BG[this.getTipo(t)] || '#eceff1';
+  }
+
   getLabelTipo(t: Tarefa): string  { return this.TIPO_LABEL[this.getTipo(t)] || 'Outros'; }
 
   // ── Dados por célula ──────────────────────────────────────────────────────
@@ -377,15 +441,35 @@ export class AgendaCalendarioComponent implements OnInit, OnDestroy {
 
     forkJoin(obs).subscribe({
       next: (resultados) => {
+        // Conjunto de IDs já inseridos em todasTarefas para evitar duplicatas
+        const idsAdicionados = new Set<number>();
+
         resultados.forEach((tarefas, i) => {
-          const data = this.diasSemana[i].data;
-          this.todasTarefas.push(...tarefas);
+          const dataConsultada = this.diasSemana[i].data;
+
           tarefas.forEach(t => {
-            const key = `${t.tecnico}_${data}`;
+            // ── A chave usa a data REAL da tarefa (t.data), não a data consultada.
+            // Isso garante que a tarefa aparece somente na coluna do dia correto,
+            // mesmo que o backend retorne a mesma tarefa em múltiplas consultas.
+            const dataCorreta = t.data || dataConsultada;
+            const key = `${t.tecnico}_${dataCorreta}`;
+
             if (!this.tarefasMap.has(key)) this.tarefasMap.set(key, []);
-            this.tarefasMap.get(key)!.push(t);
+
+            // Evita duplicar o mesmo card na mesma célula
+            const jaNoMap = this.tarefasMap.get(key)!.some(x => x.id === t.id);
+            if (!jaNoMap) {
+              this.tarefasMap.get(key)!.push(t);
+            }
+
+            // Acumula em todasTarefas sem repetir (usado pelos KPIs da sidebar)
+            if (t.id !== undefined && !idsAdicionados.has(t.id)) {
+              idsAdicionados.add(t.id);
+              this.todasTarefas.push(t);
+            }
           });
         });
+
         this.carregando = false;
       },
       error: () => { this.toastr.error('Erro ao carregar tarefas.'); this.carregando = false; }
@@ -405,9 +489,12 @@ export class AgendaCalendarioComponent implements OnInit, OnDestroy {
       next: (tarefas) => {
         this.todasTarefas = tarefas;
         tarefas.forEach(t => {
-          const key = `${t.tecnico}_${this.dataSelecionada}`;
+          // Usa a data real da tarefa como chave (não dataSelecionada)
+          const dataCorreta = t.data || this.dataSelecionada;
+          const key = `${t.tecnico}_${dataCorreta}`;
           if (!this.tarefasMap.has(key)) this.tarefasMap.set(key, []);
-          this.tarefasMap.get(key)!.push(t);
+          const jaNoMap = this.tarefasMap.get(key)!.some(x => x.id === t.id);
+          if (!jaNoMap) this.tarefasMap.get(key)!.push(t);
         });
         this.carregando = false;
       },

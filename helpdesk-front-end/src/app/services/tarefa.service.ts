@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
 import { Tarefa } from '../models/tarefa';
 
@@ -16,6 +17,13 @@ export class TarefaService {
 
   /** URL base do recurso de tarefas */
   private readonly baseUrl = `${API_CONFIG.baseUrl}/tarefas`;
+
+  /**
+   * Emite sempre que uma tarefa é criada, atualizada, tem status alterado ou é excluída.
+   * Permite que outros componentes (ex: Calendário da Equipe) se inscrevam e recarreguem.
+   */
+  private _refresh$ = new Subject<void>();
+  get refresh$() { return this._refresh$.asObservable(); }
 
   constructor(private http: HttpClient) {}
 
@@ -51,36 +59,19 @@ export class TarefaService {
    * @param tarefa dados da tarefa a criar
    */
   create(tarefa: Tarefa): Observable<Tarefa> {
-    return this.http.post<Tarefa>(this.baseUrl, tarefa);
+    return this.http.post<Tarefa>(this.baseUrl, tarefa).pipe(tap(() => this._refresh$.next()));
   }
 
-  /**
-   * Atualiza todos os campos de uma tarefa.
-   *
-   * @param id     ID da tarefa
-   * @param tarefa novos dados
-   */
   update(id: number, tarefa: Tarefa): Observable<Tarefa> {
-    return this.http.put<Tarefa>(`${this.baseUrl}/${id}`, tarefa);
+    return this.http.put<Tarefa>(`${this.baseUrl}/${id}`, tarefa).pipe(tap(() => this._refresh$.next()));
   }
 
-  /**
-   * Altera apenas o status de uma tarefa.
-   *
-   * @param id     ID da tarefa
-   * @param status código numérico do novo status
-   */
   alterarStatus(id: number, status: number): Observable<Tarefa> {
-    return this.http.patch<Tarefa>(`${this.baseUrl}/${id}/status`, { status });
+    return this.http.patch<Tarefa>(`${this.baseUrl}/${id}/status`, { status }).pipe(tap(() => this._refresh$.next()));
   }
 
-  /**
-   * Remove uma tarefa.
-   *
-   * @param id ID da tarefa a excluir
-   */
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(tap(() => this._refresh$.next()));
   }
 }
 
