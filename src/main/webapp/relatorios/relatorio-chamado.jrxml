@@ -141,11 +141,14 @@
         END AS status,
         c.observacoes,
         c.data_fechamento,
-        TIMESTAMPDIFF(MINUTE, c.data_abertura, c.data_fechamento) AS minutos_atendimento
+        CASE WHEN c.data_fechamento IS NOT NULL
+             THEN EXTRACT(EPOCH FROM (c.data_fechamento - c.data_abertura))::BIGINT / 60
+             ELSE NULL
+        END AS minutos_atendimento
       FROM chamado c
       LEFT JOIN pessoa p_cli ON c.cliente_id = p_cli.id
       LEFT JOIN pessoa p_tec ON c.tecnico_id = p_tec.id
-      WHERE c.data_abertura BETWEEN '$P!{DATA_INICIO} 00:00:00' AND '$P!{DATA_FIM} 23:59:59'
+      WHERE c.data_abertura BETWEEN CAST('$P!{DATA_INICIO} 00:00:00' AS TIMESTAMP) AND CAST('$P!{DATA_FIM} 23:59:59' AS TIMESTAMP)
         AND ($P{TECNICO_ID} IS NULL OR c.tecnico_id = $P{TECNICO_ID})
       ORDER BY c.id
     ]]>
