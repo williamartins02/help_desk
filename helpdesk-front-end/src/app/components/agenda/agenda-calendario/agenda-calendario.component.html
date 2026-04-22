@@ -1,0 +1,370 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Calendário da Equipe — layout completo
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="cal-page">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER HERO — padrão premium do sistema
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="cal-hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
+    <div class="hero-left">
+      <div class="hero-icon-ring"><mat-icon>calendar_month</mat-icon></div>
+      <div>
+        <span class="hero-badge"><mat-icon>groups</mat-icon> Equipe</span>
+        <h1 class="hero-title">Calendário da <span class="accent">Equipe</span></h1>
+        <p class="hero-sub">
+          <mat-icon class="sub-icon">info_outline</mat-icon>
+          Visualize e gerencie as tarefas e compromissos da equipe
+        </p>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <!-- Botão Nova Tarefa -->
+      <button class="btn-nova" (click)="novaTarefa()">
+        <mat-icon>add_task</mat-icon>
+        <span>Nova Tarefa</span>
+      </button>
+      <!-- Filtro de técnico (Admin) -->
+      <div class="hero-select-wrap" *ngIf="isAdmin">
+        <mat-select [(ngModel)]="tecnicoFiltroId"
+                    (ngModelChange)="selecionarTecnico($event)"
+                    class="hero-select" placeholder="Todos os técnicos">
+          <mat-option [value]="null">Todos os técnicos</mat-option>
+          <mat-option *ngFor="let tec of tecnicos" [value]="tec.id">{{ tec.nome }}</mat-option>
+        </mat-select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOOLBAR: navegação + views
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="cal-toolbar">
+
+    <!-- Esquerda: nova tarefa + nav -->
+    <div class="toolbar-left">
+      <button class="btn-hoje" (click)="irParaHoje()" matTooltip="Ir para hoje">Hoje</button>
+
+      <div class="nav-group">
+        <button class="nav-btn" (click)="navAnterior()" matTooltip="Período anterior">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="nav-btn" (click)="navProximo()" matTooltip="Próximo período">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <span class="toolbar-periodo">{{ tituloPeriodo }}</span>
+    </div>
+
+    <!-- Direita: view mode + input de data -->
+    <div class="toolbar-right">
+      <input class="data-input" type="date"
+             [value]="toInputDate(dataSelecionada)"
+             (change)="onDataChange($any($event.target).value)"
+             matTooltip="Selecionar data">
+
+      <div class="view-toggle">
+        <button class="view-btn" [class.ativo]="viewMode==='dia'"    (click)="trocarModo('dia')">
+          <mat-icon>view_day</mat-icon> Dia
+        </button>
+        <button class="view-btn" [class.ativo]="viewMode==='semana'" (click)="trocarModo('semana')">
+          <mat-icon>view_week</mat-icon> Semana
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CORPO: calendário + sidebar
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="cal-body">
+
+    <!-- ── MAIN CALENDAR ─────────────────────────────────────────── -->
+    <div class="cal-main">
+
+      <!-- Loading -->
+      <div *ngIf="carregando" class="cal-loading">
+        <mat-spinner diameter="44"></mat-spinner>
+        <p>Carregando calendário...</p>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           VISÃO SEMANAL — grid técnicos × dias
+           ════════════════════════════════════════════════════════ -->
+      <div *ngIf="!carregando && viewMode === 'semana'" class="semana-grid-wrapper">
+
+        <!-- Header dos dias -->
+        <div class="semana-header">
+          <div class="tecnico-col-header">
+            <mat-icon>engineering</mat-icon> Técnicos
+          </div>
+          <div *ngFor="let dia of diasSemana"
+               class="dia-header"
+               [class.dia-hoje]="dia.data === hojeStr">
+            <span class="dia-label">{{ dia.label }}</span>
+            <span class="dia-num">{{ dia.numDia }}</span>
+            <span class="dia-mes">{{ dia.mes }}</span>
+            <span class="dia-count" *ngIf="totalDia(dia.data) > 0">
+              {{ totalDia(dia.data) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Linhas por técnico -->
+        <div class="semana-body">
+          <!-- Mensagem vazia se sem técnicos -->
+          <div *ngIf="tecnicosFiltrados.length === 0" class="semana-vazio">
+            <mat-icon>people_outline</mat-icon>
+            <p>Nenhum técnico disponível.</p>
+          </div>
+
+          <div *ngFor="let tec of tecnicosFiltrados; let last = last"
+               class="semana-row"
+               [class.semana-row-last]="last">
+
+            <!-- Célula do técnico -->
+            <div class="tecnico-cell">
+              <div class="tec-avatar"
+                   [style.background]="corAvatar(tec.nome)"
+                   [matTooltip]="tec.nome">
+                <img *ngIf="tec.fotoPerfil" [src]="tec.fotoPerfil" alt="" class="tec-foto" />
+                <span *ngIf="!tec.fotoPerfil">{{ inicialDoNome(tec.nome) }}</span>
+              </div>
+              <div class="tec-info">
+                <span class="tec-nome">{{ tec.nome }}</span>
+              </div>
+            </div>
+
+            <!-- Células dos dias -->
+            <div *ngFor="let dia of diasSemana"
+                 class="dia-cell"
+                 [class.dia-cell-hoje]="dia.data === hojeStr"
+                 (click)="novaTarefa(dia.data, tec.id)"
+                 matTooltip="Clique para agendar tarefa">
+
+              <!-- Task cards -->
+              <div *ngFor="let t of getTarefasDia(tec.id, dia.data)"
+                   class="task-card"
+                   [style.border-left-color]="getCorTarefa(t)"
+                   [style.background]="getBgTarefa(t)"
+                   (click)="$event.stopPropagation(); editarTarefa(t)"
+                   [matTooltip]="t.titulo + (t.horaInicio ? ' — ' + t.horaInicio : '')">
+
+                <div class="task-header-row">
+                  <span class="task-hora" *ngIf="t.horaInicio">
+                    <mat-icon>schedule</mat-icon>{{ t.horaInicio }}
+                  </span>
+                  <span class="task-status-dot"
+                        [class.dot-pendente]="t.status === 0"
+                        [class.dot-execucao]="t.status === 1"
+                        [class.dot-concluido]="t.status === 2">
+                  </span>
+                </div>
+                <span class="task-tipo" [style.color]="getCorTarefa(t)">
+                  {{ getLabelTipo(t) }}
+                </span>
+                <span class="task-titulo">{{ t.titulo }}</span>
+                <span class="task-chamado" *ngIf="t.chamado">
+                  <mat-icon>receipt_long</mat-icon> #{{ t.chamado }}
+                </span>
+              </div>
+
+              <!-- Placeholder vazio -->
+              <div *ngIf="getTarefasDia(tec.id, dia.data).length === 0" class="cell-vazio">
+                <mat-icon>add</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           VISÃO DIÁRIA — timeline horizontal por técnico
+           ════════════════════════════════════════════════════════ -->
+      <div *ngIf="!carregando && viewMode === 'dia'" class="dia-view-wrapper">
+
+        <!-- Header com horas -->
+        <div class="dia-header-row">
+          <div class="dia-tec-col-header">
+            <mat-icon>engineering</mat-icon> Técnicos
+          </div>
+          <div *ngFor="let hora of HORAS_DIA" class="dia-hora-col-header">
+            <span>{{ hora }}</span>
+          </div>
+        </div>
+
+        <!-- Linhas por técnico -->
+        <div *ngFor="let tec of tecnicosFiltrados; let last = last"
+             class="dia-row"
+             [class.dia-row-last]="last">
+
+          <!-- Nome do técnico -->
+          <div class="dia-tec-cell">
+            <div class="tec-avatar" [style.background]="corAvatar(tec.nome)">
+              <img *ngIf="tec.fotoPerfil" [src]="tec.fotoPerfil" alt="" class="tec-foto" />
+              <span *ngIf="!tec.fotoPerfil">{{ inicialDoNome(tec.nome) }}</span>
+            </div>
+            <span class="tec-nome">{{ tec.nome }}</span>
+          </div>
+
+          <!-- Células por hora -->
+          <div *ngFor="let hora of HORAS_DIA"
+               class="dia-hora-cell"
+               (click)="novaTarefa(dataSelecionada, tec.id)"
+               [matTooltip]="'Agendar às ' + hora">
+
+            <div *ngFor="let t of getTarefasDiaHora(tec.id, dataSelecionada, hora)"
+                 class="task-card task-card-dia"
+                 [style.border-left-color]="getCorTarefa(t)"
+                 [style.background]="getBgTarefa(t)"
+                 (click)="$event.stopPropagation(); editarTarefa(t)"
+                 [matTooltip]="t.titulo">
+              <span class="task-hora" *ngIf="t.horaInicio">{{ t.horaInicio }}</span>
+              <span class="task-titulo">{{ t.titulo }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           TAREFAS NÃO AGENDADAS (sem horaInicio, hoje)
+           ════════════════════════════════════════════════════════ -->
+      <div *ngIf="!carregando && tarefasSemHorario.length > 0" class="unscheduled-section">
+        <div class="unscheduled-header">
+          <mat-icon>event_busy</mat-icon>
+          <span>Tarefas não agendadas</span>
+          <span class="unscheduled-count">{{ tarefasSemHorario.length }}</span>
+        </div>
+        <div class="unscheduled-grid">
+          <div *ngFor="let t of tarefasSemHorario"
+               class="unscheduled-card"
+               (click)="editarTarefa(t)">
+            <div class="unscheduled-prioridade"
+                 [style.background]="getCorTarefa(t)">
+              {{ getLabelTipo(t) }}
+            </div>
+            <div class="unscheduled-body">
+              <p class="unscheduled-titulo">{{ t.titulo }}</p>
+              <span class="unscheduled-meta" *ngIf="t.chamado">
+                <mat-icon>receipt_long</mat-icon> Chamado #{{ t.chamado }}
+              </span>
+              <span class="unscheduled-meta" *ngIf="t.nomeCliente">
+                <mat-icon>person</mat-icon> {{ t.nomeCliente }}
+              </span>
+            </div>
+            <div class="unscheduled-prio-chip"
+                 [class.chip-baixa]="t.prioridade === 0"
+                 [class.chip-media]="t.prioridade === 1"
+                 [class.chip-alta]="t.prioridade === 2"
+                 [class.chip-critica]="t.prioridade === 3">
+              {{ t.prioridade === 0 ? 'Baixa' : t.prioridade === 1 ? 'Média' : t.prioridade === 2 ? 'Alta' : 'Crítica' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /cal-main -->
+
+    <!-- ── SIDEBAR DIREITA ────────────────────────────────────────── -->
+    <aside class="cal-sidebar">
+
+      <!-- Mini calendário -->
+      <div class="sidebar-card mini-cal-card">
+        <div class="sidebar-card-header">
+          <button class="mini-nav-btn" (click)="miniCalNavegar(-1)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="mini-cal-titulo">{{ miniCalTitulo }}</span>
+          <button class="mini-nav-btn" (click)="miniCalNavegar(1)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+        <div class="mini-cal-body">
+          <div class="mini-cal-labels">
+            <span *ngFor="let l of MINI_LABELS_DIA" class="mini-label">{{ l }}</span>
+          </div>
+          <div *ngFor="let semana of miniCalGrid" class="mini-cal-row">
+            <button *ngFor="let cell of semana"
+                    class="mini-cal-dia"
+                    [class.externo]="cell.externo"
+                    [class.hoje]="cell.data === hojeStr"
+                    [class.selecionado]="cell.data === dataSelecionada"
+                    [class.tem-tarefa]="datasComTarefas().has(cell.data)"
+                    (click)="selecionarDataMiniCal(cell.data)">
+              {{ cell.dia }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo do dia -->
+      <div class="sidebar-card resumo-card">
+        <div class="sidebar-section-title">
+          <mat-icon>today</mat-icon>
+          Tarefas do dia ({{ hojeStr.split('/')[0] }}/{{ hojeStr.split('/')[1] }})
+        </div>
+        <div class="resumo-list">
+          <div class="resumo-item resumo-atrasadas">
+            <span class="resumo-dot dot-vermelho"></span>
+            <span class="resumo-label">Atrasadas</span>
+            <span class="resumo-num">{{ resumoHoje.atrasadas }}</span>
+          </div>
+          <div class="resumo-item resumo-hoje">
+            <span class="resumo-dot dot-azul"></span>
+            <span class="resumo-label">Hoje</span>
+            <span class="resumo-num">{{ resumoHoje.hoje }}</span>
+          </div>
+          <div class="resumo-item resumo-proximas">
+            <span class="resumo-dot dot-laranja"></span>
+            <span class="resumo-label">Próximas</span>
+            <span class="resumo-num">{{ resumoHoje.proximas }}</span>
+          </div>
+          <div class="resumo-item resumo-concluidas">
+            <span class="resumo-dot dot-verde"></span>
+            <span class="resumo-label">Concluídas</span>
+            <span class="resumo-num">{{ resumoHoje.concluidas }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="sidebar-card alertas-card">
+        <div class="sidebar-section-title">
+          <mat-icon>notifications</mat-icon> Alertas
+        </div>
+        <div class="alerta-list">
+          <div *ngFor="let a of alertas"
+               class="alerta-item"
+               [class.alerta-erro]="a.tipo==='erro'"
+               [class.alerta-aviso]="a.tipo==='aviso'"
+               [class.alerta-info]="a.tipo==='info'"
+               [class.alerta-ok]="a.tipo==='ok'">
+            <mat-icon class="alerta-icon">{{ a.icone }}</mat-icon>
+            <span>{{ a.msg }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legenda -->
+      <div class="sidebar-card legenda-card">
+        <div class="sidebar-section-title">
+          <mat-icon>palette</mat-icon> Legenda
+        </div>
+        <div class="legenda-list">
+          <div *ngFor="let l of LEGENDA" class="legenda-item">
+            <span class="legenda-dot" [style.background]="l.cor"></span>
+            <span class="legenda-label">{{ l.label }}</span>
+          </div>
+        </div>
+      </div>
+
+    </aside><!-- /sidebar -->
+
+  </div><!-- /cal-body -->
+</div><!-- /cal-page -->
+

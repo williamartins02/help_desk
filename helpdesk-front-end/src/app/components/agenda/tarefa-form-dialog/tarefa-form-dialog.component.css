@@ -3,6 +3,8 @@
 /* ===== Wrapper ===== */
 .dialog-wrapper {
   width: 100%;
+  /* Limita ao viewport — impede que o modal "escape" da tela */
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   background: #f0f2f5;
@@ -88,9 +90,19 @@
   border-radius: 1.25rem 1.25rem 0 0;
   margin-top: -1.5rem;
   position: relative; z-index: 1;
-  padding: 1.5rem 1.75rem 1rem;
+  padding: 1.5rem 1.75rem 0;
   box-shadow: 0 -4px 20px rgba(8,15,46,.08);
+  /* ── SCROLL: ocupa o espaço restante e rola quando necessário ── */
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  /* Scrollbar discreta */
+  scrollbar-width: thin;
+  scrollbar-color: #c5cae9 transparent;
 }
+.dialog-body::-webkit-scrollbar { width: 5px; }
+.dialog-body::-webkit-scrollbar-track { background: transparent; }
+.dialog-body::-webkit-scrollbar-thumb { background: #c5cae9; border-radius: 4px; }
 
 .main-form { display: flex; flex-direction: column; }
 
@@ -132,8 +144,13 @@
 /* ===== Ações ===== */
 .dialog-actions {
   display: flex; gap: .75rem; justify-content: flex-end;
-  margin-top: .75rem; padding-top: .875rem;
+  margin-top: .75rem; padding: .875rem 0 1rem;
   border-top: 1px solid #f0f4ff;
+  /* Fica colado ao fundo do body — sempre visível sem precisar rolar */
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 2;
 }
 
 .btn-cancel,
@@ -289,11 +306,11 @@ mat-icon { opacity: 0.85 !important; }
 
 /* ===== Responsividade ===== */
 @media (max-width: 600px) {
-  .dialog-wrapper { border-radius: 0; }
+  .dialog-wrapper { border-radius: 0; max-height: 100vh; }
   .form-grid { grid-template-columns: 1fr; }
   .dialog-header { padding: 1.25rem 1.25rem 2.75rem; }
-  .dialog-body { padding: 1.25rem 1.25rem .75rem; }
-  .dialog-actions { flex-direction: column-reverse; }
+  .dialog-body { padding: 1.25rem 1.25rem 0; }
+  .dialog-actions { flex-direction: column-reverse; padding: .75rem 0 .75rem; }
   .btn-cancel, .btn-save { width: 100%; justify-content: center; }
   .chamado-opt { flex-direction: column; align-items: flex-start; }
   .chamado-opt-right { align-items: flex-start; }

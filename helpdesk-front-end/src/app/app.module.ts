@@ -95,6 +95,7 @@ import { RankingDialogComponent } from './components/home/ranking-dialog/ranking
 import { MatDialogRef } from '@angular/material/dialog';
 import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
 import {TarefaFormDialogComponent} from "./components/agenda/tarefa-form-dialog/tarefa-form-dialog.component";
+import {AgendaCalendarioComponent} from "./components/agenda/agenda-calendario/agenda-calendario.component";
 import {AgendaWsService} from "./services/agenda-ws.service";
 import { KanbanComponent } from './components/chamado/kanban/kanban.component';
 import { BiDashboardComponent } from './components/chamado/chart/bi-dashboard/bi-dashboard.component';
@@ -148,6 +149,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
       AgendaComponent,
     TarefaFormDialogComponent,
+    AgendaCalendarioComponent,
 
     UsuarioDetalheDialogComponent,
 

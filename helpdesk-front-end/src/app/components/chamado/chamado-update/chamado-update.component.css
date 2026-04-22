@@ -11,9 +11,8 @@
 ══════════════════════════════════════════════════════════ */
 .dialog-wrapper {
   width: 100%;
-  height: 100%;
-  min-height: 580px;
-  max-height: 90vh;
+  /* Sem height fixo — adapta-se ao conteúdo até max-height */
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   background: #f8fafc;
@@ -102,10 +101,13 @@
   border-radius: 1.25rem 1.25rem 0 0;
   margin-top: -1.5rem;
   position: relative; z-index: 1;
-  padding: 1.5rem 1.75rem 1rem;
+  /* padding-bottom normal — ações estão FORA desta área */
+  padding: 1.5rem 1.75rem 1.25rem;
   overflow-y: auto;
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #c5cae9 transparent;
 }
 .dialog-body::-webkit-scrollbar { width: 5px; }
 .dialog-body::-webkit-scrollbar-thumb { background: rgba(21,101,192,.22); border-radius: 99px; }
@@ -147,9 +149,16 @@
 .encerrado-text span   { font-size: .78rem; color: rgba(255,255,255,.80); line-height: 1.45; }
 
 /* ══════════════════════════════════════════════════════════
-   FORM
+   FORM — flex-container pai: organiza corpo scrollável
+   + ações estáticas abaixo (fora do scroll)
 ══════════════════════════════════════════════════════════ */
-.main-form { display: flex; flex-direction: column; gap: .6rem; }
+.main-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
 
 /* Section headers com icon wrap colorido */
 .section-header {
@@ -199,12 +208,14 @@
 .disabled-field-wrapper { cursor: not-allowed; opacity: .72; }
 
 /* ══════════════════════════════════════════════════════════
-   AÇÕES — botões premium
+   AÇÕES — fora do scroll, sempre visíveis na base do form
 ══════════════════════════════════════════════════════════ */
 .dialog-actions {
   display: flex; gap: .75rem; justify-content: flex-end;
-  margin-top: .85rem; padding-top: .9rem;
+  flex-shrink: 0;
+  padding: .85rem 1.75rem 1rem;
   border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
 .btn-cancel {
@@ -252,15 +263,13 @@
 
 mat-icon { opacity: .85 !important; }
 
-/* ══════════════════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════════════════ */
+/* ══ Responsive ══════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .dialog-wrapper { border-radius: 0; }
+  .dialog-wrapper { border-radius: 0; max-height: 100vh; }
   .dialog-header  { padding: 1.25rem 1.25rem 2.75rem; }
-  .dialog-body    { padding: 1.25rem 1.25rem .75rem; }
+  .dialog-body    { padding: 1.25rem 1.25rem 1rem; }
   .form-grid      { grid-template-columns: 1fr; }
   .field-wide     { grid-column: span 1; }
-  .dialog-actions { flex-direction: column-reverse; }
+  .dialog-actions { flex-direction: column-reverse; padding: .75rem 1.25rem .75rem; }
   .btn-cancel, .btn-save { width: 100%; justify-content: center; }
 }

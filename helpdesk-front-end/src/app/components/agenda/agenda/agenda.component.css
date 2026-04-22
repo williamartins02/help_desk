@@ -702,3 +702,303 @@
   .filtros-header { flex-direction: column; align-items: flex-start; gap: 10px; }
   .hero-actions { width: 100%; justify-content: flex-start; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   BOTÕES DE MODO (Dia / Semana / Kanban)
+   ══════════════════════════════════════════════════════════════════ */
+.modo-btns {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,.12);
+  border: 1.5px solid rgba(255,255,255,.22);
+  border-radius: 12px; padding: 3px;
+  backdrop-filter: blur(4px);
+  gap: 2px;
+}
+
+.modo-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,.70); font-size: .76rem; font-weight: 600;
+  padding: 5px 10px; border-radius: 9px;
+  transition: background .16s, color .16s; font-family: inherit;
+  white-space: nowrap;
+}
+.modo-btn:hover  { background: rgba(255,255,255,.15); color: #fff; }
+.modo-btn.ativo  { background: rgba(255,255,255,.24); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.modo-btn mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
+
+/* Botões de exportação */
+.hero-export-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.25);
+  border-radius: 10px; cursor: pointer; color: #fff;
+  transition: background .16s, transform .18s; backdrop-filter: blur(4px);
+}
+.hero-export-btn:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
+.hero-export-btn mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+
+/* Input type=date estilizado para o hero escuro */
+.hero-date-input[type="date"] {
+  color-scheme: dark;
+  width: 120px;
+}
+.hero-date-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(.7);
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BOTÃO REABRIR
+   ══════════════════════════════════════════════════════════════════ */
+.btn-reabrir {
+  border-radius: 10px !important;
+  font-size: .78rem !important; font-weight: 700 !important;
+  padding: 0 14px !important; min-height: 36px !important;
+  border-color: #64748b !important; color: #475569 !important;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important;
+  box-shadow: 0 2px 8px rgba(71,85,105,.18) !important;
+  transition: transform .2s cubic-bezier(0.34,1.56,0.64,1), box-shadow .18s !important;
+}
+.btn-reabrir:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  box-shadow: 0 6px 18px rgba(71,85,105,.28) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BADGE DE CONFLITO DE HORÁRIO
+   ══════════════════════════════════════════════════════════════════ */
+.tarefa-titulo-row {
+  display: flex; align-items: center; gap: 6px;
+}
+
+.conflito-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1.5px solid #fbbf24;
+  border-radius: 999px; padding: 2px 5px;
+  cursor: help;
+  animation: conflito-pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.conflito-badge mat-icon {
+  font-size: 14px !important; width: 14px !important; height: 14px !important;
+  color: #b45309 !important; opacity: 1 !important;
+}
+@keyframes conflito-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(251,191,36,0); }
+}
+
+/* ── Chips de duração e timer ─── */
+.meta-duracao { background: linear-gradient(135deg, #ede9fe, #ddd6fe) !important; color: #5b21b6 !important; border-color: #c4b5fd !important; }
+.meta-duracao mat-icon { color: #6d28d9 !important; }
+
+.meta-timer { background: linear-gradient(135deg, #ecfdf5, #bbf7d0) !important; color: #065f46 !important; border-color: #6ee7b7 !important; animation: timer-blink 2s ease-in-out infinite; }
+.meta-timer mat-icon { color: #047857 !important; }
+@keyframes timer-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .75; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   KANBAN
+   ══════════════════════════════════════════════════════════════════ */
+.kanban-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.kanban-col {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(8,15,46,.10), 0 1px 4px rgba(8,15,46,.06);
+  background: #f0f2f5;
+  display: flex; flex-direction: column;
+  min-height: 320px;
+}
+
+.kanban-col-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.1rem;
+}
+.kanban-header-left {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .88rem; font-weight: 800; color: #fff;
+}
+.kanban-header-left mat-icon { font-size: 1.1rem !important; width: 1.1rem !important; height: 1.1rem !important; }
+
+.kanban-header-pendente  { background: linear-gradient(135deg, #b45309, #f59e0b); }
+.kanban-header-execucao  { background: linear-gradient(135deg, #1a237e, #1565c0); }
+.kanban-header-concluida { background: linear-gradient(135deg, #1b5e20, #43a047); }
+
+.kanban-lista {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: .9rem;
+  flex: 1; min-height: 100px;
+  transition: background .2s;
+}
+.kanban-lista.cdk-drop-list-dragging { background: rgba(37,99,235,.04); }
+.kanban-lista.cdk-drop-list-receiving { background: rgba(22,163,74,.04); }
+
+.kanban-item-wrapper { display: flex; flex-direction: column; }
+
+.kanban-card {
+  cursor: grab;
+}
+.kanban-card:active { cursor: grabbing; }
+
+/* Drag preview (sombra ao arrastar) */
+.cdk-drag-preview {
+  border-radius: 18px !important;
+  box-shadow: 0 16px 40px rgba(8,15,46,.3) !important;
+  opacity: .96;
+  transform: rotate(1.5deg);
+}
+
+/* Placeholder no destino */
+.kanban-drag-placeholder {
+  height: 80px; border-radius: 14px;
+  border: 2px dashed; margin: 0;
+}
+.kanban-ph-pendente  { border-color: #fbbf24; background: #fffbeb; }
+.kanban-ph-execucao  { border-color: #93c5fd; background: #eff6ff; }
+.kanban-ph-concluida { border-color: #86efac; background: #f0fdf4; }
+
+.kanban-empty {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  color: #94a3b8; font-style: italic; font-size: .82rem;
+  padding: 36px 0; flex: 1;
+}
+.kanban-empty mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; color: #cbd5e1; }
+
+/* ══════════════════════════════════════════════════════════════════
+   VISÃO SEMANAL
+   ══════════════════════════════════════════════════════════════════ */
+.semana-wrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(8,15,46,.10);
+  background: #fff;
+}
+
+.semana-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  min-height: 380px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.semana-col {
+  display: flex; flex-direction: column;
+  border-right: 1px solid #e2e8f0;
+  background: #fff;
+  transition: background .2s;
+}
+.semana-col:last-child { border-right: none; }
+.semana-col:hover { background: #fafbff; }
+
+.semana-col-hoje {
+  background: linear-gradient(to bottom, #eff6ff, #fff) !important;
+}
+.semana-col-hoje .semana-col-header { background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; }
+
+.semana-col-header {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: .75rem .5rem;
+  background: linear-gradient(135deg, #080f2e, #1a3a8a);
+  cursor: pointer; gap: 2px;
+  transition: filter .18s;
+  position: relative;
+}
+.semana-col-header:hover { filter: brightness(1.18); }
+
+.semana-dia-label {
+  font-size: .65rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .1em; color: rgba(255,255,255,.65);
+}
+.semana-dia-num {
+  font-size: 1.35rem; font-weight: 900; color: #fff; line-height: 1;
+}
+.semana-count-badge {
+  position: absolute; top: 6px; right: 8px;
+  background: #f59e0b; color: #fff;
+  font-size: .6rem; font-weight: 800;
+  padding: 1px 5px; border-radius: 999px;
+  min-width: 16px; text-align: center;
+}
+
+.semana-tarefas {
+  padding: .5rem .4rem; display: flex; flex-direction: column; gap: 4px; flex: 1;
+}
+
+.semana-tarefa-mini {
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 6px; border-radius: 8px;
+  cursor: pointer; font-size: .72rem; font-weight: 600;
+  transition: transform .15s, box-shadow .15s;
+  overflow: hidden;
+}
+.semana-tarefa-mini:hover { transform: translateX(2px); box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+
+.mini-pendente  { background: #fef3c7; color: #78350f; border-left: 3px solid #f59e0b; }
+.mini-execucao  { background: #dbeafe; color: #1e3a8a; border-left: 3px solid #2563eb; }
+.mini-concluido { background: #dcfce7; color: #14532d; border-left: 3px solid #16a34a; text-decoration: line-through; opacity: .8; }
+
+.mini-prioridade-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.mini-hora {
+  font-size: .65rem; font-weight: 700; opacity: .7; flex-shrink: 0;
+}
+.mini-titulo {
+  font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+}
+
+.semana-vazio {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: #cbd5e1; font-size: .72rem; padding: 20px 0; flex: 1;
+}
+.semana-vazio mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; opacity: .5; }
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVIDADE — novos elementos
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .kanban-wrapper { grid-template-columns: 1fr; }
+  .semana-grid { grid-template-columns: repeat(4, 1fr); overflow-x: auto; }
+}
+
+@media (max-width: 768px) {
+  .modo-btns .modo-btn span { display: none; }
+  .semana-grid { grid-template-columns: repeat(3, minmax(100px, 1fr)); overflow-x: auto; }
+}
+
+@media (max-width: 600px) {
+  .semana-grid { grid-template-columns: repeat(2, 1fr); }
+  .kanban-wrapper { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   IMPRESSÃO
+   ══════════════════════════════════════════════════════════════════ */
+@media print {
+  .hero-actions,
+  .modo-btns,
+  .hero-export-btn,
+  .hero-nova-btn,
+  .hero-orb,
+  .filtros-card,
+  .resumo-cards,
+  .agenda-paginator,
+  .tarefa-actions { display: none !important; }
+
+  .agenda-container { padding: 0 !important; max-width: 100% !important; }
+  .agenda-hero { border-radius: 0 !important; margin: 0 0 .5rem !important; }
+  .tarefa-card { page-break-inside: avoid; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+  .agenda-tabs, .kanban-wrapper { box-shadow: none !important; }
+}

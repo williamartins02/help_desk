@@ -170,15 +170,15 @@
         </div>
       </ng-container>
 
-      <!-- ── Ações ── -->
-      <div class="dialog-actions">
-        <button type="button" mat-flat-button color="primary" class="btn-return" (click)="onNoClick()">
-          <mat-icon>keyboard_return</mat-icon>
-          Retornar
-        </button>
-      </div>
-
     </form>
+  </div><!-- /dialog-body -->
+
+  <!-- ── Ações — estáticas, sempre visíveis fora do scroll ── -->
+  <div class="dialog-actions">
+    <button type="button" mat-flat-button color="primary" class="btn-return" (click)="onNoClick()">
+      <mat-icon>keyboard_return</mat-icon>
+      Retornar
+    </button>
   </div>
 
   <footer class="dialog-footer">

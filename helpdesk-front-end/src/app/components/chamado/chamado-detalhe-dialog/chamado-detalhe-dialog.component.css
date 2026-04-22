@@ -14,6 +14,8 @@
   border-radius: 1.25rem;
   overflow: hidden;
   font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  /* Limita ao viewport e permite scroll interno */
+  max-height: 92vh;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -162,7 +164,7 @@
 .hbadge mat-icon { font-size: .85rem; width: .85rem; height: .85rem; }
 
 /* ══════════════════════════════════════════════════════════
-   BODY — 2 colunas
+   BODY — 2 colunas, scrollável
 ══════════════════════════════════════════════════════════ */
 .dialog-body {
   display: grid;
@@ -171,7 +173,16 @@
   padding: 1rem 1.4rem;
   align-items: start;
   background: #f8fafc;
+  /* scroll quando o conteúdo ultrapassar o espaço disponível */
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #c5cae9 transparent;
 }
+.dialog-body::-webkit-scrollbar { width: 5px; }
+.dialog-body::-webkit-scrollbar-track { background: transparent; }
+.dialog-body::-webkit-scrollbar-thumb { background: #c5cae9; border-radius: 4px; }
 
 .col-left, .col-right {
   display: flex; flex-direction: column; gap: .75rem;
@@ -401,7 +412,8 @@
 
 /* ══ Responsive ══════════════════════════════════════════════════════════ */
 @media (max-width: 580px) {
-  .dialog-body { grid-template-columns: 1fr; padding: .9rem 1rem; }
-  .info-grid   { grid-template-columns: 1fr; }
+  .dialog-wrap   { max-height: 100vh; border-radius: 0; }
+  .dialog-body   { grid-template-columns: 1fr; padding: .9rem 1rem; }
+  .info-grid     { grid-template-columns: 1fr; }
   .header-titulo { font-size: .95rem; }
 }

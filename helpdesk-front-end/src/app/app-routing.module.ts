@@ -17,6 +17,7 @@ import { ChatComponent } from './components/chat/chat/chat.component';
 import { UsuariosListComponent } from './components/usuarios/usuarios-list/usuarios-list.component';
 import {RelatorioChamadoComponent} from "./components/chamado/relatorio-chamado/relatorio-chamado.component";
 import {AgendaComponent} from "./components/agenda/agenda/agenda.component";
+import { AgendaCalendarioComponent } from './components/agenda/agenda-calendario/agenda-calendario.component';
 import { KanbanComponent } from './components/chamado/kanban/kanban.component';
 import { BiDashboardComponent } from './components/chamado/chart/bi-dashboard/bi-dashboard.component';
 
@@ -47,6 +48,7 @@ const routes: Routes = [
       { path: 'chat', component: ChatComponent },
       { path: 'usuarios', component: UsuariosListComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
       { path: 'agenda', component: AgendaComponent },
+      { path: 'agenda-calendario', component: AgendaCalendarioComponent },
       { path: 'kanban', component: KanbanComponent },
       { path: 'bi-dashboard', component: BiDashboardComponent, canActivate: [RoleGuard], data: { roles: ['ROLE_ADMIN'] } },
     ]

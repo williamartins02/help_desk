@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, interval } from 'rxjs';
 import { Tarefa, PRIORIDADE_LABELS, PRIORIDADE_COLORS, STATUS_TAREFA_LABELS } from '../../../models/tarefa';
 import { TarefaService } from '../../../services/tarefa.service';
 import { TecnicoService } from '../../../services/tecnico.service';
@@ -11,16 +11,11 @@ import { Tecnico } from '../../../models/tecnico';
 import { TarefaFormDialogComponent, TarefaDialogData } from '../tarefa-form-dialog/tarefa-form-dialog.component';
 import { AgendaWsService } from '../../../services/agenda-ws.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { DeleteDialogComponent } from '../../molecules/delete/delete-dialog/delete-dialog.component';
 
-/**
- * Componente principal da Agenda de Tarefas.
- *
- * Comportamento por perfil:
- *  - TÉCNICO  → vê e interage apenas com as próprias tarefas.
- *  - ADMIN    → painel de gestão com filtro por técnico, visão geral
- *               e visão individual. Ações de Iniciar/Concluir ficam
- *               disponíveis para facilitar a gestão operacional.
- */
+export interface SemanaDia { data: string; label: string; tarefas: Tarefa[]; }
+
 @Component({
   selector: 'app-agenda',
   templateUrl: './agenda.component.html',
@@ -29,55 +24,56 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 export class AgendaComponent implements OnInit, OnDestroy {
 
   // ── Estado geral ──────────────────────────────────────────────────────────
-
   dataSelecionada: string = this.hoje();
   tarefas: Tarefa[]       = [];
   carregando              = false;
 
-  // ── Perfil do usuário logado ──────────────────────────────────────────────
-
-  /** ID do usuário autenticado extraído do JWT */
+  // ── Perfil ────────────────────────────────────────────────────────────────
   tecnicoId!: number;
-  /** true quando o perfil é ADMIN ou ADMIN_TECNICO */
   isAdmin    = false;
-  /** Nome do usuário logado (exibido no subtítulo quando perfil é TÉCNICO) */
   nomeUsuario = '';
 
-  // ── Painel Admin: filtro de técnicos ─────────────────────────────────────
-
-  /** Lista de todos os técnicos carregada para o select do Admin */
+  // ── Painel Admin ──────────────────────────────────────────────────────────
   tecnicos: Tecnico[] = [];
-  /**
-   * ID do técnico selecionado no filtro Admin.
-   * null = visão geral (todos os técnicos).
-   */
   tecnicoFiltroId: number | null = null;
 
-  // ── Filtros adicionais ────────────────────────────────────────────────────
-
-  /** Texto de busca livre (título ou nº do chamado) */
+  // ── Filtros ───────────────────────────────────────────────────────────────
   filtroBusca = '';
-  /** Prioridade selecionada: null = todas */
   filtroPrioridade: number | null = null;
 
   readonly opcoesItemsPorPagina = [5, 10, 20];
 
-  // ── Paginação por aba ─────────────────────────────────────────────────────
-
-  pageSize           = 5;   // alinhado com opcoesItemsPorPagina[0]
-  pageIndexPendentes = 0;
-  pageIndexExecucao  = 0;
+  // ── Paginação ─────────────────────────────────────────────────────────────
+  pageSize            = 5;
+  pageIndexPendentes  = 0;
+  pageIndexExecucao   = 0;
   pageIndexConcluidas = 0;
 
-  // ── JWT / WebSocket ───────────────────────────────────────────────────────
+  // ── Modo de visualização ──────────────────────────────────────────────────
+  /** 'dia' | 'semana' | 'kanban' */
+  viewMode: 'dia' | 'semana' | 'kanban' = 'dia';
 
+  // ── Kanban (arrays mutáveis para cdkDropList) ─────────────────────────────
+  kanbanPendentes:  Tarefa[] = [];
+  kanbanExecucao:   Tarefa[] = [];
+  kanbanConcluidas: Tarefa[] = [];
+
+  // ── Visão semanal ─────────────────────────────────────────────────────────
+  semanaDias: SemanaDia[] = [];
+  carregandoSemana = false;
+
+  // ── Timer e notificações ──────────────────────────────────────────────────
+  /** Incrementado a cada minuto → força re-avaliação de tempoDecorrido() */
+  tickerSegundos = 0;
+  private timerSub!: Subscription;
+  private notificacoesDadas = new Set<number>();
+
+  // ── Subscrições ───────────────────────────────────────────────────────────
   private jwtHelper  = new JwtHelperService();
   private wsSub!: Subscription;
-  /** Escuta atualizações no cadastro de técnicos (ativar/inativar) */
   private tecnicoSub!: Subscription;
 
-  // ── Expostos para o template ──────────────────────────────────────────────
-
+  // ── Constantes expostas ao template ──────────────────────────────────────
   readonly prioridadeLabels = PRIORIDADE_LABELS;
   readonly prioridadeColors = PRIORIDADE_COLORS;
   readonly statusLabels     = STATUS_TAREFA_LABELS;
@@ -102,7 +98,6 @@ export class AgendaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.lerPerfil();
 
-    // WebSocket: sincroniza quando Chamado é atualizado na Central
     this.agendaWs.connect();
     this.wsSub = this.agendaWs.chamadoAtualizado$.subscribe(evento => {
       this.carregarTarefas();
@@ -113,17 +108,23 @@ export class AgendaComponent implements OnInit, OnDestroy {
         { timeOut: 3000, positionClass: 'toast-bottom-right' }
       );
     });
+
+    // Timer: atualiza contador de minutos (para tempoDecorrido) + notificações
+    this.timerSub = interval(60000).subscribe(() => {
+      this.tickerSegundos++;
+      this.verificarNotificacoes();
+    });
   }
 
   ngOnDestroy(): void {
     if (this.wsSub)      this.wsSub.unsubscribe();
     if (this.tecnicoSub) this.tecnicoSub.unsubscribe();
+    if (this.timerSub)   this.timerSub.unsubscribe();
     this.agendaWs.disconnect();
   }
 
   // ── Dados filtrados ───────────────────────────────────────────────────────
 
-  /** Aplica busca livre (título/chamado) + filtro de prioridade */
   get tarefasFiltradas(): Tarefa[] {
     const busca = this.filtroBusca.trim().toLowerCase();
     return this.tarefas.filter(t => {
@@ -140,31 +141,284 @@ export class AgendaComponent implements OnInit, OnDestroy {
   get emExecucao(): Tarefa[] { return this.tarefasFiltradas.filter(t => t.status === 1); }
   get concluidas(): Tarefa[] { return this.tarefasFiltradas.filter(t => t.status === 2); }
 
-  // ── Dados paginados ───────────────────────────────────────────────────────
+  // ── Paginação ─────────────────────────────────────────────────────────────
 
-  get pendentesPaginadas():   Tarefa[] { return this.paginar(this.pendentes,  this.pageIndexPendentes);  }
-  get emExecucaoPaginadas():  Tarefa[] { return this.paginar(this.emExecucao, this.pageIndexExecucao);   }
-  get concluidasPaginadas():  Tarefa[] { return this.paginar(this.concluidas, this.pageIndexConcluidas); }
+  get pendentesPaginadas():  Tarefa[] { return this.paginar(this.pendentes,  this.pageIndexPendentes);  }
+  get emExecucaoPaginadas(): Tarefa[] { return this.paginar(this.emExecucao, this.pageIndexExecucao);   }
+  get concluidasPaginadas(): Tarefa[] { return this.paginar(this.concluidas, this.pageIndexConcluidas); }
 
   private paginar(lista: Tarefa[], pageIndex: number): Tarefa[] {
     const start = pageIndex * this.pageSize;
     return lista.slice(start, start + this.pageSize);
   }
 
-  onPagePendentes(e: PageEvent):   void { this.pageSize = e.pageSize; this.pageIndexPendentes  = e.pageIndex; }
-  onPageExecucao(e: PageEvent):    void { this.pageSize = e.pageSize; this.pageIndexExecucao   = e.pageIndex; }
-  onPageConcluidas(e: PageEvent):  void { this.pageSize = e.pageSize; this.pageIndexConcluidas = e.pageIndex; }
+  onPagePendentes(e: PageEvent):  void { this.pageSize = e.pageSize; this.pageIndexPendentes  = e.pageIndex; }
+  onPageExecucao(e: PageEvent):   void { this.pageSize = e.pageSize; this.pageIndexExecucao   = e.pageIndex; }
+  onPageConcluidas(e: PageEvent): void { this.pageSize = e.pageSize; this.pageIndexConcluidas = e.pageIndex; }
 
-  /** Reseta índices de página quando filtros mudam */
   resetarPaginas(): void {
     this.pageIndexPendentes  = 0;
     this.pageIndexExecucao   = 0;
     this.pageIndexConcluidas = 0;
   }
 
-  // ── Getters auxiliares ───────────────────────────────────────────────────
+  // ── KPI Progress bars (dinâmicas) ─────────────────────────────────────────
 
-  /** Nome do técnico selecionado no filtro (Admin) */
+  kpiPercent(valor: number): string {
+    const total = this.tarefas.length;
+    if (total === 0) return '0%';
+    return Math.round((valor / total) * 100) + '%';
+  }
+
+  // ── Modo de visualização ──────────────────────────────────────────────────
+
+  trocarModo(modo: 'dia' | 'semana' | 'kanban'): void {
+    this.viewMode = modo;
+    if (modo === 'semana') this.carregarSemana();
+    else if (modo === 'kanban') this.syncKanban();
+  }
+
+  // ── Visão Semanal ─────────────────────────────────────────────────────────
+
+  private getSemanaAtual(): string[] {
+    const [d, m, y] = this.dataSelecionada.split('/').map(Number);
+    const date = new Date(y, m - 1, d);
+    const dow  = date.getDay();
+    const mondayOffset = dow === 0 ? -6 : 1 - dow;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + mondayOffset);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return this.formatarData(d);
+    });
+  }
+
+  private labelDia(data: string): string {
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const [d, m, y] = data.split('/').map(Number);
+    return labels[new Date(y, m - 1, d).getDay()];
+  }
+
+  carregarSemana(): void {
+    const dias = this.getSemanaAtual();
+    this.carregandoSemana = true;
+
+    const obs = dias.map(data => {
+      let tecnicoParam: number | undefined;
+      if (this.tecnicoFiltroId !== null) tecnicoParam = this.tecnicoFiltroId;
+      else if (!this.isAdmin)            tecnicoParam = this.tecnicoId;
+      return this.tarefaService.findAll(data, tecnicoParam);
+    });
+
+    forkJoin(obs).subscribe({
+      next: (resultados) => {
+        this.semanaDias = dias.map((data, i) => ({
+          data,
+          label: this.labelDia(data),
+          tarefas: resultados[i]
+        }));
+        this.carregandoSemana = false;
+      },
+      error: () => {
+        this.toastr.error('Erro ao carregar semana.');
+        this.carregandoSemana = false;
+      }
+    });
+  }
+
+  irParaDiaDaSemana(data: string): void {
+    this.dataSelecionada = data;
+    this.viewMode = 'dia';
+    this.carregarTarefas();
+  }
+
+  // ── Kanban Drag & Drop ────────────────────────────────────────────────────
+
+  syncKanban(): void {
+    this.kanbanPendentes  = [...this.tarefasFiltradas.filter(t => t.status === 0)];
+    this.kanbanExecucao   = [...this.tarefasFiltradas.filter(t => t.status === 1)];
+    this.kanbanConcluidas = [...this.tarefasFiltradas.filter(t => t.status === 2)];
+  }
+
+  onDropKanban(event: CdkDragDrop<Tarefa[]>, novoStatus: number): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+
+    const tarefa = event.previousContainer.data[event.previousIndex];
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    this.tarefaService.alterarStatus(tarefa.id!, novoStatus).subscribe({
+      next: () => {
+        const local = this.tarefas.find(t => t.id === tarefa.id);
+        if (local) local.status = novoStatus;
+        const msg = novoStatus === 2 ? 'Tarefa concluída! 🎉'
+                  : novoStatus === 1 ? 'Tarefa iniciada!'
+                  : 'Tarefa reaberta.';
+        this.toastr.success(msg);
+      },
+      error: () => {
+        this.toastr.error('Erro ao mover tarefa.');
+        this.syncKanban(); // Reverte
+      }
+    });
+  }
+
+  // ── Funções de enriquecimento de card ─────────────────────────────────────
+
+  /** Retorna "Xh Ymin" de duração se ambas as horas estão preenchidas */
+  duracaoTarefa(t: Tarefa): string {
+    if (!t.horaInicio || !t.horaFim) return '';
+    const toMin = (h: string) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm; };
+    const diff = toMin(t.horaFim) - toMin(t.horaInicio);
+    if (diff <= 0) return '';
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return h > 0 ? `${h}h${m > 0 ? ' ' + m + 'min' : ''}` : `${m}min`;
+  }
+
+  /**
+   * Retorna "Xh Ymin decorrido" para tarefas em execução HOJE.
+   * Depende de `tickerSegundos` para re-avaliação a cada minuto.
+   */
+  tempoDecorrido(t: Tarefa): string {
+    if (!this.tickerSegundos && this.tickerSegundos !== 0) return '';
+    if (t.status !== 1 || !t.horaInicio || t.data !== this.hoje()) return '';
+    const toMin = (h: string) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm; };
+    const agora  = new Date();
+    const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+    const diff = agoraMin - toMin(t.horaInicio);
+    if (diff <= 0) return '';
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return h > 0 ? `${h}h ${m}min` : `${m}min`;
+  }
+
+  /** Verdadeiro quando a tarefa tem conflito de horário com outra do mesmo dia */
+  temConflito(t: Tarefa): boolean {
+    if (!t.horaInicio) return false;
+    const toMin = (h: string) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm; };
+    const tIni = toMin(t.horaInicio);
+    const tFim = t.horaFim ? toMin(t.horaFim) : tIni + 60;
+    return this.tarefas.some(other => {
+      if (other.id === t.id || !other.horaInicio) return false;
+      const oIni = toMin(other.horaInicio);
+      const oFim = other.horaFim ? toMin(other.horaFim) : oIni + 60;
+      return tIni < oFim && tFim > oIni;
+    });
+  }
+
+  // ── Notificações de tarefas próximas ──────────────────────────────────────
+
+  private verificarNotificacoes(): void {
+    if (this.dataSelecionada !== this.hoje()) return;
+    const toMin   = (h: string) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm; };
+    const agora   = new Date();
+    const agMin   = agora.getHours() * 60 + agora.getMinutes();
+
+    this.pendentes.forEach(t => {
+      if (!t.horaInicio || !t.id) return;
+      if (this.notificacoesDadas.has(t.id)) return;
+      const diff = toMin(t.horaInicio) - agMin;
+      if (diff >= 0 && diff <= 15) {
+        this.notificacoesDadas.add(t.id);
+        this.toastr.warning(
+          `"${t.titulo}" começa às ${t.horaInicio}`,
+          '⏰ Tarefa em breve!',
+          { timeOut: 6000, positionClass: 'toast-bottom-right' }
+        );
+      }
+    });
+  }
+
+  // ── Ações de status ───────────────────────────────────────────────────────
+
+  iniciarTarefa(tarefa: Tarefa): void {
+    this.tarefaService.alterarStatus(tarefa.id!, 1).subscribe({
+      next: () => { this.toastr.info('Tarefa iniciada!'); this.carregarTarefas(); },
+      error: () => this.toastr.error('Erro ao iniciar tarefa.')
+    });
+  }
+
+  concluirTarefa(tarefa: Tarefa): void {
+    this.tarefaService.alterarStatus(tarefa.id!, 2).subscribe({
+      next: () => { this.toastr.success('Tarefa concluída! 🎉'); this.carregarTarefas(); },
+      error: () => this.toastr.error('Erro ao concluir tarefa.')
+    });
+  }
+
+  reabrirTarefa(tarefa: Tarefa): void {
+    this.tarefaService.alterarStatus(tarefa.id!, 0).subscribe({
+      next: () => { this.toastr.info('Tarefa reaberta.'); this.carregarTarefas(); },
+      error: () => this.toastr.error('Erro ao reabrir tarefa.')
+    });
+  }
+
+  // ── Confirm dialog para exclusão ──────────────────────────────────────────
+
+  confirmarExclusao(tarefa: Tarefa): void {
+    const ref = this.dialog.open(DeleteDialogComponent, { width: '420px' });
+    ref.afterClosed().subscribe(confirmado => {
+      if (!confirmado) return;
+      this.tarefaService.delete(tarefa.id!).subscribe({
+        next: () => { this.toastr.warning('Tarefa excluída.'); this.carregarTarefas(); },
+        error: () => this.toastr.error('Erro ao excluir tarefa.')
+      });
+    });
+  }
+
+  // ── Exportação ────────────────────────────────────────────────────────────
+
+  exportarCSV(): void {
+    const header = ['ID', 'Título', 'Descrição', 'Data', 'Hora Início', 'Hora Fim',
+                    'Prioridade', 'Status', 'Técnico', 'Chamado'];
+    const rows = this.tarefasFiltradas.map(t => [
+      t.id ?? '',
+      `"${(t.titulo || '').replace(/"/g, '""')}"`,
+      `"${(t.descricao || '').replace(/"/g, '""')}"`,
+      t.data,
+      t.horaInicio || '',
+      t.horaFim    || '',
+      this.labelPrioridade(t.prioridade),
+      this.statusLabels[t.status] || '',
+      t.nomeTecnico || '',
+      t.chamado     || '',
+    ]);
+    const csv  = [header.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = `agenda_${this.dataSelecionada.replace(/\//g, '-')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.toastr.success('CSV gerado com sucesso!');
+  }
+
+  imprimirAgenda(): void { window.print(); }
+
+  // ── Auxiliares de template ────────────────────────────────────────────────
+
+  corPrioridade(codigo: number): string  { return this.prioridadeColors[codigo] ?? '#757575'; }
+  labelPrioridade(codigo: number): string { return this.prioridadeLabels[codigo] ?? '—'; }
+
+  dataFormatada(): string {
+    const hoje   = this.hoje();
+    const ontem  = this.deslocarData(hoje, -1);
+    const amanha = this.deslocarData(hoje, 1);
+    if (this.dataSelecionada === hoje)   return `📅 Hoje — ${this.dataSelecionada}`;
+    if (this.dataSelecionada === ontem)  return `📅 Ontem — ${this.dataSelecionada}`;
+    if (this.dataSelecionada === amanha) return `📅 Amanhã — ${this.dataSelecionada}`;
+    return `📅 ${this.dataSelecionada}`;
+  }
+
   get nomeTecnicoFiltro(): string {
     if (this.tecnicoFiltroId === null) return 'Todos os técnicos';
     const tec = this.tecnicos.find(t => t.id === this.tecnicoFiltroId);
@@ -175,11 +429,24 @@ export class AgendaComponent implements OnInit, OnDestroy {
     return this.filtroBusca.trim() !== '' || this.filtroPrioridade !== null;
   }
 
-  /** Retorna o nome do técnico de uma tarefa */
   nomeTecnicoDaTarefa(tarefa: any): string {
     if (tarefa.nomeTecnico) return tarefa.nomeTecnico;
     const tec = this.tecnicos.find(t => t.id === tarefa.tecnico);
     return tec ? tec.nome : '';
+  }
+
+  // ── Conversão de data para input[type=date] ───────────────────────────────
+
+  toInputDate(ddMMyyyy: string): string {
+    if (!ddMMyyyy || !ddMMyyyy.includes('/')) return '';
+    const [d, m, y] = ddMMyyyy.split('/');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+
+  fromInputDate(yyyyMMdd: string): string {
+    if (!yyyyMMdd || !yyyyMMdd.includes('-')) return this.dataSelecionada;
+    const [y, m, d] = yyyyMMdd.split('-');
+    return `${d}/${m}/${y}`;
   }
 
   // ── Navegação de datas ────────────────────────────────────────────────────
@@ -200,11 +467,12 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   onDataChange(novaData: string): void {
+    if (!novaData) return;
     this.dataSelecionada = novaData;
     this.carregarTarefas();
   }
 
-  // ── Filtro de técnico (Admin) ─────────────────────────────────────────────
+  // ── Filtros ───────────────────────────────────────────────────────────────
 
   selecionarTecnico(id: number | null): void {
     this.tecnicoFiltroId = id;
@@ -215,17 +483,19 @@ export class AgendaComponent implements OnInit, OnDestroy {
   limparTodosFiltros(): void {
     this.filtroBusca = '';
     this.filtroPrioridade = null;
-    this.tecnicoFiltroId = null;
+    this.tecnicoFiltroId  = null;
     this.resetarPaginas();
     this.carregarTarefas();
   }
 
-  onFiltroChange(): void { this.resetarPaginas(); }
+  onFiltroChange(): void {
+    this.resetarPaginas();
+    if (this.viewMode === 'kanban') this.syncKanban();
+  }
 
-  // ── CRUD de tarefas ───────────────────────────────────────────────────────
+  // ── CRUD ──────────────────────────────────────────────────────────────────
 
   novaTarefa(): void {
-    // Admin criando tarefa: usa o técnico do filtro (se selecionado) ou o próprio ID
     const idParaCriacao = (this.isAdmin && this.tecnicoFiltroId)
       ? this.tecnicoFiltroId
       : this.tecnicoId;
@@ -233,12 +503,12 @@ export class AgendaComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(TarefaFormDialogComponent, {
       data: {
         tecnicoId:    idParaCriacao,
-        dataPadrao:   this.dataSelecionada,   // pré-preenche a data selecionada na agenda
-        tarefasDoDia: this.tarefas,           // usado para detectar conflitos de horário
-        isAdmin:      this.isAdmin,           // carrega todos os chamados quando admin
+        dataPadrao:   this.dataSelecionada,
+        tarefasDoDia: this.tarefas,
+        isAdmin:      this.isAdmin,
       } as TarefaDialogData,
-      width: '620px', maxWidth: '98vw',
-      panelClass: 'dialog-no-padding', disableClose: true
+      width: '620px', maxWidth: '98vw', maxHeight: '92vh',
+      panelClass: 'dialog-no-padding', disableClose: true, autoFocus: false
     });
     ref.afterClosed().subscribe(r => { if (r) this.carregarTarefas(); });
   }
@@ -248,55 +518,17 @@ export class AgendaComponent implements OnInit, OnDestroy {
       data: {
         tarefa,
         tecnicoId:    tarefa.tecnico,
-        tarefasDoDia: this.tarefas,   // mantém detecção de conflitos na edição
+        tarefasDoDia: this.tarefas,
         isAdmin:      this.isAdmin,
       } as TarefaDialogData,
-      width: '620px', maxWidth: '98vw',
-      panelClass: 'dialog-no-padding', disableClose: true
+      width: '620px', maxWidth: '98vw', maxHeight: '92vh',
+      panelClass: 'dialog-no-padding', disableClose: true, autoFocus: false
     });
     ref.afterClosed().subscribe(r => { if (r) this.carregarTarefas(); });
   }
 
-  iniciarTarefa(tarefa: Tarefa): void {
-    this.tarefaService.alterarStatus(tarefa.id!, 1).subscribe({
-      next: () => { this.toastr.info('Tarefa iniciada!'); this.carregarTarefas(); },
-      error: () => this.toastr.error('Erro ao iniciar tarefa.')
-    });
-  }
-
-  concluirTarefa(tarefa: Tarefa): void {
-    this.tarefaService.alterarStatus(tarefa.id!, 2).subscribe({
-      next: () => { this.toastr.success('Tarefa concluída! 🎉'); this.carregarTarefas(); },
-      error: () => this.toastr.error('Erro ao concluir tarefa.')
-    });
-  }
-
-  excluirTarefa(tarefa: Tarefa): void {
-    if (!confirm(`Excluir a tarefa "${tarefa.titulo}"?`)) return;
-    this.tarefaService.delete(tarefa.id!).subscribe({
-      next: () => { this.toastr.warning('Tarefa excluída.'); this.carregarTarefas(); },
-      error: () => this.toastr.error('Erro ao excluir tarefa.')
-    });
-  }
-
-  // ── Auxiliares de template ────────────────────────────────────────────────
-
-  corPrioridade(codigo: number): string  { return this.prioridadeColors[codigo] ?? '#757575'; }
-  labelPrioridade(codigo: number): string { return this.prioridadeLabels[codigo] ?? '—'; }
-
-  dataFormatada(): string {
-    const hoje   = this.hoje();
-    const ontem  = this.deslocarData(hoje, -1);
-    const amanha = this.deslocarData(hoje, 1);
-    if (this.dataSelecionada === hoje)   return `📅 Hoje — ${this.dataSelecionada}`;
-    if (this.dataSelecionada === ontem)  return `📅 Ontem — ${this.dataSelecionada}`;
-    if (this.dataSelecionada === amanha) return `📅 Amanhã — ${this.dataSelecionada}`;
-    return `📅 ${this.dataSelecionada}`;
-  }
-
   // ── Carregamento de dados ─────────────────────────────────────────────────
 
-  /** Recarrega lista de técnicos ativos (chamado no init e ao detectar mudança via refresh$) */
   private carregarTecnicosAtivos(): void {
     this.tecnicoService.findAllAtivos().subscribe({
       next: (lista) => { this.tecnicos = lista; },
@@ -306,25 +538,22 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
   private carregarTarefas(): void {
     this.carregando = true;
-
     let tecnicoParam: number | undefined;
-
-    if (this.tecnicoFiltroId !== null) {
-      // Técnico selecionado no filtro → sempre respeita a seleção
-      tecnicoParam = this.tecnicoFiltroId;
-    } else if (!this.isAdmin) {
-      // Não-admin sem seleção → exibe apenas as próprias tarefas
-      tecnicoParam = this.tecnicoId;
-    }
-    // Admin sem seleção → undefined → backend retorna todos
+    if      (this.tecnicoFiltroId !== null) tecnicoParam = this.tecnicoFiltroId;
+    else if (!this.isAdmin)                  tecnicoParam = this.tecnicoId;
 
     this.tarefaService.findAll(this.dataSelecionada, tecnicoParam).subscribe({
-      next: (lista) => { this.tarefas = lista; this.carregando = false; },
+      next: (lista) => {
+        this.tarefas = lista;
+        this.carregando = false;
+        this.syncKanban();
+        this.verificarNotificacoes();
+        if (this.viewMode === 'semana') this.carregarSemana();
+      },
       error: () => { this.toastr.error('Erro ao carregar tarefas.'); this.carregando = false; }
     });
   }
 
-  /** Lê perfil, ID e nome via API — mesmo padrão do report-param */
   private lerPerfil(): void {
     const token = localStorage.getItem('token');
     if (!token) { this.carregarTarefas(); return; }
@@ -338,36 +567,24 @@ export class AgendaComponent implements OnInit, OnDestroy {
         this.tecnicoId   = info.id   ?? 0;
         this.nomeUsuario = info.nome ?? '';
 
-        // Extrai authorities no mesmo formato que report-param
         const authorities: string[] = (info.authorities || [])
           .map((a: any) => typeof a === 'string' ? a : (a?.authority ?? ''));
-
-        // isAdmin = tem ROLE_ADMIN (inclui usuários ADMIN+TECNICO)
-        // Técnico puro = tem ROLE_TECNICO mas NÃO tem ROLE_ADMIN
         this.isAdmin = authorities.includes('ROLE_ADMIN');
 
-        // Admin carrega apenas técnicos ATIVOS para o select de filtro
-        // (técnicos inativados na tela de Equipe Técnica não aparecem aqui)
         if (this.isAdmin) {
           this.carregarTecnicosAtivos();
-
-          // Atualiza a lista automaticamente quando um técnico é ativado ou inativado
           this.tecnicoSub = this.tecnicoService.refresh$.subscribe(() => {
             this.carregarTecnicosAtivos();
-            // Se o técnico selecionado foi inativado, limpa o filtro
             if (this.tecnicoFiltroId !== null) {
               const ainda = this.tecnicos.find(t => t.id === this.tecnicoFiltroId);
-              if (!ainda) { this.limparTodosFiltros(); }
+              if (!ainda) this.limparTodosFiltros();
             }
           });
         }
 
         this.carregarTarefas();
       },
-      error: () => {
-        // Fallback: sem perfil detectado, carrega as próprias tarefas
-        this.carregarTarefas();
-      }
+      error: () => this.carregarTarefas()
     });
   }
 

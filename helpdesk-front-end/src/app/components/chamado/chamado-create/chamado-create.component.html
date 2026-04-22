@@ -33,8 +33,9 @@
   </div>
 
   <!-- ── Corpo ── -->
-  <div class="dialog-body">
-    <form class="main-form" (ngSubmit)="create()">
+  <form class="main-form" (ngSubmit)="create()">
+
+    <div class="dialog-body">
 
       <!-- ══ Seção 1: Identificação ══ -->
       <div class="form-section">
@@ -288,20 +289,21 @@
         <button type="button" class="ia-hint-btn" (click)="togglePainel()">ver sugestões</button>
       </div>
 
-      <!-- ── Ações ── -->
-      <div class="dialog-actions">
-        <button type="button" class="btn-cancel" (click)="onNoClick()">
-          <mat-icon>close</mat-icon>
-          Cancelar
-        </button>
-        <button type="submit" class="btn-save" [disabled]="!validaCampos()">
-          <mat-icon>playlist_add_check</mat-icon>
-          Abrir Chamado
-        </button>
-      </div>
+    </div><!-- /dialog-body -->
 
-    </form>
-  </div>
+    <!-- ── Ações — estáticas, sempre visíveis fora do scroll ── -->
+    <div class="dialog-actions">
+      <button type="button" class="btn-cancel" (click)="onNoClick()">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button type="submit" class="btn-save" [disabled]="!validaCampos()">
+        <mat-icon>playlist_add_check</mat-icon>
+        Abrir Chamado
+      </button>
+    </div>
+
+  </form><!-- /main-form -->
 
   <footer class="dialog-footer">
     <mat-icon class="footer-icon">support_agent</mat-icon>

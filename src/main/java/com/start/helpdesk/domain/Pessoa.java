@@ -54,7 +54,7 @@ public abstract class Pessoa implements Serializable {
 	protected String senha;
 
 	/** Foto de perfil armazenada como string Base64 (data URL) ou SVG gerado automaticamente. */
-	@Column(name = "foto_perfil", columnDefinition = "LONGTEXT")
+	@Column(name = "foto_perfil", columnDefinition = "TEXT")
 	protected String fotoPerfil;
 
 	/** Indica se o técnico/usuário está ativo no sistema. Exclusão lógica. */

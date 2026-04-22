@@ -45,6 +45,9 @@ export class TarefaFormDialogComponent implements OnInit {
   isEdicao = false;
   salvando = false;
 
+  /** Valor do datepicker nativo (formato yyyy-MM-dd) */
+  dataPickerValue = '';
+
   // ── Chamado autocomplete ──────────────────────────────────────────────────
   chamadosAbertos: Chamado[]   = [];
   chamadosFiltrados: Chamado[] = [];
@@ -89,9 +92,8 @@ export class TarefaFormDialogComponent implements OnInit {
 
   private buildForm(): void {
     const t = this.data.tarefa;
-
-    // Usa a data da tarefa (edição) ou a data do dia selecionado na Agenda (criação)
     const dataInicial = t?.data || this.data.dataPadrao || '';
+    this.dataPickerValue = this.toInputDate(dataInicial);
 
     this.form = this.fb.group({
       titulo:       [t?.titulo     || '',  [Validators.required, Validators.maxLength(150)]],
@@ -266,6 +268,26 @@ export class TarefaFormDialogComponent implements OnInit {
   /** Fecha sem salvar */
   cancelar(): void {
     this.dialogRef.close();
+  }
+
+  // ── Datepicker nativo ─────────────────────────────────────────────────────
+
+  onDataPickerChange(yyyyMMdd: string): void {
+    this.dataPickerValue = yyyyMMdd;
+    this.form.get('data')?.setValue(this.fromInputDate(yyyyMMdd));
+    this.form.get('data')?.markAsTouched();
+  }
+
+  private toInputDate(ddMMyyyy: string): string {
+    if (!ddMMyyyy || !ddMMyyyy.includes('/')) return '';
+    const [d, m, y] = ddMMyyyy.split('/');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+
+  private fromInputDate(yyyyMMdd: string): string {
+    if (!yyyyMMdd || !yyyyMMdd.includes('-')) return '';
+    const [y, m, d] = yyyyMMdd.split('-');
+    return `${d}/${m}/${y}`;
   }
 }
 

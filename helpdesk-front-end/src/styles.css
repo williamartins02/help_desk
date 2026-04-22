@@ -179,8 +179,22 @@ table {
   border-radius: 1.25rem !important;
   display: flex !important;
   flex-direction: column !important;
-  height: 100% !important;
+  /* height auto + maxHeight: o dialog se adapta ao conteúdo */
+  height: auto !important;
+  max-height: 92vh !important;
   min-height: inherit !important;
+}
+
+/* Panel do ChamadoDetalheDialog */
+.chamado-detalhe-panel .mat-dialog-container,
+.chamado-detalhe-panel .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 1.25rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: 92vh !important;
 }
 
 
@@ -222,13 +236,16 @@ table {
 .dialog-no-padding .mat-dialog-container,
 .dialog-no-padding .mat-mdc-dialog-surface {
   padding: 0 !important;
+  /* Permite que o conteúdo interno controle o scroll */
   overflow: hidden !important;
   border-radius: 20px !important;
   background: #f8fafc !important;
   display: flex;
   flex-direction: column;
   width: 100% !important;
-  height: 100% !important;
+  /* height: auto para que o dialog se adapte ao conteúdo até maxHeight */
+  height: auto !important;
+  max-height: 92vh !important;
 }
 
 /* Ranking dialog panel */

@@ -304,12 +304,14 @@
 .sla-date-icon { font-size: .72rem !important; width: .72rem !important; height: .72rem !important; opacity: .6 !important; }
 
 /* ══════════════════════════════════════════════════════════
-   AÇÕES
+   AÇÕES — estáticas, fora do scroll, sempre visíveis
 ══════════════════════════════════════════════════════════ */
 .dialog-actions {
   display: flex; gap: .75rem; justify-content: flex-end;
-  margin-top: .85rem; padding-top: .9rem;
+  flex-shrink: 0;
+  padding: .85rem 1.75rem 1rem;
   border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 .btn-return {
   min-height: 42px; min-width: 160px;
@@ -339,11 +341,11 @@ mat-icon { opacity: .85 !important; }
 
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE
-══════════════════════════════════════════════════════════ */
+/* ══ Responsive ══════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .dialog-wrapper { border-radius: 0; }
+  .dialog-wrapper { border-radius: 0; max-height: 100vh; }
   .dialog-header  { padding: 1.25rem 1.25rem 2.75rem; }
-  .dialog-body    { padding: 1.25rem 1.25rem .75rem; }
+  .dialog-body    { padding: 1.25rem 1.25rem 0; }
   .status-row     { flex-direction: column; gap: .75rem; }
   .divider-v      { display: none; }
   .status-item    { flex-direction: row; align-items: center; justify-content: space-between; min-width: unset; flex: unset; width: 100%; }

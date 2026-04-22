@@ -541,8 +541,10 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Dialogs ───────────────────────────────────────────────────────────────
   openCreate(): void {
-    this.dialog.open(ChamadoCreateComponent, { width: "720px" })
-        .afterClosed().subscribe(() => {});
+    this.dialog.open(ChamadoCreateComponent, {
+      width: '720px', maxWidth: '98vw', maxHeight: '92vh',
+      panelClass: 'dialog-no-padding', autoFocus: false
+    }).afterClosed().subscribe(() => {});
   }
 
   reportParame(): void {
@@ -552,15 +554,17 @@ export class ChamadoListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openEdit(id: number): void {
     this.dialog.open(ChamadoUpdateComponent, {
-      width: "720px", maxHeight: "90vh", minHeight: "580px",
-      panelClass: "custom-dialog-container", data: { id }
+      width: '720px', maxWidth: '98vw', maxHeight: '92vh',
+      panelClass: 'custom-dialog-container', autoFocus: false,
+      data: { id }
     }).afterClosed().subscribe(() => {});
   }
 
   openRed(id: number): void {
     this.dialog.open(ChamadoReadComponent, {
-      width: "720px", maxHeight: "90vh",
-      panelClass: "custom-dialog-container", data: { id }
+      width: '720px', maxWidth: '98vw', maxHeight: '92vh',
+      panelClass: 'custom-dialog-container', autoFocus: false,
+      data: { id }
     }).afterClosed().subscribe(() => {});
   }
 

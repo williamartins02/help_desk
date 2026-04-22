@@ -3,9 +3,8 @@
      ═══════════════════════════════════════════════════════════════ -->
 <div class="agenda-container">
 
-  <!-- ── Hero Header (padrão Dashboard premium) ───────────────── -->
+  <!-- ── Hero Header ───────────────────────────────────────────── -->
   <div class="agenda-hero">
-    <!-- Decorative orbs -->
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
 
@@ -32,18 +31,34 @@
       </div>
     </div>
 
-    <!-- Direita: navegação de data + ações -->
+    <!-- Direita: botões de modo + data + ações -->
     <div class="hero-actions">
-      <!-- Navegação de datas -->
-      <div class="hero-date-nav">
+
+      <!-- Toggle de visualização -->
+      <div class="modo-btns">
+        <button class="modo-btn" [class.ativo]="viewMode==='dia'"
+                (click)="trocarModo('dia')" matTooltip="Visão do dia">
+          <mat-icon>view_day</mat-icon><span>Dia</span>
+        </button>
+        <button class="modo-btn" [class.ativo]="viewMode==='semana'"
+                (click)="trocarModo('semana')" matTooltip="Visão da semana">
+          <mat-icon>view_week</mat-icon><span>Semana</span>
+        </button>
+        <button class="modo-btn" [class.ativo]="viewMode==='kanban'"
+                (click)="trocarModo('kanban')" matTooltip="Modo Kanban com drag & drop">
+          <mat-icon>view_kanban</mat-icon><span>Kanban</span>
+        </button>
+      </div>
+
+      <!-- Navegação de datas (somente dia e kanban) -->
+      <div class="hero-date-nav" *ngIf="viewMode !== 'semana'">
         <button class="hero-nav-btn" (click)="diaAnterior()" matTooltip="Dia anterior">
           <mat-icon>chevron_left</mat-icon>
         </button>
         <input class="hero-date-input"
-               [value]="dataSelecionada"
-               (change)="onDataChange($any($event.target).value)"
-               placeholder="dd/MM/yyyy"
-               maxlength="10">
+               type="date"
+               [value]="toInputDate(dataSelecionada)"
+               (change)="onDataChange(fromInputDate($any($event.target).value))">
         <button class="hero-nav-btn" (click)="proximoDia()" matTooltip="Próximo dia">
           <mat-icon>chevron_right</mat-icon>
         </button>
@@ -52,6 +67,15 @@
           <span>Hoje</span>
         </button>
       </div>
+
+      <!-- Exportar -->
+      <button class="hero-export-btn" (click)="exportarCSV()" matTooltip="Exportar tarefas em CSV">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button class="hero-export-btn" (click)="imprimirAgenda()" matTooltip="Imprimir agenda do dia">
+        <mat-icon>print</mat-icon>
+      </button>
+
       <!-- Nova tarefa -->
       <button class="hero-nova-btn" (click)="novaTarefa()">
         <mat-icon>add_task</mat-icon>
@@ -62,7 +86,7 @@
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════
-       Cards de resumo (KPIs) — premium solid gradient
+       Cards de resumo (KPIs) — barras dinâmicas
        ══════════════════════════════════════════════════════════════ -->
   <div class="resumo-cards">
 
@@ -74,7 +98,9 @@
       </div>
       <div class="kpi-value">{{ pendentes.length }}</div>
       <div class="kpi-label">Pendentes</div>
-      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:80%"></div></div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar" [style.width]="kpiPercent(pendentes.length)"></div>
+      </div>
     </div>
 
     <div class="kpi-card kpi-execucao">
@@ -85,7 +111,9 @@
       </div>
       <div class="kpi-value">{{ emExecucao.length }}</div>
       <div class="kpi-label">Em Execução</div>
-      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:65%"></div></div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar" [style.width]="kpiPercent(emExecucao.length)"></div>
+      </div>
     </div>
 
     <div class="kpi-card kpi-concluido">
@@ -96,7 +124,9 @@
       </div>
       <div class="kpi-value">{{ concluidas.length }}</div>
       <div class="kpi-label">Concluídas</div>
-      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:90%"></div></div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar" [style.width]="kpiPercent(concluidas.length)"></div>
+      </div>
     </div>
 
     <div class="kpi-card kpi-total">
@@ -107,7 +137,9 @@
       </div>
       <div class="kpi-value">{{ tarefasFiltradas.length }}</div>
       <div class="kpi-label">Total filtrado</div>
-      <div class="kpi-progress-track"><div class="kpi-progress-bar" style="width:100%"></div></div>
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-bar" style="width:100%"></div>
+      </div>
     </div>
 
   </div>
@@ -117,7 +149,6 @@
        ══════════════════════════════════════════════════════════════ -->
   <div class="filtros-card">
 
-    <!-- Cabeçalho da seção de filtros — gradiente premium -->
     <div class="filtros-header">
       <div class="filtros-header-left">
         <div class="filtros-header-icon">
@@ -137,13 +168,10 @@
       </button>
     </div>
 
-    <!-- Linha divisória -->
     <div class="filtros-divider"></div>
 
-    <!-- Campos de filtro -->
     <div class="filtros-campos">
 
-      <!-- Select de técnico — somente Admin -->
       <div class="filtro-grupo" *ngIf="isAdmin">
         <label class="filtro-label">
           <mat-icon>engineering</mat-icon> Técnico
@@ -162,10 +190,8 @@
         </mat-form-field>
       </div>
 
-      <!-- Separador vertical — somente quando o select de técnico está visível -->
       <div class="filtro-sep" *ngIf="isAdmin"></div>
 
-      <!-- Busca por título ou chamado -->
       <div class="filtro-grupo filtro-grupo-flex">
         <label class="filtro-label">
           <mat-icon>search</mat-icon> Busca
@@ -183,10 +209,8 @@
         </mat-form-field>
       </div>
 
-      <!-- Separador vertical -->
       <div class="filtro-sep"></div>
 
-      <!-- Filtro de prioridade -->
       <div class="filtro-grupo">
         <label class="filtro-label">
           <mat-icon>flag</mat-icon> Prioridade
@@ -205,7 +229,6 @@
 
     </div>
 
-    <!-- Rodapé: badge de resultados quando filtros ativos -->
     <div class="filtros-footer" *ngIf="filtrosAtivos || tecnicoFiltroId !== null">
       <mat-icon>info_outline</mat-icon>
       <span>Exibindo <strong>{{ tarefasFiltradas.length }}</strong> tarefa(s) com os filtros aplicados</span>
@@ -219,8 +242,11 @@
     <p>Carregando tarefas...</p>
   </div>
 
-  <!-- ── Abas: Pendentes / Em Execução / Concluídas ───────────── -->
-  <mat-tab-group *ngIf="!carregando" animationDuration="200ms" class="agenda-tabs">
+  <!-- ══════════════════════════════════════════════════════════════
+       VISÃO DO DIA — Abas: Pendentes / Em Execução / Concluídas
+       ══════════════════════════════════════════════════════════════ -->
+  <mat-tab-group *ngIf="!carregando && viewMode === 'dia'"
+                 animationDuration="200ms" class="agenda-tabs">
 
     <!-- ────── ABA: PENDENTES ────── -->
     <mat-tab>
@@ -293,10 +319,150 @@
 
   </mat-tab-group>
 
+  <!-- ══════════════════════════════════════════════════════════════
+       VISÃO KANBAN — 3 colunas com drag & drop
+       ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="!carregando && viewMode === 'kanban'" class="kanban-wrapper">
+
+    <!-- Coluna: Pendentes -->
+    <div class="kanban-col">
+      <div class="kanban-col-header kanban-header-pendente">
+        <div class="kanban-header-left">
+          <mat-icon class="icon-pendente">pending_actions</mat-icon>
+          <span>Pendentes</span>
+        </div>
+        <span class="badge badge-pendente">{{ kanbanPendentes.length }}</span>
+      </div>
+      <div cdkDropList
+           id="drop-pendentes"
+           [cdkDropListData]="kanbanPendentes"
+           [cdkDropListConnectedTo]="['drop-execucao', 'drop-concluidas']"
+           (cdkDropListDropped)="onDropKanban($event, 0)"
+           class="kanban-lista">
+        <div *ngFor="let t of kanbanPendentes"
+             cdkDrag
+             class="kanban-item-wrapper">
+          <mat-card class="tarefa-card card-borda-pendente kanban-card">
+            <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+          </mat-card>
+          <div *cdkDragPlaceholder class="kanban-drag-placeholder kanban-ph-pendente"></div>
+        </div>
+        <p *ngIf="kanbanPendentes.length === 0" class="kanban-empty">
+          <mat-icon>inbox</mat-icon> Arraste tarefas aqui
+        </p>
+      </div>
+    </div>
+
+    <!-- Coluna: Em Execução -->
+    <div class="kanban-col">
+      <div class="kanban-col-header kanban-header-execucao">
+        <div class="kanban-header-left">
+          <mat-icon class="icon-execucao">play_circle</mat-icon>
+          <span>Em Execução</span>
+        </div>
+        <span class="badge badge-execucao">{{ kanbanExecucao.length }}</span>
+      </div>
+      <div cdkDropList
+           id="drop-execucao"
+           [cdkDropListData]="kanbanExecucao"
+           [cdkDropListConnectedTo]="['drop-pendentes', 'drop-concluidas']"
+           (cdkDropListDropped)="onDropKanban($event, 1)"
+           class="kanban-lista">
+        <div *ngFor="let t of kanbanExecucao"
+             cdkDrag
+             class="kanban-item-wrapper">
+          <mat-card class="tarefa-card card-borda-execucao kanban-card">
+            <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+          </mat-card>
+          <div *cdkDragPlaceholder class="kanban-drag-placeholder kanban-ph-execucao"></div>
+        </div>
+        <p *ngIf="kanbanExecucao.length === 0" class="kanban-empty">
+          <mat-icon>inbox</mat-icon> Arraste tarefas aqui
+        </p>
+      </div>
+    </div>
+
+    <!-- Coluna: Concluídas -->
+    <div class="kanban-col">
+      <div class="kanban-col-header kanban-header-concluida">
+        <div class="kanban-header-left">
+          <mat-icon class="icon-concluido">task_alt</mat-icon>
+          <span>Concluídas</span>
+        </div>
+        <span class="badge badge-concluido">{{ kanbanConcluidas.length }}</span>
+      </div>
+      <div cdkDropList
+           id="drop-concluidas"
+           [cdkDropListData]="kanbanConcluidas"
+           [cdkDropListConnectedTo]="['drop-pendentes', 'drop-execucao']"
+           (cdkDropListDropped)="onDropKanban($event, 2)"
+           class="kanban-lista">
+        <div *ngFor="let t of kanbanConcluidas"
+             cdkDrag
+             class="kanban-item-wrapper">
+          <mat-card class="tarefa-card card-borda-concluido kanban-card">
+            <ng-container *ngTemplateOutlet="tarefaTemplate; context: { t: t }"></ng-container>
+          </mat-card>
+          <div *cdkDragPlaceholder class="kanban-drag-placeholder kanban-ph-concluida"></div>
+        </div>
+        <p *ngIf="kanbanConcluidas.length === 0" class="kanban-empty">
+          <mat-icon>inbox</mat-icon> Arraste tarefas aqui
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       VISÃO SEMANAL
+       ══════════════════════════════════════════════════════════════ -->
+  <div *ngIf="viewMode === 'semana'" class="semana-wrapper">
+
+    <div *ngIf="carregandoSemana" class="loading-wrapper">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Carregando semana...</p>
+    </div>
+
+    <div *ngIf="!carregandoSemana" class="semana-grid">
+      <div *ngFor="let dia of semanaDias"
+           class="semana-col"
+           [class.semana-col-hoje]="dia.data === dataSelecionada">
+
+        <div class="semana-col-header" (click)="irParaDiaDaSemana(dia.data)"
+             [matTooltip]="'Ver tarefas de ' + dia.data">
+          <span class="semana-dia-label">{{ dia.label }}</span>
+          <span class="semana-dia-num">{{ dia.data.split('/')[0] }}</span>
+          <span class="semana-count-badge" *ngIf="dia.tarefas.length > 0">{{ dia.tarefas.length }}</span>
+        </div>
+
+        <div class="semana-tarefas">
+          <div *ngFor="let t of dia.tarefas"
+               class="semana-tarefa-mini"
+               [class.mini-pendente]="t.status === 0"
+               [class.mini-execucao]="t.status === 1"
+               [class.mini-concluido]="t.status === 2"
+               (click)="irParaDiaDaSemana(dia.data)"
+               [matTooltip]="t.titulo + (t.horaInicio ? ' — ' + t.horaInicio : '')">
+            <span class="mini-prioridade-dot" [style.background-color]="corPrioridade(t.prioridade)"></span>
+            <span class="mini-hora" *ngIf="t.horaInicio">{{ t.horaInicio }}</span>
+            <span class="mini-titulo">{{ t.titulo }}</span>
+          </div>
+
+          <div *ngIf="dia.tarefas.length === 0" class="semana-vazio">
+            <mat-icon>event_available</mat-icon>
+            <span>Livre</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     Template reutilizável para renderizar cada card de tarefa
+     Template reutilizável para cada card de tarefa
      ═══════════════════════════════════════════════════════════════ -->
 <ng-template #tarefaTemplate let-t="t">
 
@@ -309,10 +475,14 @@
         {{ t.status === 0 ? 'radio_button_unchecked' : t.status === 1 ? 'timelapse' : 'check_circle' }}
       </mat-icon>
       <div class="tarefa-titulo-col">
-        <h3 class="tarefa-titulo" [class.concluida]="t.status === 2">{{ t.titulo }}</h3>
-        <!-- Nome do técnico — exibido sempre para Admin -->
-        <span *ngIf="isAdmin && nomeTecnicoDaTarefa(t)"
-              class="tarefa-tecnico-label">
+        <div class="tarefa-titulo-row">
+          <h3 class="tarefa-titulo" [class.concluida]="t.status === 2">{{ t.titulo }}</h3>
+          <!-- Badge de conflito de horário -->
+          <span *ngIf="temConflito(t)" class="conflito-badge" matTooltip="Conflito de horário com outra tarefa!">
+            <mat-icon>warning_amber</mat-icon>
+          </span>
+        </div>
+        <span *ngIf="isAdmin && nomeTecnicoDaTarefa(t)" class="tarefa-tecnico-label">
           <mat-icon>engineering</mat-icon> {{ nomeTecnicoDaTarefa(t) }}
         </span>
       </div>
@@ -327,14 +497,25 @@
     <p *ngIf="t.descricao" class="tarefa-descricao">{{ t.descricao }}</p>
 
     <div class="tarefa-meta">
+      <!-- Horário -->
       <span *ngIf="t.horaInicio" class="meta-item">
         <mat-icon>schedule</mat-icon>
         {{ t.horaInicio }}{{ t.horaFim ? ' – ' + t.horaFim : '' }}
       </span>
+      <!-- Duração calculada -->
+      <span *ngIf="duracaoTarefa(t)" class="meta-item meta-duracao">
+        <mat-icon>timelapse</mat-icon> {{ duracaoTarefa(t) }}
+      </span>
+      <!-- Tempo decorrido (apenas "Em Execução" hoje) -->
+      <span *ngIf="tempoDecorrido(t)" class="meta-item meta-timer">
+        <mat-icon>timer</mat-icon> {{ tempoDecorrido(t) }} decorrido
+      </span>
+      <!-- Chamado -->
       <span *ngIf="t.chamado" class="meta-item">
         <mat-icon>receipt_long</mat-icon>
         Chamado #{{ t.chamado }}<span *ngIf="t.tituloChamado"> — {{ t.tituloChamado }}</span>
       </span>
+      <!-- Cliente -->
       <span *ngIf="t.nomeCliente" class="meta-item">
         <mat-icon>person</mat-icon> {{ t.nomeCliente }}
       </span>
@@ -358,13 +539,22 @@
       <mat-icon>check</mat-icon> Concluir
     </button>
 
+    <!-- Reabrir (CONCLUÍDA) -->
+    <button mat-stroked-button class="btn-reabrir"
+            *ngIf="t.status === 2"
+            (click)="reabrirTarefa(t)"
+            matTooltip="Reabrir como pendente">
+      <mat-icon>restart_alt</mat-icon> Reabrir
+    </button>
+
     <span class="actions-spacer"></span>
 
     <button mat-icon-button (click)="editarTarefa(t)" matTooltip="Editar tarefa">
       <mat-icon>edit</mat-icon>
     </button>
 
-    <button mat-icon-button color="warn" (click)="excluirTarefa(t)" matTooltip="Excluir tarefa">
+    <!-- Excluir com confirm dialog (sem confirm() nativo) -->
+    <button mat-icon-button color="warn" (click)="confirmarExclusao(t)" matTooltip="Excluir tarefa">
       <mat-icon>delete_outline</mat-icon>
     </button>
   </mat-card-actions>

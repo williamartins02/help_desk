@@ -133,16 +133,29 @@
   margin-top: -1.5rem;
   position: relative;
   z-index: 1;
-  padding: 1.25rem 1.5rem 0.75rem;
+  padding: 1.25rem 1.5rem 1.25rem;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
-}
-
-.main-form {
+  /* gap entre seções — era gap do main-form */
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  scrollbar-width: thin;
+  scrollbar-color: #c5cae9 transparent;
+}
+.dialog-body::-webkit-scrollbar { width: 5px; }
+.dialog-body::-webkit-scrollbar-track { background: transparent; }
+.dialog-body::-webkit-scrollbar-thumb { background: #c5cae9; border-radius: 4px; }
+
+/* form — flex-container pai: corpo scrollável + ações estáticas */
+.main-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -243,15 +256,16 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   AÇÕES
+   AÇÕES — estáticas, sempre visíveis, fora do scroll
    ══════════════════════════════════════════════════════════════ */
 .dialog-actions {
   display: flex;
   gap: 0.65rem;
   justify-content: flex-end;
-  padding: 0.75rem 0 0.25rem;
+  flex-shrink: 0;
+  padding: 0.85rem 1.5rem 1rem;
   border-top: 1px solid #eef2ff;
-  margin-top: 0.1rem;
+  background: #f8faff;
 }
 
 .btn-cancel {
@@ -566,11 +580,11 @@ mat-icon { opacity: 0.85 !important; }
 @media (max-width: 640px) {
   .dialog-wrapper { border-radius: 0; }
   .dialog-header  { padding: 1.2rem 1.25rem 2.6rem; }
-  .dialog-body    { padding: 1rem 1rem 0.5rem; }
+  .dialog-body    { padding: 1rem 1rem 1rem; }
   .form-grid      { grid-template-columns: 1fr; }
   .field-wide     { grid-column: span 1; }
   .dh-chips       { display: none; }
-  .dialog-actions { flex-direction: column-reverse; }
+  .dialog-actions { flex-direction: column-reverse; padding: .75rem 1rem .75rem; }
   .btn-cancel,
   .btn-save       { width: 100%; justify-content: center; }
 }

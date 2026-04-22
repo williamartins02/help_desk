@@ -22,21 +22,22 @@
     </div>
   </div>
 
-  <!-- ══ BODY — card lift sobre o header ══════════════════════════════ -->
-  <div class="dialog-body">
+  <!-- ══ FORM — envolve corpo scrollável + ações estáticas ══════════════ -->
+  <form class="main-form" (ngSubmit)="update()">
 
-    <!-- Banner chamado encerrado -->
-    <div *ngIf="isEncerrado" class="encerrado-banner">
-      <div class="encerrado-icon-wrap">
-        <mat-icon class="encerrado-icon">lock</mat-icon>
-      </div>
-      <div class="encerrado-text">
-        <strong>Chamado Encerrado</strong>
-        <span>Este chamado foi finalizado e não pode ser reaberto. Para novo atendimento, crie um novo chamado.</span>
-      </div>
-    </div>
+    <!-- ── Corpo scrollável ── -->
+    <div class="dialog-body">
 
-    <form class="main-form" (ngSubmit)="update()">
+      <!-- Banner chamado encerrado -->
+      <div *ngIf="isEncerrado" class="encerrado-banner">
+        <div class="encerrado-icon-wrap">
+          <mat-icon class="encerrado-icon">lock</mat-icon>
+        </div>
+        <div class="encerrado-text">
+          <strong>Chamado Encerrado</strong>
+          <span>Este chamado foi finalizado e não pode ser reaberto. Para novo atendimento, crie um novo chamado.</span>
+        </div>
+      </div>
 
       <!-- ── Seção: Dados do chamado ── -->
       <div class="section-header">
@@ -169,28 +170,29 @@
         ></textarea>
       </mat-form-field>
 
-      <!-- ── Ações ── -->
-      <div class="dialog-actions">
-        <button type="button" mat-stroked-button class="btn-cancel" (click)="onNoClick()">
-          <mat-icon>close</mat-icon>
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          mat-flat-button
-          color="primary"
-          class="btn-save"
-          [disabled]="!validaCampos() || isEncerrado"
-          [matTooltip]="isEncerrado ? 'Chamado encerrado não pode ser editado' : ''"
-          (click)="isEncerrado ? showEncerradoMsg() : null"
-        >
-          <mat-icon>save</mat-icon>
-          Salvar Alterações
-        </button>
-      </div>
+    </div><!-- /dialog-body -->
 
-    </form>
-  </div>
+    <!-- ── Ações — estáticas, sempre visíveis fora do scroll ── -->
+    <div class="dialog-actions">
+      <button type="button" mat-stroked-button class="btn-cancel" (click)="onNoClick()">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        mat-flat-button
+        color="primary"
+        class="btn-save"
+        [disabled]="!validaCampos() || isEncerrado"
+        [matTooltip]="isEncerrado ? 'Chamado encerrado não pode ser editado' : ''"
+        (click)="isEncerrado ? showEncerradoMsg() : null"
+      >
+        <mat-icon>save</mat-icon>
+        Salvar Alterações
+      </button>
+    </div>
+
+  </form><!-- /main-form -->
 
   <footer class="dialog-footer">
     <mat-icon class="footer-icon">support_agent</mat-icon>

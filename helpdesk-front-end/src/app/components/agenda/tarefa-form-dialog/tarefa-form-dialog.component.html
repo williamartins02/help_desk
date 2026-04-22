@@ -60,11 +60,17 @@
 
       <div class="form-grid">
 
-        <!-- Data -->
+        <!-- Data — input nativo tipo date com conversão dd/MM/yyyy -->
         <mat-form-field class="field" appearance="outline">
           <mat-label>Data</mat-label>
           <mat-icon matPrefix class="field-prefix-icon">calendar_today</mat-icon>
-          <input matInput formControlName="data" placeholder="dd/MM/yyyy" maxlength="10" />
+          <!-- Input oculto: mantém o valor dd/MM/yyyy no FormGroup para validação -->
+          <input matInput formControlName="data" style="display:none" />
+          <!-- Input visível: datepicker nativo yyyy-MM-dd convertido pelo componente -->
+          <input matInput type="date"
+                 [value]="dataPickerValue"
+                 (change)="onDataPickerChange($any($event.target).value)"
+                 required />
           <mat-error *ngIf="form.get('data')?.hasError('required')">Data é obrigatória</mat-error>
         </mat-form-field>
 
