@@ -31,8 +31,8 @@
   </div>
 
   <!-- ── Corpo ── -->
+  <form class="main-form">
   <div class="dialog-body">
-    <form class="main-form">
 
       <!-- ══ Seção 1: Foto de perfil ══ -->
       <div class="form-section">
@@ -163,20 +163,21 @@
         </mat-form-field>
       </div>
 
-      <!-- ── Ações ── -->
-      <div class="dialog-actions">
-        <button class="btn-cancel" (click)="onNoClick()" type="button">
-          <mat-icon>close</mat-icon>
-          Cancelar
-        </button>
-        <button class="btn-save" (click)="create()" [disabled]="!validaCampos()" type="button">
-          <mat-icon>how_to_reg</mat-icon>
-          Cadastrar Técnico
-        </button>
-      </div>
+  </div><!-- /dialog-body -->
 
-    </form>
+  <!-- ── Ações ── -->
+  <div class="dialog-actions">
+    <button class="btn-cancel" (click)="onNoClick()" type="button">
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+    <button class="btn-save" (click)="create()" [disabled]="!validaCampos()" type="button">
+      <mat-icon>how_to_reg</mat-icon>
+      Cadastrar Técnico
+    </button>
   </div>
+
+  </form>
 
   <footer class="dialog-footer">
     <mat-icon class="footer-icon">support_agent</mat-icon>
