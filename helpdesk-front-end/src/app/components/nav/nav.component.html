@@ -61,14 +61,24 @@
                 <mat-icon class="nav-icon">manage_accounts</mat-icon>
                 <span class="nav-label">Gestão de Usuários</span>
             </a>
-            <a mat-list-item routerLink="agenda" routerLinkActive="active-link" class="nav-item link-agenda">
-                <mat-icon class="nav-icon">event_note</mat-icon>
-                <span class="nav-label">Agenda de Tarefas</span>
-            </a>
-            <a mat-list-item routerLink="agenda-calendario" routerLinkActive="active-link" class="nav-item link-agenda">
-                <mat-icon class="nav-icon">calendar_month</mat-icon>
-                <span class="nav-label">Calendário da Equipe</span>
-            </a>
+            <!-- ── Agenda de Tarefas (com submenu Calendário da Equipe) ── -->
+            <div class="nav-group">
+                <a mat-list-item routerLink="agenda" routerLinkActive="active-link"
+                   class="nav-item link-agenda nav-group-toggle"
+                   [routerLinkActiveOptions]="{exact: true}"
+                   (click)="isAgendaOpen = !isAgendaOpen">
+                    <mat-icon class="nav-icon">event_note</mat-icon>
+                    <span class="nav-label">Agenda de Tarefas</span>
+                    <mat-icon class="nav-chevron" [class.rotated]="isAgendaOpen">expand_more</mat-icon>
+                </a>
+                <div class="nav-submenu" [class.open]="isAgendaOpen">
+                    <a mat-list-item routerLink="agenda-calendario" routerLinkActive="active-link"
+                       class="nav-item nav-subitem link-agenda-cal">
+                        <mat-icon class="nav-icon">calendar_month</mat-icon>
+                        <span class="nav-label">Calendário da Equipe</span>
+                    </a>
+                </div>
+            </div>
             <a mat-list-item routerLink="kanban" routerLinkActive="active-link" class="nav-item link-kanban">
                 <mat-icon class="nav-icon">view_kanban</mat-icon>
                 <span class="nav-label">Kanban</span>

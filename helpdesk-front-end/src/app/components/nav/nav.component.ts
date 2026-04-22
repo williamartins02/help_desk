@@ -15,6 +15,7 @@ export class NavComponent implements OnInit, AfterViewInit {
   @ViewChild('drawer') drawer!: MatDrawer;
   isMenuOpen = false;
   isDashboardOpen = false;
+  isAgendaOpen = false;
 
   constructor(
     private router: Router,
@@ -26,12 +27,17 @@ export class NavComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // Abre o submenu Dashboard se a rota ativa for bi-dashboard
     this.isDashboardOpen = this.router.url.includes('bi-dashboard');
+    // Abre o submenu Agenda se a rota ativa for agenda-calendario
+    this.isAgendaOpen = this.router.url.includes('agenda');
 
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: any) => {
         if (e.urlAfterRedirects?.includes('bi-dashboard')) {
           this.isDashboardOpen = true;
+        }
+        if (e.urlAfterRedirects?.includes('agenda')) {
+          this.isAgendaOpen = true;
         }
       });
   }

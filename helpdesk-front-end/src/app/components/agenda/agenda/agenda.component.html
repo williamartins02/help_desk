@@ -34,21 +34,6 @@
     <!-- Direita: botões de modo + data + ações -->
     <div class="hero-actions">
 
-      <!-- Toggle de visualização -->
-      <div class="modo-btns">
-        <button class="modo-btn" [class.ativo]="viewMode==='dia'"
-                (click)="trocarModo('dia')" matTooltip="Visão do dia">
-          <mat-icon>view_day</mat-icon><span>Dia</span>
-        </button>
-        <button class="modo-btn" [class.ativo]="viewMode==='semana'"
-                (click)="trocarModo('semana')" matTooltip="Visão da semana">
-          <mat-icon>view_week</mat-icon><span>Semana</span>
-        </button>
-        <button class="modo-btn" [class.ativo]="viewMode==='kanban'"
-                (click)="trocarModo('kanban')" matTooltip="Modo Kanban com drag & drop">
-          <mat-icon>view_kanban</mat-icon><span>Kanban</span>
-        </button>
-      </div>
 
       <!-- Navegação de datas (somente dia e kanban) -->
       <div class="hero-date-nav" *ngIf="viewMode !== 'semana'">
@@ -159,6 +144,18 @@
           <span class="filtros-header-sub">Refine a visualização das tarefas</span>
         </div>
       </div>
+      <!-- Toggle de visualização -->
+      <div class="modo-btns">
+        <button class="modo-btn" [class.ativo]="viewMode==='dia'"
+                (click)="trocarModo('dia')" matTooltip="Visão do dia">
+          <mat-icon>view_day</mat-icon><span>Dia</span>
+        </button>
+        <button class="modo-btn" [class.ativo]="viewMode==='semana'"
+                (click)="trocarModo('semana')" matTooltip="Visão da semana">
+          <mat-icon>view_week</mat-icon><span>Semana</span>
+        </button>
+      </div>
+
       <button mat-stroked-button
               *ngIf="filtrosAtivos || tecnicoFiltroId !== null"
               (click)="limparTodosFiltros()"

@@ -24,22 +24,56 @@
    CONTAINER
 ══════════════════════════════════════════════════════════ */
 .bi-container {
-  max-width: 1440px;
-  margin: 0 auto;
+  width: min(1440px, 98%);
+  margin: 1.5rem auto 2.5rem;
   font-family: 'Inter', 'Roboto', system-ui, sans-serif;
   background: var(--surface-2);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 }
 
-/* PAGE BODY — padding centralizado em um único lugar */
+/* PAGE BODY — padding padrão das outras telas */
 .bi-page {
-  padding: 1.5rem 2rem 2rem;
+  padding: 1.5rem 1.85rem 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   flex: 1;
+}
+
+/* sk-fade-in é o wrapper real de todo o conteúdo após o skeleton.
+   Precisa herdar o mesmo gap para que as seções respirem. */
+.sk-fade-in {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BI FOOTER
+══════════════════════════════════════════════════════════ */
+.bi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .85rem 1.85rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-4);
+  letter-spacing: .02em;
+}
+.bi-footer-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary) !important;
+  opacity: .55 !important;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -49,8 +83,8 @@
 .bi-hero {
   position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 1.25rem;
-  padding: 1.6rem 2rem 1.7rem;
+  flex-wrap: wrap; gap: 1rem;
+  padding: 1.65rem 1.85rem;
   border-radius: var(--radius-xl);
   background:
     linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
@@ -172,7 +206,7 @@
 /* ── Header do filtro ── */
 .filter-card-header {
   display: flex; align-items: center; gap: 1rem;
-  padding: 1.1rem 1.6rem .95rem;
+  padding: 1rem 1.5rem .9rem;
   border-bottom: 1px solid rgba(226,232,240,.7);
   background: transparent;
 }
@@ -238,18 +272,18 @@
 .filter-fields-row {
   display: flex;
   align-items: flex-end;
-  gap: .75rem;
+  gap: .85rem;
   flex-wrap: wrap;
-  padding: 1.1rem 1.6rem 1.3rem;
+  padding: 1.1rem 1.5rem 1.35rem;
 }
 
 /* ── Wrapper de cada campo ── */
 .ff-wrap {
   display: flex;
   flex-direction: column;
-  gap: .28rem;
-  flex: 1 1 148px;
-  min-width: 140px;
+  gap: .38rem;
+  flex: 1 1 160px;
+  min-width: 148px;
 }
 
 /* Label acima do campo */
@@ -267,12 +301,12 @@
 .ff-input-box {
   display: flex;
   align-items: center;
-  height: 44px;
+  height: 48px;
   background: #fff;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0 .75rem;
-  gap: .5rem;
+  padding: 0 .9rem;
+  gap: .6rem;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 .ff-input-box:focus-within {
@@ -306,7 +340,7 @@
   font-size: .84rem;
   font-weight: 500;
   color: var(--text-1);
-  line-height: 44px;
+  line-height: 48px;
   padding: 0;
   min-width: 0;
 }
@@ -482,8 +516,8 @@
 /* ── Botão Aplicar — CTA premium ── */
 .apply-btn {
   display: inline-flex; align-items: center; gap: .42rem;
-  padding: 0 1.25rem;
-  height: 44px;         /* igual à altura dos campos */
+  padding: 0 1.5rem;
+  height: 48px;         /* igual à altura dos campos */
   flex-shrink: 0;
   align-self: stretch;
   border-radius: var(--radius-md); border: none;
@@ -530,8 +564,8 @@
 /* ── Botão Limpar ── */
 .clear-btn {
   display: inline-flex; align-items: center; gap: .38rem;
-  padding: 0 1.1rem;
-  height: 44px;
+  padding: 0 1.25rem;
+  height: 48px;
   align-self: stretch;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border);
@@ -583,19 +617,19 @@
    SECTION HEADER  (replaces section-divider — more informative)
 ══════════════════════════════════════════════════════════ */
 .section-header {
-  display: flex; align-items: center; gap: .85rem;
-  padding: .15rem 0;
+  display: flex; align-items: center; gap: 1rem;
+  padding: .3rem 0 .1rem;
 }
 .section-header-icon {
-  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
   background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   box-shadow: 0 3px 10px rgba(29,78,216,.38);
 }
 .section-header-icon mat-icon { font-size: .95rem; width: .95rem; height: .95rem; color: #fff !important; opacity: 1 !important; }
 .section-header-text { display: flex; flex-direction: column; gap: .02rem; flex-shrink: 0; }
-.section-header-title { font-size: .82rem; font-weight: 800; color: var(--text-1); letter-spacing: -.01em; }
-.section-header-sub   { font-size: .68rem; color: var(--text-4); }
+.section-header-title { font-size: .88rem; font-weight: 800; color: var(--text-1); letter-spacing: -.01em; }
+.section-header-sub   { font-size: .72rem; color: var(--text-4); }
 .section-divider-line {
   flex: 1; height: 1px;
   background: linear-gradient(90deg, var(--border), transparent);
@@ -636,12 +670,12 @@
 /* ══════════════════════════════════════════════════════════
    ALERTAS
 ══════════════════════════════════════════════════════════ */
-.alert-row { display: flex; flex-direction: column; gap: .55rem; }
+.alert-row { display: flex; flex-direction: column; gap: .9rem; }
 .alert-item {
-  display: flex; align-items: center; gap: .8rem;
+  display: flex; align-items: center; gap: 1rem;
   background: linear-gradient(135deg, #fffbeb, #fef3c7);
   border: 1px solid #fde68a; border-left: 4px solid #d97706;
-  padding: .8rem 1rem; border-radius: var(--radius-md);
+  padding: 1rem 1.35rem; border-radius: var(--radius-md);
   box-shadow: 0 2px 8px rgba(217,119,6,.10);
 }
 .alert-icon-wrap {
@@ -672,11 +706,11 @@
 
 /* Base card */
 .kpi-card {
-  padding: .85rem 1rem .72rem;
+  padding: .9rem 1rem .78rem;
   border-radius: 18px; border: none;
   position: relative; overflow: hidden;
   display: flex; flex-direction: column;
-  min-height: 110px;
+  min-height: 112px;
   cursor: default; z-index: 0;
   transition: box-shadow var(--transition), transform var(--transition), filter var(--transition);
   animation: kpiIn .38s ease both;
@@ -795,7 +829,7 @@
 /* Card header — dark gradient + grid overlay */
 .chart-card-header {
   display: flex; align-items: center; gap: .8rem;
-  padding: .8rem 1.2rem .72rem;
+  padding: .85rem 1.25rem .75rem;
   border-bottom: 1px solid rgba(255,255,255,.10);
 }
 .chart-header-blue {
@@ -841,10 +875,10 @@
 .chart-content canvas { max-height: 100%; }
 
 /* Mini table */
-.mini-table { padding: .35rem 1.2rem .9rem; background: var(--surface); }
+.mini-table { padding: .5rem 1.5rem 1.25rem; background: var(--surface); }
 .mini-row {
-  display: flex; align-items: center; gap: .5rem;
-  padding: .32rem 0; border-bottom: 1px solid #f1f5f9; font-size: .8rem;
+  display: flex; align-items: center; gap: .65rem;
+  padding: .45rem 0; border-bottom: 1px solid #f1f5f9; font-size: .8rem;
 }
 .mini-row:last-child { border-bottom: none; }
 .mini-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }

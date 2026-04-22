@@ -133,6 +133,9 @@
 .link-chart.active-link    .nav-icon { color: #43a047; }
 .link-chat.active-link     .nav-icon { color: #7b1fa2; }
 .link-usuarios.active-link .nav-icon { color: #3949ab; }
+.link-agenda.active-link      .nav-icon { color: #f57c00; }
+.link-agenda-cal.active-link  .nav-icon { color: #f57c00; }
+.link-kanban.active-link      .nav-icon { color: #00838f; }
 
 /* Ícone dos itens de nav */
 .nav-icon {
